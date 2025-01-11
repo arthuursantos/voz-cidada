@@ -499,3 +499,15 @@ insert into usuario (data_nascimento, cpf, cep, rua, numero, bairro, complemento
 ('2024-06-26', '1145595626', '82', 'Pleasure', '046', 'Crescent Oaks', 'Terrace', 'Penco', 'TW', 'Chile', '2024-07-13 19:42:22'),
 ('2022-09-16', '7311129060', '16', 'Monterey', '153', 'Ohio', null, 'Kōchi-shi', 'PG', 'Japan', '2024-12-01 04:02:50'),
 ('1987-09-20', '3996787715', '51607', 'Forest', '87', 'Doe Crossing', null, 'Chiang Rai', 'GB', 'Thailand', '2024-06-23 06:51:10');
+
+insert into funcionario_prefeitura (cpf, cargo, setor, data_cadastro) values
+('25834124929', 'Construction Expeditor', 'Business Development', '2024-07-23 05:11:06'),
+('51352566399', 'Project Manager', 'Services', '2024-01-31 05:33:15'),
+('63540072196', 'Construction Expeditor', 'Legal', '2024-05-05 02:56:02'),
+('76348688464', 'Construction Manager', 'Training', '2024-03-02 01:40:06'),
+('00253045871', 'Engineer', 'Legal', '2024-07-10 10:14:14'),
+('90522994606', 'Electrician', 'Product Management', '2025-01-04 06:43:48'),
+('78719857573', 'Subcontractor', 'Services', '2024-10-22 04:50:01'),
+('45576573757', 'Project Manager', 'Accounting', '2024-05-26 06:49:56'),
+('24611559924', 'Architect', 'Engineering', '2024-03-07 22:49:31'),
+('14943077260', 'Project Manager', 'Training', '2024-01-26 12:38:47');
