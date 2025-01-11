@@ -17,7 +17,6 @@ public class FuncionarioPrefeitura implements Serializable {
     private String cpf;
     private String cargo;
     private String setor;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataCadastro;
 
     public FuncionarioPrefeitura() {

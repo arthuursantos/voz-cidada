@@ -19,9 +19,7 @@ public class Usuario implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataNascimento;
-
     private String cpf;
     private String cep;
     private String rua;
@@ -31,11 +29,9 @@ public class Usuario implements Serializable {
     private String cidade;
     private String uf;
     private String pais;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime dataCadastro;
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Chamado> chamados;
 

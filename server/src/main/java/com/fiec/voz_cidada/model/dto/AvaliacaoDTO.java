@@ -1,7 +1,6 @@
 package com.fiec.voz_cidada.model.dto;
 
-import com.fiec.voz_cidada.model.entity.Chamado;
-import com.fiec.voz_cidada.model.entity.Usuario;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
@@ -11,10 +10,11 @@ public class AvaliacaoDTO extends RepresentationModel<AvaliacaoDTO> implements S
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private Chamado chamadoId;
-    private Usuario usuarioId;
+    private Long chamadoId;
+    private Long usuarioId;
     private Integer estrelas;
     private String comentario;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataAvaliacao;
 
     public Long getId() {
@@ -25,19 +25,19 @@ public class AvaliacaoDTO extends RepresentationModel<AvaliacaoDTO> implements S
         this.id = id;
     }
 
-    public Chamado getChamadoId() {
+    public Long getChamadoId() {
         return chamadoId;
     }
 
-    public void setChamadoId(Chamado chamadoId) {
+    public void setChamadoId(Long chamadoId) {
         this.chamadoId = chamadoId;
     }
 
-    public Usuario getUsuarioId() {
+    public Long getUsuarioId() {
         return usuarioId;
     }
 
-    public void setUsuarioId(Usuario usuarioId) {
+    public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
     }
 

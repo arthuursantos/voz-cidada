@@ -1,6 +1,8 @@
 package com.fiec.voz_cidada.model.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,8 +21,8 @@ public class Chamado implements Serializable {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @OneToOne(mappedBy = "chamado", cascade = CascadeType.ALL)
-    private Avaliacao avaliacao;
+    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
+    private List<Avaliacao> avaliacao;
 
     private LocalDateTime dataAbertura;
     private String status;
@@ -31,6 +33,7 @@ public class Chamado implements Serializable {
     private String descricao;
 
     @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
+    @Fetch(FetchMode.JOIN)
     private List<HistoricoChamado> historicos;
 
     public Chamado() {
@@ -52,12 +55,8 @@ public class Chamado implements Serializable {
         this.usuario = usuario;
     }
 
-    public Avaliacao getAvaliacao() {
+    public List<Avaliacao> getAvaliacao() {
         return avaliacao;
-    }
-
-    public void setAvaliacao(Avaliacao avaliacao) {
-        this.avaliacao = avaliacao;
     }
 
     public LocalDateTime getDataAbertura() {

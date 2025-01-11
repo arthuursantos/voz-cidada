@@ -1,7 +1,6 @@
 package com.fiec.voz_cidada.model.dto;
 
-import com.fiec.voz_cidada.model.entity.HistoricoChamado;
-import com.fiec.voz_cidada.model.entity.Usuario;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
@@ -13,7 +12,8 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private Usuario usuarioId;
+    private Long usuarioId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataAbertura;
     private String status;
     private String fotoUrl;
@@ -21,7 +21,7 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String descricao;
-    private List<HistoricoChamado> historicos;
+    private List<HistoricoDTO> historicos;
 
     public Long getId() {
         return id;
@@ -31,11 +31,11 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
         this.id = id;
     }
 
-    public Usuario getUsuarioId() {
+    public Long getUsuarioId() {
         return usuarioId;
     }
 
-    public void setUsuarioId(Usuario usuarioId) {
+    public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
     }
 
@@ -95,8 +95,11 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
         this.descricao = descricao;
     }
 
-    public List<HistoricoChamado> getHistoricos() {
+    public List<HistoricoDTO> getHistoricos() {
         return historicos;
     }
 
+    public void setHistoricos(List<HistoricoDTO> historicos) {
+        this.historicos = historicos;
+    }
 }

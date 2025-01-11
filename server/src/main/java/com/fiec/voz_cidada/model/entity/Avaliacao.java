@@ -14,7 +14,7 @@ public class Avaliacao implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "chamado_id")
     @JsonIgnore
     private Chamado chamado;

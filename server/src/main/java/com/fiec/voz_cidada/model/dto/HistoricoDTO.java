@@ -1,6 +1,6 @@
 package com.fiec.voz_cidada.model.dto;
 
-import com.fiec.voz_cidada.model.entity.Chamado;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
@@ -10,7 +10,8 @@ public class HistoricoDTO extends RepresentationModel<HistoricoDTO> implements S
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private Chamado chamadoId;
+    private Long chamadoId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataModificacao;
     private String statusAnterior;
     private String statusNovo;
@@ -24,11 +25,11 @@ public class HistoricoDTO extends RepresentationModel<HistoricoDTO> implements S
         this.id = id;
     }
 
-    public Chamado getChamadoId() {
+    public Long getChamadoId() {
         return chamadoId;
     }
 
-    public void setChamadoId(Chamado chamadoId) {
+    public void setChamadoId(Long chamadoId) {
         this.chamadoId = chamadoId;
     }
 
