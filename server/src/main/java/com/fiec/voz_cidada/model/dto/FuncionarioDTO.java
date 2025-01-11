@@ -1,25 +1,20 @@
-package com.fiec.voz_cidada.domain.entity;
+package com.fiec.voz_cidada.model.dto;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
-@Entity
-@Table(name = "funcionario_prefeitura")
-public class FuncionarioPrefeitura implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class FuncionarioDTO extends RepresentationModel<FuncionarioDTO> implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Long id;
-
     private String cpf;
     private String cargo;
     private String setor;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataCadastro;
-
-    public FuncionarioPrefeitura() {
-    }
 
     public Long getId() {
         return id;
@@ -59,17 +54,5 @@ public class FuncionarioPrefeitura implements Serializable {
 
     public void setDataCadastro(LocalDateTime dataCadastro) {
         this.dataCadastro = dataCadastro;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        FuncionarioPrefeitura that = (FuncionarioPrefeitura) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }

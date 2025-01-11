@@ -1,4 +1,4 @@
-package com.fiec.voz_cidada.domain.entity;
+package com.fiec.voz_cidada.model.entity;
 
 import jakarta.persistence.*;
 
@@ -19,21 +19,18 @@ public class Chamado implements Serializable {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "tipo_servico_id")
-    private TipoServico tipoServico;
-
     @OneToOne(mappedBy = "chamado", cascade = CascadeType.ALL)
     private Avaliacao avaliacao;
 
     private LocalDateTime dataAbertura;
     private String status;
+    private String secretaria;
     private String fotoUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String descricao;
 
-    @OneToMany(mappedBy = "chamado")
+    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
     private List<HistoricoChamado> historicos;
 
     public Chamado() {
@@ -53,14 +50,6 @@ public class Chamado implements Serializable {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
-    }
-
-    public TipoServico getTipoServico() {
-        return tipoServico;
-    }
-
-    public void setTipoServico(TipoServico tipoServico) {
-        this.tipoServico = tipoServico;
     }
 
     public Avaliacao getAvaliacao() {
@@ -93,6 +82,14 @@ public class Chamado implements Serializable {
 
     public void setFotoUrl(String fotoUrl) {
         this.fotoUrl = fotoUrl;
+    }
+
+    public String getSecretaria() {
+        return secretaria;
+    }
+
+    public void setSecretaria(String secretaria) {
+        this.secretaria = secretaria;
     }
 
     public BigDecimal getLatitude() {

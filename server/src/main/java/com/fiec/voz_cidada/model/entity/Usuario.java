@@ -1,4 +1,4 @@
-package com.fiec.voz_cidada.domain.entity;
+package com.fiec.voz_cidada.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
