@@ -1,21 +1,26 @@
-package com.fiec.voz_cidada.model.dto;
+package com.fiec.voz_cidada.domain.usuario;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.hateoas.RepresentationModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fiec.voz_cidada.domain.chamado.Chamado;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
-public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Serializable {
+@Entity
+@Table(name = "usuario")
+public class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String cpf;
-    @JsonFormat(pattern = "yyyy-MM-dd")
+
     private LocalDate dataNascimento;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime dataCadastro;
+    private String cpf;
     private String cep;
     private String rua;
     private String numero;
@@ -24,6 +29,14 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
     private String cidade;
     private String uf;
     private String pais;
+    private LocalDateTime dataCadastro;
+
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Chamado> chamados;
+
+    public Usuario() {
+    }
 
     public Long getId() {
         return id;
@@ -31,14 +44,6 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
     }
 
     public LocalDate getDataNascimento() {
@@ -49,12 +54,12 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
         this.dataNascimento = dataNascimento;
     }
 
-    public LocalDateTime getDataCadastro() {
-        return dataCadastro;
+    public String getCpf() {
+        return cpf;
     }
 
-    public void setDataCadastro(LocalDateTime dataCadastro) {
-        this.dataCadastro = dataCadastro;
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
     }
 
     public String getCep() {
@@ -119,5 +124,33 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
 
     public void setPais(String pais) {
         this.pais = pais;
+    }
+
+    public LocalDateTime getDataCadastro() {
+        return dataCadastro;
+    }
+
+    public void setDataCadastro(LocalDateTime dataCadastro) {
+        this.dataCadastro = dataCadastro;
+    }
+
+    public List<Chamado> getChamados() {
+        return chamados;
+    }
+
+    public void setChamados(List<Chamado> chamados) {
+        this.chamados = chamados;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return Objects.equals(id, usuario.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

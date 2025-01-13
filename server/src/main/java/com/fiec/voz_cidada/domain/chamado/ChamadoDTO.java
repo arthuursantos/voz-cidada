@@ -1,6 +1,7 @@
-package com.fiec.voz_cidada.model.dto;
+package com.fiec.voz_cidada.domain.chamado;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fiec.voz_cidada.domain.historico.HistoricoDTO;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;

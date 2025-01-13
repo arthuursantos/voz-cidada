@@ -1,6 +1,6 @@
 package com.fiec.voz_cidada.repository;
 
-import com.fiec.voz_cidada.model.entity.FuncionarioPrefeitura;
+import com.fiec.voz_cidada.domain.funcionario.FuncionarioPrefeitura;
 import org.springframework.stereotype.Repository;
 
 @Repository

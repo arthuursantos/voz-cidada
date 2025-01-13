@@ -1,9 +1,8 @@
 package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.controller.HistoricoController;
-import com.fiec.voz_cidada.controller.UsuarioController;
-import com.fiec.voz_cidada.model.dto.HistoricoDTO;
-import com.fiec.voz_cidada.model.entity.HistoricoChamado;
+import com.fiec.voz_cidada.domain.historico.HistoricoDTO;
+import com.fiec.voz_cidada.domain.historico.HistoricoChamado;
 import com.fiec.voz_cidada.repository.HistoricoRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;

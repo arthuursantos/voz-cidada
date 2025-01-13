@@ -1,7 +1,7 @@
 package com.fiec.voz_cidada.controller;
 
-import com.fiec.voz_cidada.model.dto.FuncionarioDTO;
-import com.fiec.voz_cidada.model.entity.FuncionarioPrefeitura;
+import com.fiec.voz_cidada.domain.funcionario.FuncionarioDTO;
+import com.fiec.voz_cidada.domain.funcionario.FuncionarioPrefeitura;
 import com.fiec.voz_cidada.service.FuncionarioService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

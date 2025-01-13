@@ -1,6 +1,6 @@
 package com.fiec.voz_cidada.repository;
 
-import com.fiec.voz_cidada.model.entity.HistoricoChamado;
+import com.fiec.voz_cidada.domain.historico.HistoricoChamado;
 import org.springframework.stereotype.Repository;
 
 @Repository

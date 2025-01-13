@@ -1,8 +1,8 @@
 package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.controller.UsuarioController;
-import com.fiec.voz_cidada.model.dto.UsuarioDTO;
-import com.fiec.voz_cidada.model.entity.Usuario;
+import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
+import com.fiec.voz_cidada.domain.usuario.Usuario;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;

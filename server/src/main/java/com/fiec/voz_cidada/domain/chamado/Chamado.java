@@ -1,5 +1,8 @@
-package com.fiec.voz_cidada.model.entity;
+package com.fiec.voz_cidada.domain.chamado;
 
+import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
+import com.fiec.voz_cidada.domain.historico.HistoricoChamado;
+import com.fiec.voz_cidada.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;

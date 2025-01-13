@@ -1,7 +1,7 @@
 package com.fiec.voz_cidada.controller;
 
-import com.fiec.voz_cidada.model.dto.UsuarioDTO;
-import com.fiec.voz_cidada.model.entity.Usuario;
+import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
+import com.fiec.voz_cidada.domain.usuario.Usuario;
 import com.fiec.voz_cidada.service.UsuarioService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

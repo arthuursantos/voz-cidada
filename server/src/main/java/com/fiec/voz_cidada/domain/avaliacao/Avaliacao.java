@@ -1,6 +1,8 @@
-package com.fiec.voz_cidada.model.entity;
+package com.fiec.voz_cidada.domain.avaliacao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fiec.voz_cidada.domain.chamado.Chamado;
+import com.fiec.voz_cidada.domain.usuario.Usuario;
 import jakarta.persistence.*;
 
 import java.io.Serializable;

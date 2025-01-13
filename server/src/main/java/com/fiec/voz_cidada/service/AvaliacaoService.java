@@ -1,9 +1,8 @@
 package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.controller.AvaliacaoController;
-import com.fiec.voz_cidada.controller.UsuarioController;
-import com.fiec.voz_cidada.model.dto.AvaliacaoDTO;
-import com.fiec.voz_cidada.model.entity.Avaliacao;
+import com.fiec.voz_cidada.domain.avaliacao.AvaliacaoDTO;
+import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
 import com.fiec.voz_cidada.repository.AvaliacaoRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;

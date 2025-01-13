@@ -1,7 +1,7 @@
 package com.fiec.voz_cidada.controller;
 
-import com.fiec.voz_cidada.model.dto.AvaliacaoDTO;
-import com.fiec.voz_cidada.model.entity.Avaliacao;
+import com.fiec.voz_cidada.domain.avaliacao.AvaliacaoDTO;
+import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
 import com.fiec.voz_cidada.service.AvaliacaoService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

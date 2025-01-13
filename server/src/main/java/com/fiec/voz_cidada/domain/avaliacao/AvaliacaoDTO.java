@@ -1,4 +1,4 @@
-package com.fiec.voz_cidada.model.dto;
+package com.fiec.voz_cidada.domain.avaliacao;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.hateoas.RepresentationModel;

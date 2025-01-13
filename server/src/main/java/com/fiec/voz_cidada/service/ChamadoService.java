@@ -1,11 +1,9 @@
 package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.controller.ChamadoController;
-import com.fiec.voz_cidada.controller.UsuarioController;
-import com.fiec.voz_cidada.model.dto.ChamadoDTO;
-import com.fiec.voz_cidada.model.entity.Chamado;
+import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
+import com.fiec.voz_cidada.domain.chamado.Chamado;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;

@@ -1,6 +1,5 @@
-package com.fiec.voz_cidada.model.entity;
+package com.fiec.voz_cidada.domain.funcionario;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
