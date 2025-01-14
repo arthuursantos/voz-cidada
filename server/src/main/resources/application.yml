@@ -2,12 +2,12 @@ spring:
   application:
     name: "Voz Cidadã"
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/voz-cidada?useSSL=false&serverTimezone=UTC
-    username: root
-    password: sacola07
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/voz-cidada
+    username: postgres
+    password: admin
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    show-sql: true
     open-in-view: false
