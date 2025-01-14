@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
+@Data
 @Entity
 @Table(name = "avaliacao")
 public class Avaliacao implements Serializable {
@@ -29,66 +30,4 @@ public class Avaliacao implements Serializable {
     private String comentario;
     private LocalDateTime dataAvaliacao;
 
-    public Avaliacao() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Chamado getChamado() {
-        return chamado;
-    }
-
-    public void setChamado(Chamado chamado) {
-        this.chamado = chamado;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public Integer getEstrelas() {
-        return estrelas;
-    }
-
-    public void setEstrelas(Integer estrelas) {
-        this.estrelas = estrelas;
-    }
-
-    public String getComentario() {
-        return comentario;
-    }
-
-    public void setComentario(String comentario) {
-        this.comentario = comentario;
-    }
-
-    public LocalDateTime getDataAvaliacao() {
-        return dataAvaliacao;
-    }
-
-    public void setDataAvaliacao(LocalDateTime dataAvaliacao) {
-        this.dataAvaliacao = dataAvaliacao;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Avaliacao avaliacao = (Avaliacao) o;
-        return Objects.equals(id, avaliacao.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
 }

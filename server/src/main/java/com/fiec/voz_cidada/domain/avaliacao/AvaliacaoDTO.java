@@ -1,11 +1,15 @@
 package com.fiec.voz_cidada.domain.avaliacao;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 public class AvaliacaoDTO extends RepresentationModel<AvaliacaoDTO> implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -17,51 +21,4 @@ public class AvaliacaoDTO extends RepresentationModel<AvaliacaoDTO> implements S
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataAvaliacao;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getChamadoId() {
-        return chamadoId;
-    }
-
-    public void setChamadoId(Long chamadoId) {
-        this.chamadoId = chamadoId;
-    }
-
-    public Long getUsuarioId() {
-        return usuarioId;
-    }
-
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
-    public Integer getEstrelas() {
-        return estrelas;
-    }
-
-    public void setEstrelas(Integer estrelas) {
-        this.estrelas = estrelas;
-    }
-
-    public String getComentario() {
-        return comentario;
-    }
-
-    public void setComentario(String comentario) {
-        this.comentario = comentario;
-    }
-
-    public LocalDateTime getDataAvaliacao() {
-        return dataAvaliacao;
-    }
-
-    public void setDataAvaliacao(LocalDateTime dataAvaliacao) {
-        this.dataAvaliacao = dataAvaliacao;
-    }
 }
