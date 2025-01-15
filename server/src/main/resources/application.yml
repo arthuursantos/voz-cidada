@@ -11,3 +11,7 @@ spring:
       ddl-auto: none
     show-sql: true
     open-in-view: false
+security:
+  token:
+    secret: ${JWT_SECRET:default-secret}
+    expires-in: 86400000
