@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -23,14 +25,26 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
     AuthRepository repository;
 
+    private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(
+            "/auth/login",
+            "/auth/register",
+            "/auth/refresh"
+    );
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if (isPublicEndpoint(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         var token = this.recoverToken(request);
         if (token != null) {
-            var login = service.verifyToken(token);
-            UserDetails user = repository.findByLogin(login);
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            var subject = service.validateAccessToken(token);
+            if (subject != null && !subject.isEmpty()) {
+                UserDetails user = repository.findById(subject).orElseThrow();
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
         filterChain.doFilter(request, response);
     }
@@ -40,4 +54,10 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (authHeader == null) return null;
         return authHeader.replace("Bearer ", "");
     }
+
+    private boolean isPublicEndpoint(HttpServletRequest request) {
+        String requestPath = request.getRequestURI();
+        return PUBLIC_ENDPOINTS.stream().anyMatch(requestPath::endsWith);
+    }
+
 }

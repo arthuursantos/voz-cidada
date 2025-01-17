@@ -11,10 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -31,8 +28,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody AuthenticationDTO data){
         var credentials = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var auth = authManager.authenticate(credentials);
-        var accesstoken = tokenService.generateToken((AuthUser) auth.getPrincipal());
-        return ResponseEntity.ok(new LoginResponseDTO(accesstoken));
+        return ResponseEntity.ok(tokenService.createAuthTokens((AuthUser) auth.getPrincipal()));
     }
 
     @PostMapping("/register")
@@ -43,4 +39,12 @@ public class AuthController {
         repository.save(newUser);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
+        String id = tokenService.validateRefreshToken(refreshToken.replace("Bearer ", ""));
+        var user = repository.findById(id).orElseThrow();
+        return ResponseEntity.ok(tokenService.createAuthTokens(user));
+    }
+
 }

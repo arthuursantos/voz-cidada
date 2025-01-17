@@ -14,4 +14,4 @@ spring:
 security:
   token:
     secret: ${JWT_SECRET:default-secret}
-    expires-in: 86400000
+    expire-lenght: 3600

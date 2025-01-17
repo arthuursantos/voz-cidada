@@ -1,4 +1,7 @@
 package com.fiec.voz_cidada.domain.auth_user;
 
-public record LoginResponseDTO(String accessToken) {
+import lombok.Builder;
+
+@Builder
+public record LoginResponseDTO(String accessToken, String refreshToken) {
 }

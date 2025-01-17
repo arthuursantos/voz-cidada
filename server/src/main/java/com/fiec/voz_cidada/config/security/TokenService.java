@@ -5,11 +5,11 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fiec.voz_cidada.domain.auth_user.LoginResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -18,25 +18,57 @@ public class TokenService {
 
     @Value("${security.token.secret")
     private String secret;
+    @Value("${security.token.expire-lenght}")
+    private Long expireLenght;
 
-    public String generateToken(AuthUser user) {
+    private static final String tokenTypeClaim = "token_type";
+    private static final String rolesClaim = "roles";
+
+    public LoginResponseDTO createAuthTokens(AuthUser user) {
+        return LoginResponseDTO.builder()
+                .accessToken(createAccessToken(user))
+                .refreshToken(createRefreshToken(user))
+                .build();
+    }
+
+    public String createAccessToken(AuthUser user) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        String issuerUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
         try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
-                    .withIssuer("Voz-Cidadã")
-                    .withSubject(user.getLogin())
-                    .withExpiresAt(genExpirationDate())
+                    .withIssuer(issuerUrl)
+                    .withSubject(user.getId())
+                    .withClaim(tokenTypeClaim, "ACCESS")
+                    .withClaim(rolesClaim, user.getRole().name())
+                    .withExpiresAt(LocalDateTime.now().plusSeconds(expireLenght).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
         } catch (JWTCreationException e) {
-            throw new RuntimeException("Error while generating token: ", e);
+            throw new RuntimeException("Error while generating access token: ", e);
         }
     }
 
-    public String verifyToken(String token) {
+    private String createRefreshToken(AuthUser user) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        String issuerUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
         try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.create()
+                    .withIssuer(issuerUrl)
+                    .withSubject(user.getId())
+                    .withClaim(tokenTypeClaim, "REFRESH")
+                    .withExpiresAt(LocalDateTime.now().plusSeconds(expireLenght*24).toInstant(ZoneOffset.of("-03:00")))
+                    .sign(algorithm);
+        } catch (JWTCreationException e) {
+            throw new RuntimeException("Error while generating refresh token: ", e);
+        }
+    }
+
+    public String getTokenSubject(String token, String tokenType) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        String issuerUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
+        try {
             return JWT.require(algorithm)
-                    .withIssuer("Voz-Cidadã")
+                    .withIssuer(issuerUrl)
+                    .withClaim(tokenTypeClaim, tokenType)
                     .build()
                     .verify(token)
                     .getSubject();
@@ -45,7 +77,12 @@ public class TokenService {
         }
     }
 
-    private Instant genExpirationDate() {
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    public String validateAccessToken(String token) {
+        return getTokenSubject(token, "ACCESS");
     }
+
+    public String validateRefreshToken(String token) {
+        return getTokenSubject(token, "REFRESH");
+    }
+
 }
