@@ -1,7 +1,11 @@
 package com.fiec.voz_cidada.service;
 
+import com.fiec.voz_cidada.domain.auth_user.AuthUser;
+import com.fiec.voz_cidada.domain.usuario.Usuario;
 import com.fiec.voz_cidada.repository.GenericRepository;
+import com.fiec.voz_cidada.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +15,9 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.Serializable;
 
@@ -22,6 +29,9 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
 
     @Autowired
     private ModelMapper mapper;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private PagedResourcesAssembler<D> assembler;
@@ -61,8 +71,29 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
+    @Transactional
     public void deleteById(ID id) {
+        System.out.println("genericservice deleteById: " + id);
         repository.deleteById(id);
+    }
+
+    public void validateUserAccess(Long userId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Usuário não autenticado.");
+        }
+        AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            Usuario entity = usuarioRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+            if (!entity.getAuthUser().getId().equals(currentAuthUser.getId())) {
+                throw new AccessDeniedException("Você não tem permissão para acessar este recurso.");
+            }
+        }
     }
 
     protected D convertToDto(T entity) {

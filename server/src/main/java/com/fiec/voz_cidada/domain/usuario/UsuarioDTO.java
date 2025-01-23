@@ -15,6 +15,7 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private String nome;
     private String cpf;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataNascimento;
@@ -27,6 +28,5 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
     private String complemento;
     private String cidade;
     private String uf;
-    private String pais;
 
 }

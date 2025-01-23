@@ -7,6 +7,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -54,5 +55,6 @@ public abstract class GenericController<T, D extends RepresentationModel<D>, ID 
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
 
 }

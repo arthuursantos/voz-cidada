@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.auth_user.LoginResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -18,8 +19,8 @@ public class TokenService {
 
     @Value("${security.token.secret")
     private String secret;
-    @Value("${security.token.expire-lenght}")
-    private Long expireLenght;
+    @Value("${security.token.expire-length}")
+    private Long expireLength;
 
     private static final String tokenTypeClaim = "token_type";
     private static final String rolesClaim = "roles";
@@ -32,15 +33,18 @@ public class TokenService {
     }
 
     public String createAccessToken(AuthUser user) {
+        System.out.println("createAccessToken");
         Algorithm algorithm = Algorithm.HMAC256(secret);
         String issuerUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
         try {
             return JWT.create()
                     .withIssuer(issuerUrl)
-                    .withSubject(user.getId())
+                    .withSubject(String.valueOf(user.getId()))
                     .withClaim(tokenTypeClaim, "ACCESS")
-                    .withClaim(rolesClaim, user.getRole().name())
-                    .withExpiresAt(LocalDateTime.now().plusSeconds(expireLenght).toInstant(ZoneOffset.of("-03:00")))
+                    .withClaim(rolesClaim, user.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .toList())
+                    .withExpiresAt(LocalDateTime.now().plusSeconds(expireLength).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
         } catch (JWTCreationException e) {
             throw new RuntimeException("Error while generating access token: ", e);
@@ -53,9 +57,9 @@ public class TokenService {
         try {
             return JWT.create()
                     .withIssuer(issuerUrl)
-                    .withSubject(user.getId())
+                    .withSubject(String.valueOf(user.getId()))
                     .withClaim(tokenTypeClaim, "REFRESH")
-                    .withExpiresAt(LocalDateTime.now().plusSeconds(expireLenght*24).toInstant(ZoneOffset.of("-03:00")))
+                    .withExpiresAt(LocalDateTime.now().plusSeconds(expireLength*24).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
         } catch (JWTCreationException e) {
             throw new RuntimeException("Error while generating refresh token: ", e);

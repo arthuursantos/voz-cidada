@@ -1,6 +1,7 @@
 package com.fiec.voz_cidada.domain.usuario;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -20,6 +21,11 @@ public class Usuario implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne
+    @JoinColumn(name = "auth_user_id", nullable = false)
+    private AuthUser authUser;
+
+    private String nome;
     private LocalDate dataNascimento;
     private String cpf;
     private String cep;
@@ -29,7 +35,6 @@ public class Usuario implements Serializable {
     private String complemento;
     private String cidade;
     private String uf;
-    private String pais;
     private LocalDateTime dataCadastro;
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)

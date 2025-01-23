@@ -3,7 +3,7 @@ spring:
     name: "Voz Cidadã"
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/voz-cidada
+    url: jdbc:postgresql://localhost:5432/voz-cidada
     username: postgres
     password: admin
   jpa:
@@ -14,4 +14,4 @@ spring:
 security:
   token:
     secret: ${JWT_SECRET:default-secret}
-    expire-lenght: 3600
+    expire-length: 3600

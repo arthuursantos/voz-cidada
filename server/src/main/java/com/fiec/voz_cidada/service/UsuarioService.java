@@ -1,19 +1,52 @@
 package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.controller.UsuarioController;
+import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
+import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private AuthRepository authRepository;
+
     public UsuarioService(UsuarioRepository repository) {
         super(repository, UsuarioDTO.class, Usuario.class);
+    }
+
+    public EntityModel<UsuarioDTO> createUserProfile(UsuarioDTO dto) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
+        AuthUser authUser = authRepository.findById(currentAuthUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
+        Usuario entity = convertToEntity(dto);
+        entity.setAuthUser(authUser);
+        UsuarioDTO savedDto = convertToDto(usuarioRepository.save(entity));
+        return EntityModel.of(savedDto, generateLinks(savedDto));
+    }
+
+    @Transactional
+    @Override
+    public void deleteById(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+        authRepository.deleteById(usuario.getAuthUser().getId());
+        usuarioRepository.delete(usuario);
     }
 
     @Override

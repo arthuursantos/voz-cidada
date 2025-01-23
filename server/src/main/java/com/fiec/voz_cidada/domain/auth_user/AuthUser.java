@@ -1,5 +1,6 @@
 package com.fiec.voz_cidada.domain.auth_user;
 
+import com.fiec.voz_cidada.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -22,10 +23,16 @@ import java.util.List;
 @Entity(name = "auth_user")
 public class AuthUser implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(mappedBy = "authUser", cascade = CascadeType.ALL)
+    private Usuario profile;
+
     private String login;
     private String password;
+
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
     public AuthUser(String login, String password, UserRole role){

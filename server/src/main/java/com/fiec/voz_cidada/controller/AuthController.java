@@ -43,7 +43,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
         String id = tokenService.validateRefreshToken(refreshToken.replace("Bearer ", ""));
-        var user = repository.findById(id).orElseThrow();
+        var user = repository.findById(Long.valueOf(id)).orElseThrow();
         return ResponseEntity.ok(tokenService.createAuthTokens(user));
     }
 

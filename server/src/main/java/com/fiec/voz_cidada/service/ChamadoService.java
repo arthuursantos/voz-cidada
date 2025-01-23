@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
+
     public ChamadoService(ChamadoRepository repository) {
         super(repository, ChamadoDTO.class, Chamado.class);
     }
