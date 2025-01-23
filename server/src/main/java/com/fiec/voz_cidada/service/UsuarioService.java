@@ -8,7 +8,6 @@ import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -19,14 +18,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final AuthRepository authRepository;
 
-    @Autowired
-    private AuthRepository authRepository;
-
-    public UsuarioService(UsuarioRepository repository) {
+    public UsuarioService(
+            UsuarioRepository repository,
+            UsuarioRepository usuarioRepository,
+            AuthRepository authRepository)
+    {
         super(repository, UsuarioDTO.class, Usuario.class);
+        this.usuarioRepository = usuarioRepository;
+        this.authRepository = authRepository;
     }
 
     public EntityModel<UsuarioDTO> createUserProfile(UsuarioDTO dto) {

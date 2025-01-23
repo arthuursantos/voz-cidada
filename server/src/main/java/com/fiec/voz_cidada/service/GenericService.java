@@ -29,18 +29,21 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
 
     @Autowired
     private ModelMapper mapper;
-
     @Autowired
     private UsuarioRepository usuarioRepository;
-
     @Autowired
     private PagedResourcesAssembler<D> assembler;
 
-    protected GenericService(GenericRepository<T, ID> repository, Class<D> dtoClass, Class<T> entityClass) {
+    protected GenericService(
+            GenericRepository<T, ID> repository,
+            Class<D> dtoClass,
+            Class<T> entityClass
+    ) {
         this.repository = repository;
         this.dtoClass = dtoClass;
         this.entityClass = entityClass;
     }
+
 
     public PagedModel<EntityModel<D>> findAll(Pageable pageable) {
         Page<T> entities = repository.findAll(pageable);

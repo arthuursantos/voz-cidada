@@ -3,12 +3,9 @@ package com.fiec.voz_cidada.controller;
 import com.fiec.voz_cidada.domain.avaliacao.AvaliacaoDTO;
 import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
-import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.repository.AvaliacaoRepository;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
-import com.fiec.voz_cidada.repository.UsuarioRepository;
 import com.fiec.voz_cidada.service.AvaliacaoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +17,17 @@ import java.net.URI;
 @RequestMapping("/api/avaliacao")
 public class AvaliacaoController extends GenericController<Avaliacao, AvaliacaoDTO, Long> {
 
-    @Autowired
-    private AvaliacaoRepository avaliacaoRepository;
-    @Autowired
-    private ChamadoRepository chamadoRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
+    private final ChamadoRepository chamadoRepository;
 
-    public AvaliacaoController(AvaliacaoService service) {
+    public AvaliacaoController(
+            AvaliacaoService service,
+            AvaliacaoRepository avaliacaoRepository,
+            ChamadoRepository chamadoRepository)
+    {
         super(service);
+        this.avaliacaoRepository = avaliacaoRepository;
+        this.chamadoRepository = chamadoRepository;
     }
 
     @Override

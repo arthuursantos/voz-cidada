@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,11 +18,13 @@ import java.util.List;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    @Autowired
-    TokenService service;
+    private final TokenService service;
+    private final AuthRepository repository;
 
-    @Autowired
-    AuthRepository repository;
+    public SecurityFilter(TokenService service, AuthRepository repository) {
+        this.service = service;
+        this.repository = repository;
+    }
 
     private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(
             "/auth/login",

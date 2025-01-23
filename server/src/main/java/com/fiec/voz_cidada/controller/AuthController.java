@@ -3,10 +3,8 @@ package com.fiec.voz_cidada.controller;
 import com.fiec.voz_cidada.config.security.TokenService;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.auth_user.AuthenticationDTO;
-import com.fiec.voz_cidada.domain.auth_user.LoginResponseDTO;
 import com.fiec.voz_cidada.domain.auth_user.RegisterDTO;
 import com.fiec.voz_cidada.repository.AuthRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,12 +15,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authManager;
-    @Autowired
-    private AuthRepository repository;
-    @Autowired
-    private TokenService tokenService;
+    private final AuthenticationManager authManager;
+    private final AuthRepository repository;
+    private final TokenService tokenService;
+
+    public AuthController(AuthenticationManager authManager, AuthRepository repository, TokenService tokenService) {
+        this.authManager = authManager;
+        this.repository = repository;
+        this.tokenService = tokenService;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationDTO data){

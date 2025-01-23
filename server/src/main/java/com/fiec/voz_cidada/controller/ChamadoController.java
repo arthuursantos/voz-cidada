@@ -4,7 +4,6 @@ import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.service.ChamadoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +15,11 @@ import java.net.URI;
 @RequestMapping("/api/chamado")
 public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Long> {
 
-    @Autowired
-    private ChamadoRepository repository;
+    private final ChamadoRepository repository;
 
-    public ChamadoController(ChamadoService service) {
+    public ChamadoController(ChamadoService service, ChamadoRepository repository) {
         super(service);
+        this.repository = repository;
     }
 
     @Override

@@ -32,7 +32,7 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
 
     @Override
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<UsuarioDTO>>> findAll(
             @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(service.findAll(pageable));
