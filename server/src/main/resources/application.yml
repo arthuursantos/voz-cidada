@@ -15,3 +15,5 @@ security:
   token:
     secret: ${JWT_SECRET:default-secret}
     expire-length: 3600
+server:
+  port: 8080
