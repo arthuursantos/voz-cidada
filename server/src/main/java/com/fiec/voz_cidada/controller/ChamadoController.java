@@ -2,6 +2,7 @@ package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
+import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.service.ChamadoService;
 import org.springframework.hateoas.EntityModel;
@@ -34,7 +35,7 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Chamado entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Chamado não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível excluir os dados. O chamado não foi encontrado."));
         service.validateUserAccess(entity.getUsuario().getId());
         service.deleteById(id);
         return ResponseEntity.noContent().build();

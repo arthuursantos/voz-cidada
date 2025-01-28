@@ -3,6 +3,7 @@ package com.fiec.voz_cidada.controller;
 import com.fiec.voz_cidada.domain.avaliacao.AvaliacaoDTO;
 import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
+import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.repository.AvaliacaoRepository;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.service.AvaliacaoService;
@@ -34,7 +35,7 @@ public class AvaliacaoController extends GenericController<Avaliacao, AvaliacaoD
     @PutMapping
     public ResponseEntity<EntityModel<AvaliacaoDTO>> update(@RequestBody AvaliacaoDTO dto) {
         Avaliacao entity = avaliacaoRepository.findById(dto.getId())
-                .orElseThrow(() -> new RuntimeException("A avaliação não existe."));
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível atualizar os dados. A avaliação não foi encontrada."));
         service.validateUserAccess(entity.getUsuario().getId());
         EntityModel<AvaliacaoDTO> entityModel = service.update(dto);
         return ResponseEntity.ok(entityModel);
@@ -44,7 +45,7 @@ public class AvaliacaoController extends GenericController<Avaliacao, AvaliacaoD
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Avaliacao entity = avaliacaoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("A avaliação não existe."));
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível excluir os dados. A avaliação não foi encontrada."));
         service.validateUserAccess(entity.getUsuario().getId());
         service.deleteById(id);
         return ResponseEntity.noContent().build();
@@ -54,7 +55,7 @@ public class AvaliacaoController extends GenericController<Avaliacao, AvaliacaoD
     @PostMapping
     public ResponseEntity<EntityModel<AvaliacaoDTO>> create(@RequestBody AvaliacaoDTO dto) {
         Chamado entity = chamadoRepository.findById(dto.getChamadoId())
-                .orElseThrow(() -> new RuntimeException("Não é possível avaliar um chamado que não existe."));
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível avaliar. O chamado não existe."));
         service.validateUserAccess(entity.getUsuario().getId());
         service.validateUserAccess(dto.getUsuarioId());
         EntityModel<AvaliacaoDTO> entityModel = service.create(dto);

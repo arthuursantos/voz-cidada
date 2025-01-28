@@ -4,6 +4,7 @@ import com.fiec.voz_cidada.controller.UsuarioController;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
+import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,7 +36,7 @@ public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
         AuthUser authUser = authRepository.findById(currentAuthUser.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
+                .orElseThrow(() -> new ResourceNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
         Usuario entity = convertToEntity(dto);
         entity.setAuthUser(authUser);
         UsuarioDTO savedDto = convertToDto(usuarioRepository.save(entity));
@@ -46,7 +47,7 @@ public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
     @Override
     public void deleteById(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
         authRepository.deleteById(usuario.getAuthUser().getId());
         usuarioRepository.delete(usuario);
     }

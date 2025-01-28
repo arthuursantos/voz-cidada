@@ -6,9 +6,11 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.auth_user.LoginResponseDTO;
+import com.fiec.voz_cidada.exceptions.InvalidAuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
@@ -33,7 +35,6 @@ public class TokenService {
     }
 
     public String createAccessToken(AuthUser user) {
-        System.out.println("createAccessToken");
         Algorithm algorithm = Algorithm.HMAC256(secret);
         String issuerUrl = ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
         try {
@@ -46,8 +47,8 @@ public class TokenService {
                             .toList())
                     .withExpiresAt(LocalDateTime.now().plusSeconds(expireLength).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
-        } catch (JWTCreationException e) {
-            throw new RuntimeException("Error while generating access token: ", e);
+        } catch (Exception e) {
+            throw new InvalidAuthenticationException("Não foi possível se autenticar: " + e.getMessage());
         }
     }
 
@@ -61,8 +62,8 @@ public class TokenService {
                     .withClaim(tokenTypeClaim, "REFRESH")
                     .withExpiresAt(LocalDateTime.now().plusSeconds(expireLength*24).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
-        } catch (JWTCreationException e) {
-            throw new RuntimeException("Error while generating refresh token: ", e);
+        } catch (Exception e) {
+            throw new InvalidAuthenticationException("Não foi possível se autenticar: " + e.getMessage());
         }
     }
 
@@ -76,8 +77,8 @@ public class TokenService {
                     .build()
                     .verify(token)
                     .getSubject();
-        } catch (JWTVerificationException e) {
-            return "";
+        } catch (Exception e) {
+            throw new InvalidAuthenticationException("Não foi possível validar a autenticação: " + e.getMessage());
         }
     }
 

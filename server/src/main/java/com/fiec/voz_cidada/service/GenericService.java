@@ -2,6 +2,8 @@ package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
+import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
+import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.repository.GenericRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -55,7 +57,7 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         return repository.findById(id)
                 .map(this::convertToDto)
                 .map(dto -> EntityModel.of(dto, generateLinks(dto)))
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado."));
     }
 
     public EntityModel<D> create(D dto) {
@@ -68,7 +70,7 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
     public EntityModel<D> update(D dto) {
         ID id = getResourceID(dto);
         T existingEntity = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Entity with ID " + id + " not found"));
+                new ResourceNotFoundException("Nenhum recurso com ID " + id + " encontrado."));
         mapper.map(dto, existingEntity);
         D savedDto = convertToDto(repository.save(existingEntity));
         return EntityModel.of(savedDto, generateLinks(savedDto));
@@ -76,14 +78,13 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
 
     @Transactional
     public void deleteById(ID id) {
-        System.out.println("genericservice deleteById: " + id);
         repository.deleteById(id);
     }
 
     public void validateUserAccess(Long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AccessDeniedException("Usuário não autenticado.");
+            throw new UnauthorizedException("Usuário não autenticado.");
         }
         AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
 
@@ -92,9 +93,9 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
 
         if (!isAdmin) {
             Usuario entity = usuarioRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
             if (!entity.getAuthUser().getId().equals(currentAuthUser.getId())) {
-                throw new AccessDeniedException("Você não tem permissão para acessar este recurso.");
+                throw new UnauthorizedException("Você não tem permissão para acessar este recurso.");
             }
         }
     }

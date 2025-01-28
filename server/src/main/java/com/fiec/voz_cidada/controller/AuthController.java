@@ -4,6 +4,7 @@ import com.fiec.voz_cidada.config.security.TokenService;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.auth_user.AuthenticationDTO;
 import com.fiec.voz_cidada.domain.auth_user.RegisterDTO;
+import com.fiec.voz_cidada.exceptions.InvalidAuthenticationException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,7 +45,8 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
         String id = tokenService.validateRefreshToken(refreshToken.replace("Bearer ", ""));
-        var user = repository.findById(Long.valueOf(id)).orElseThrow();
+        var user = repository.findById(Long.valueOf(id))
+                .orElseThrow(() -> new InvalidAuthenticationException("Não foi possível renovar sua autenticação."));
         return ResponseEntity.ok(tokenService.createAuthTokens(user));
     }
 
