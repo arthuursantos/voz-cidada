@@ -1,9 +1,12 @@
-function App() {
-  return (
-    <>
-        <h1>vai corinthians</h1>
-    </>
-  )
-}
+import LoginForm from './components/Login.tsx';
+import {AuthProvider} from "@/contexts/AuthContext.tsx";
 
-export default App
+const App = () => {
+    return (
+        <AuthProvider>
+            <LoginForm></LoginForm>
+        </AuthProvider>
+    );
+};
+
+export default App;
