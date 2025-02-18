@@ -28,6 +28,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationDTO data){
+        System.out.println("credentials: " + data.login() + " " + data.password());
         var credentials = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var auth = authManager.authenticate(credentials);
         return ResponseEntity.ok(tokenService.createAuthTokens((AuthUser) auth.getPrincipal()));
