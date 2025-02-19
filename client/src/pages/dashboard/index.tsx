@@ -7,6 +7,7 @@ export default function Dashboard() {
         <>
             <h1>vai corinthians</h1>
             <p>Oi {user?.nome}</p>
+            <p>nascimento {user?.dataNascimento}</p>
         </>
     )
 }

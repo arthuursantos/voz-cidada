@@ -94,7 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
 
             const decoded = jwtDecode<JWTClaims>(accessToken);
-            const userResponse = await api.get(`/api/usuario/${decoded.sub}`);
+            const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
 
             navigate("/dashboard");

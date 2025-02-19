@@ -3,6 +3,7 @@ package com.fiec.voz_cidada.controller;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
+import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import com.fiec.voz_cidada.service.UsuarioService;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +44,17 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
     public ResponseEntity<EntityModel<UsuarioDTO>> findById(@PathVariable Long id) {
         service.validateUserAccess(id);
         return ResponseEntity.ok(service.findById(id));
+    }
+
+    @GetMapping("/auth/{authUserId}")
+    public ResponseEntity<EntityModel<UsuarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
+        try {
+            var entity = service.findByAuthUserId(authUserId);
+            service.validateUserAccess(entity.getContent().getId());
+            return ResponseEntity.ok(entity);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Override
