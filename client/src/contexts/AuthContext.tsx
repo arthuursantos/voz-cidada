@@ -3,6 +3,7 @@ import api from "@/lib/axios.ts";
 import { setCookie, parseCookies } from "nookies";
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode";
+import {AxiosResponse} from "axios";
 
 type User = {
     id: number;
@@ -36,7 +37,9 @@ type SignInData = {
     password: string;
 }
 
-type SignInResponse = {
+type SignInResponse = AxiosResponse<SignInResponseData>
+
+type SignInResponseData = {
     accessToken: string,
     refreshToken: string;
 }
@@ -74,22 +77,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }, [])
 
     async function signIn({ login, password }: SignInData) {
+        try {
+            const response: SignInResponse = await api.post("/auth/login", {
+                login,
+                password
+            });
 
-        const { accessToken, refreshToken }: SignInResponse = await api.post("/auth/login", {
-            login,
-            password
-        })
+            const { accessToken, refreshToken } = response.data;
 
-        setCookie(undefined, "vozcidada.accessToken", accessToken, {
-            maxAge: 60*60*1, // 1h
-        })
+            setCookie(undefined, "vozcidada.accessToken", accessToken, {
+                maxAge: 60 * 60 * 1, // 1h
+            });
 
-        setCookie(undefined, "vozcidada.accessToken", refreshToken, {
-            maxAge: 60*60*24, // 24h
-        })
+            setCookie(undefined, "vozcidada.refreshToken", refreshToken, {
+                maxAge: 60 * 60 * 24, // 24h
+            });
 
-        navigate("/dashboard")
+            const decoded = jwtDecode<JWTClaims>(accessToken);
+            const userResponse = await api.get(`/api/usuario/${decoded.sub}`);
+            setUser(userResponse.data);
 
+            navigate("/dashboard");
+        } catch (error) {
+            console.error('Erro durante o login:', error);
+            throw error;
+        }
     }
 
     return (

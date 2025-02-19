@@ -1,18 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { AuthContext } from "@/contexts/AuthContext.tsx"
-import {useContext} from "react";
+import { useContext } from "react";
 
-export default function LoginForm(){
-
-    const { register, handleSubmit } = useForm();
-    const { signIn } = useContext(AuthContext)
-
-    async function handleSignIn(data) {
-        await signIn(data)
+export default function LoginForm() {
+    interface SignInData {
+        login: string;
+        password: string;
     }
+
+    const { register, handleSubmit } = useForm<SignInData>();
+    const { signIn } = useContext(AuthContext);
+
+    const handleSignIn: SubmitHandler<SignInData> = async (data) => {
+        await signIn(data);
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -43,6 +47,5 @@ export default function LoginForm(){
                 </CardContent>
             </Card>
         </div>
-
     );
-};
+}
