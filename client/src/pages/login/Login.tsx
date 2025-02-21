@@ -12,7 +12,7 @@ export default function LoginForm() {
     }
 
     const { register, handleSubmit } = useForm<SignInData>();
-    const { signIn } = useContext(AuthContext);
+    const { signIn } = useContext(AuthContext); 
 
     const handleSignIn: SubmitHandler<SignInData> = async (data) => {
         await signIn(data);

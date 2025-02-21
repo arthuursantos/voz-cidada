@@ -5,19 +5,42 @@ import {AuthContext, AuthProvider} from "@/contexts/AuthContext.tsx";
 import Dashboard from "@/pages/dashboard";
 
 const PrivateRoute = ({ children }: {children: ReactNode}) => {
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, loading } = useContext(AuthContext);
+    if (loading) {
+        return "";
+    }
     if (!isAuthenticated) {
         return <Navigate to={"/login"}/>
     }
     return children;
 }
 
+const PublicRoute = ({ children }: {children: ReactNode}) => {
+    const { isAuthenticated, loading } = useContext(AuthContext);
+    if (loading) {
+        return "";
+    }
+    if (isAuthenticated) {
+        return <Navigate to={"/dashboard"}/>
+    }
+    return children;
+}
+
+
 const App = () => {
     return (
         <BrowserRouter>
             <AuthProvider>
                 <Routes>
-                    <Route path="/login" element={<LoginForm />} />
+
+                    <Route
+                        path="/login"
+                        element={
+                            <PublicRoute>
+                                <LoginForm />
+                            </PublicRoute>
+                        }
+                    />
 
                     <Route
                         path="/dashboard"
@@ -28,9 +51,9 @@ const App = () => {
                         }
                     />
 
-                    <Route path="/" element={<Navigate to="/login" />} />
+                    <Route path="/" element={<Navigate to="/dashboard" />} />
 
-                    <Route path="*" element={<Navigate to="/login" />} />
+                    <Route path="*" element={<Navigate to="/dashboard" />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>

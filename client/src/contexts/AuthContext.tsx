@@ -48,12 +48,14 @@ type AuthContextType = {
     isAuthenticated: boolean,
     signIn: (data: SignInData) => Promise<void>,
     user: User | null;
+    loading: boolean;
 }
 
 export const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
+    const [loading, setLoading] = useState(true)
     const isAuthenticated = !!user;
 
     const navigate = useNavigate();
@@ -63,21 +65,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (accessToken) {
             try {
                 const decoded = jwtDecode<JWTClaims>(accessToken);
-                api.get(`/api/usuario/${decoded.sub}`)
+                api.get(`/api/usuario/auth/${decoded.sub}`)
                     .then(response => {
                         setUser(response.data)
                     })
                     .catch(() => {
                         setUser(null)
                     })
+                    .finally(() => {
+                        setLoading(false)
+                    })
             } catch (error) {
                 setUser(null)
+                setLoading(false)
             }
+        } else {
+            setLoading(false)
         }
     }, [])
 
     async function signIn({ login, password }: SignInData) {
         try {
+
             const response: SignInResponse = await api.post("/auth/login", {
                 login,
                 password
@@ -104,8 +113,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
+    console.log(isAuthenticated)
+    console.log(user?.nome)
+
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, signIn }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, signIn, loading }}>
             {children}
         </AuthContext.Provider>
     )
