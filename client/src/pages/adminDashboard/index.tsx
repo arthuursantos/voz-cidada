@@ -1,12 +1,12 @@
 import {useContext} from "react";
 import {AuthContext} from "@/contexts/AuthContext.tsx";
 
-export default function Dashboard() {
+export default function AdminDashboard() {
     const { user } = useContext(AuthContext)
     return (
         <>
-            <p>user dashboard</p>
-            <p>oi user {user?.nome}</p>
+            <h1>admin dashboard</h1>
+            <p>oi adm {user?.nome}</p>
         </>
-    )
+    );
 }

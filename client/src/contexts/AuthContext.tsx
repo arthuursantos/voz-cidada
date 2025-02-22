@@ -49,6 +49,7 @@ type AuthContextType = {
     signIn: (data: SignInData) => Promise<void>,
     user: User | null;
     loading: boolean;
+    userRoles: string[] | null;
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -56,6 +57,7 @@ export const AuthContext = createContext({} as AuthContextType)
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
+    const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const isAuthenticated = !!user;
 
     const navigate = useNavigate();
@@ -65,28 +67,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (accessToken) {
             try {
                 const decoded = jwtDecode<JWTClaims>(accessToken);
+                console.log("Roles from token:", decoded.roles);
+                setUserRoles(decoded.roles);
+
                 api.get(`/api/usuario/auth/${decoded.sub}`)
                     .then(response => {
                         setUser(response.data)
+                        console.log("User data loaded:", response.data);
                     })
-                    .catch(() => {
+                    .catch((error) => {
+                        console.error("Error loading user:", error);
                         setUser(null)
+                        setUserRoles(null)
                     })
                     .finally(() => {
                         setLoading(false)
                     })
             } catch (error) {
+                console.error("Error decoding token:", error);
                 setUser(null)
+                setUserRoles(null)
                 setLoading(false)
             }
         } else {
+            console.log("No access token found");
             setLoading(false)
         }
     }, [])
 
     async function signIn({ login, password }: SignInData) {
         try {
-
             const response: SignInResponse = await api.post("/auth/login", {
                 login,
                 password
@@ -103,21 +113,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
 
             const decoded = jwtDecode<JWTClaims>(accessToken);
+            console.log("Roles after login:", decoded.roles);
+            setUserRoles(decoded.roles);
+
             const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
+            console.log("User data after login:", userResponse.data);
 
-            navigate("/dashboard");
+            // Removi o navigate redundante e mantive apenas o condicional
+            if (decoded.roles.includes("ROLE_ADMIN")) {
+                console.log("Redirecting to admin dashboard");
+                navigate("/admin/dashboard");
+            } else {
+                console.log("Redirecting to regular dashboard");
+                navigate("/dashboard");
+            }
         } catch (error) {
             console.error('Erro durante o login:', error);
             throw error;
         }
     }
 
-    console.log(isAuthenticated)
-    console.log(user?.nome)
-
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, signIn, loading }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, signIn, loading, userRoles }}>
             {children}
         </AuthContext.Provider>
     )
