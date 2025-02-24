@@ -48,12 +48,16 @@ type AuthContextType = {
     isAuthenticated: boolean,
     signIn: (data: SignInData) => Promise<void>,
     user: User | null;
+    loading: boolean;
+    userRoles: string[] | null;
 }
 
 export const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const isAuthenticated = !!user;
 
     const navigate = useNavigate();
@@ -63,16 +67,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (accessToken) {
             try {
                 const decoded = jwtDecode<JWTClaims>(accessToken);
-                api.get(`/api/usuario/${decoded.sub}`)
+                setUserRoles(decoded.roles);
+
+                api.get(`/api/usuario/auth/${decoded.sub}`)
                     .then(response => {
                         setUser(response.data)
                     })
-                    .catch(() => {
+                    .catch((error) => {
                         setUser(null)
+                        setUserRoles(null)
+                    })
+                    .finally(() => {
+                        setLoading(false)
                     })
             } catch (error) {
                 setUser(null)
+                setUserRoles(null)
+                setLoading(false)
             }
+        } else {
+            setLoading(false)
         }
     }, [])
 
@@ -94,18 +108,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
 
             const decoded = jwtDecode<JWTClaims>(accessToken);
+            setUserRoles(decoded.roles);
+
             const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
 
-            navigate("/dashboard");
+            if (decoded.roles.includes("ROLE_ADMIN")) {
+                navigate("/admin/dashboard");
+            } else {
+                navigate("/dashboard");
+            }
         } catch (error) {
-            console.error('Erro durante o login:', error);
             throw error;
         }
     }
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, signIn }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, signIn, loading, userRoles }}>
             {children}
         </AuthContext.Provider>
     )
