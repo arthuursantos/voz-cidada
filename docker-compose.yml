@@ -10,6 +10,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=admin
 
+  web:
+    build: client
+    ports:
+      - "5173:80"
+    depends_on:
+      - app
+
   postgres:
     image: postgres:16
     ports:

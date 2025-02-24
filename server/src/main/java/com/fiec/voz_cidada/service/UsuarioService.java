@@ -44,6 +44,17 @@ public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
     }
 
     @Transactional
+    public EntityModel<UsuarioDTO> findByAuthUserId(Long authUserId) {
+        try {
+            var entity = usuarioRepository.findByAuthUser_Id(authUserId);
+            var dto = convertToDto(entity);
+            return EntityModel.of(dto, generateLinks(dto));
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado.");
+        }
+    }
+
+    @Transactional
     @Override
     public void deleteById(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
