@@ -31,11 +31,11 @@ export default function LoginForm() {
             <div className="flex items-center justify-center w-full p-8 md:w-1/2">
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-center">
-                        <h2 className="text-3xl font-bold text-[#504136]">Bem-vindo!</h2>
-                        <p className="mt-2 text-sm text-gray-600">Por favor, faça login na sua conta</p>
+                        <h2 className="text-3xl font-bold text-[#504136] font-montserrat">Bem-vindo!</h2>
+                        <p className="mt-2 text-sm text-gray-600 font-lato">Por favor, faça login na sua conta</p>
                     </div>
 
-                    <form onSubmit={handleSubmit(handleSignIn)} className="mt-8 space-y-6">
+                    <form onSubmit={handleSubmit(handleSignIn)} className="mt-8 space-y-6 font-lato">
                         <div className="space-y-4">
                             <div>
                                 <Label htmlFor="login" className="text-[#504136]">
@@ -73,7 +73,7 @@ export default function LoginForm() {
                         </div>
                     </form>
 
-                    <p className="mt-2 text-sm text-center text-gray-600">
+                    <p className="mt-2 text-sm text-center text-gray-600 font-lato">
                         Não tem uma conta?{" "}
                         <a href="#" className="font-medium text-[#689689] hover:text-[#504136]">
                             Registre-se
