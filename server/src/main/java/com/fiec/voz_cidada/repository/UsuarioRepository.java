@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UsuarioRepository extends GenericRepository<Usuario, Long> {
+    Usuario findByAuthUser_Id(Long id);
 }

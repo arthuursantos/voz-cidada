@@ -36,7 +36,7 @@ public class AvaliacaoController extends GenericController<Avaliacao, AvaliacaoD
     public ResponseEntity<EntityModel<AvaliacaoDTO>> update(@RequestBody AvaliacaoDTO dto) {
         Avaliacao entity = avaliacaoRepository.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi possível atualizar os dados. A avaliação não foi encontrada."));
-        service.validateUserAccess(entity.getUsuario().getId());
+        service.checkUserAccess(entity.getUsuario().getId());
         EntityModel<AvaliacaoDTO> entityModel = service.update(dto);
         return ResponseEntity.ok(entityModel);
     }
@@ -46,7 +46,7 @@ public class AvaliacaoController extends GenericController<Avaliacao, AvaliacaoD
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Avaliacao entity = avaliacaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi possível excluir os dados. A avaliação não foi encontrada."));
-        service.validateUserAccess(entity.getUsuario().getId());
+        service.checkUserAccess(entity.getUsuario().getId());
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -56,8 +56,8 @@ public class AvaliacaoController extends GenericController<Avaliacao, AvaliacaoD
     public ResponseEntity<EntityModel<AvaliacaoDTO>> create(@RequestBody AvaliacaoDTO dto) {
         Chamado entity = chamadoRepository.findById(dto.getChamadoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi possível avaliar. O chamado não existe."));
-        service.validateUserAccess(entity.getUsuario().getId());
-        service.validateUserAccess(dto.getUsuarioId());
+        service.checkUserAccess(entity.getUsuario().getId());
+        service.checkUserAccess(dto.getUsuarioId());
         EntityModel<AvaliacaoDTO> entityModel = service.create(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

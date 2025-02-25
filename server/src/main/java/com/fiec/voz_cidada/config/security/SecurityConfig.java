@@ -1,5 +1,10 @@
 package com.fiec.voz_cidada.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fiec.voz_cidada.exceptions.StandardError;
+import com.fiec.voz_cidada.exceptions.UnauthorizedException;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +18,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.time.Instant;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -21,6 +32,9 @@ public class SecurityConfig {
 
     private final SecurityFilter filter;
 
+    @Value("${cors.originPatterns}")
+    private String origins;
+
     public SecurityConfig(SecurityFilter filter) {
         this.filter = filter;
     }
@@ -28,6 +42,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
@@ -38,6 +53,20 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        var allowedOrigins = origins.split(",");
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean

@@ -47,7 +47,7 @@ public class TokenService {
                             .toList())
                     .withExpiresAt(LocalDateTime.now().plusSeconds(expireLength).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
-        } catch (Exception e) {
+        } catch (InvalidAuthenticationException e) {
             throw new InvalidAuthenticationException("Não foi possível se autenticar: " + e.getMessage());
         }
     }
@@ -62,7 +62,7 @@ public class TokenService {
                     .withClaim(tokenTypeClaim, "REFRESH")
                     .withExpiresAt(LocalDateTime.now().plusSeconds(expireLength*24).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
-        } catch (Exception e) {
+        } catch (InvalidAuthenticationException e) {
             throw new InvalidAuthenticationException("Não foi possível se autenticar: " + e.getMessage());
         }
     }
@@ -77,7 +77,7 @@ public class TokenService {
                     .build()
                     .verify(token)
                     .getSubject();
-        } catch (Exception e) {
+        } catch (InvalidAuthenticationException e) {
             throw new InvalidAuthenticationException("Não foi possível validar a autenticação: " + e.getMessage());
         }
     }
