@@ -31,14 +31,14 @@ export default function LoginForm() {
             <div className="flex items-center justify-center w-full p-8 md:w-1/2">
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-center">
-                        <h2 className="text-3xl font-bold text-[#504136] font-montserrat">Bem-vindo!</h2>
+                        <h2 className="text-3xl font-bold text-[--cor-primaria] font-montserrat">Bem-vindo!</h2>
                         <p className="mt-2 text-sm text-gray-600 font-lato">Por favor, faça login na sua conta</p>
                     </div>
 
                     <form onSubmit={handleSubmit(handleSignIn)} className="mt-8 space-y-6 font-lato">
                         <div className="space-y-4">
                             <div>
-                                <Label htmlFor="login" className="text-[#504136]">
+                                <Label htmlFor="login" className="text-[--cor-primaria]">
                                     Login
                                 </Label>
                                 <Input
@@ -47,12 +47,12 @@ export default function LoginForm() {
                                     type="text"
                                     autoComplete="username"
                                     required
-                                    className="mt-1 border-[#689689]"
+                                    className="mt-1 border-[--cor-primaria]"
                                     placeholder="seu@email.com"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="password" className="text-[#504136]">
+                                <Label htmlFor="password" className="text-[--cor-primaria]">
                                     Senha
                                 </Label>
                                 <Input
@@ -61,13 +61,13 @@ export default function LoginForm() {
                                     type="password"
                                     autoComplete="current-password"
                                     required
-                                    className="mt-1 border-[#689689]"
+                                    className="mt-1 border-[--cor-primaria]"
                                     placeholder="••••••••"
                                 />
                             </div>
                         </div>
                         <div>
-                            <Button type="submit" className="w-full bg-[#504136] hover:bg-[#689689] text-white">
+                            <Button type="submit" className="w-full bg-[--cor-primaria] hover:bg-[--cor-primaria2] text-white">
                                 Entrar
                             </Button>
                         </div>
@@ -75,7 +75,7 @@ export default function LoginForm() {
 
                     <p className="mt-2 text-sm text-center text-gray-600 font-lato">
                         Não tem uma conta?{" "}
-                        <a href="#" className="font-medium text-[#689689] hover:text-[#504136]">
+                        <a href="#" className="font-medium text-[--cor-primaria] hover:text-[--cor-primaria2]">
                             Registre-se
                         </a>
                     </p>

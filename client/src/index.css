@@ -3,6 +3,11 @@
 @tailwind utilities;
 @layer base {
   :root {
+    --cor-primaria: #1c305c;
+    --cor-primaria2: #2086b7;
+    --cor-secundaria: #ff812f;
+    --cor-secundaria2: #514b9c;
+    --cor-secundaria3: #f1537a;
     --background: 0 0% 100%;
     --foreground: 20 14.3% 4.1%;
     --card: 0 0% 100%;
