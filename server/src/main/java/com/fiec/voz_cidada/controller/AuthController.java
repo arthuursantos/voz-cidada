@@ -28,12 +28,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationDTO data){
-<<<<<<< HEAD
-        System.out.println("credentials: " + data.login() + " " + data.password());
-        var credentials = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-        var auth = authManager.authenticate(credentials);
-        return ResponseEntity.ok(tokenService.createAuthTokens((AuthUser) auth.getPrincipal()));
-=======
         try {
             var credentials = new UsernamePasswordAuthenticationToken(data.login(), data.password());
             var auth = authManager.authenticate(credentials);
@@ -42,7 +36,6 @@ public class AuthController {
             throw new InvalidAuthenticationException("Seu login ou senha estão incorretos!");
         }
 
->>>>>>> 6be89f2416bd6e79584d617eb581a35fa3867467
     }
 
     @PostMapping("/register")

@@ -2,14 +2,8 @@ package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
-<<<<<<< HEAD
-import com.fiec.voz_cidada.domain.auth_user.AuthUser;
-import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
-import com.fiec.voz_cidada.repository.UsuarioRepository;
-=======
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.exceptions.UnauthorizedException;
->>>>>>> 6be89f2416bd6e79584d617eb581a35fa3867467
 import com.fiec.voz_cidada.service.UsuarioService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -56,11 +50,8 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
     public ResponseEntity<EntityModel<UsuarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
         try {
             var entity = service.findByAuthUserId(authUserId);
-<<<<<<< HEAD
-            service.validateUserAccess(entity.getContent().getId());
-=======
+
             service.checkUserAccess(entity.getContent().getId());
->>>>>>> 6be89f2416bd6e79584d617eb581a35fa3867467
             return ResponseEntity.ok(entity);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();

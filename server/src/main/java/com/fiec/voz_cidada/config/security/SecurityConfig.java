@@ -1,12 +1,9 @@
 package com.fiec.voz_cidada.config.security;
 
-<<<<<<< HEAD
-=======
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiec.voz_cidada.exceptions.StandardError;
 import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletResponse;
->>>>>>> 6be89f2416bd6e79584d617eb581a35fa3867467
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,10 +22,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-<<<<<<< HEAD
-=======
 import java.time.Instant;
->>>>>>> 6be89f2416bd6e79584d617eb581a35fa3867467
 import java.util.Arrays;
 
 @Configuration

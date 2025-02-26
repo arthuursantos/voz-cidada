@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
 import { useContext } from "react";
-import "./index.css"
 
 export default function LoginForm() {
     interface SignInData {
