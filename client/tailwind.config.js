@@ -79,11 +79,15 @@ module.exports = {
     				'4': 'hsl(var(--chart-4))',
     				'5': 'hsl(var(--chart-5))'
     			}
+<<<<<<< HEAD
     		},
 			fontFamily: {
 				montserrat: ['Montserrat', 'sans-serif'],
 				lato: ['Lato', 'sans-serif'],
 			  },
+=======
+    		}
+>>>>>>> 6be89f2416bd6e79584d617eb581a35fa3867467
     	}
     },
 	plugins: [require("tailwindcss-animate")],
