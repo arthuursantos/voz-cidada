@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button.tsx';
 import { Label } from "@/components/ui/label";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
-import { useContext } from "react";
+import { useContext, useState } from "react";
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function LoginForm() {
     interface SignInData {
@@ -13,16 +15,35 @@ export default function LoginForm() {
 
     const { register, handleSubmit } = useForm<SignInData>();
     const { signIn } = useContext(AuthContext);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSignIn: SubmitHandler<SignInData> = async (data) => {
-        await signIn(data);
+        try {
+            setError(null);
+            await signIn(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Ocorreu um erro ao fazer login");
+        }
     };
 
     return (
         <div className="flex flex-col min-h-screen max-h-screen bg-white md:flex-row">
+            {/* Container do alerta de erro */}
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+                {error && (
+                    <Alert
+                        variant="destructive"
+                        className="border-red-500 bg-red-50 animate-in fade-in slide-in-from-top duration-300 shadow-lg"
+                    >
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
+            </div>
+
             <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
                 <img
-                    src="src/pages/login/predios.png"
+                    src="./images/predios.png"
                     alt="Login visual"
                     className="w-full h-full object-cover object-[center_90%] md:object-center rounded-b-[50%] md:rounded-none"
                 />
@@ -72,8 +93,7 @@ export default function LoginForm() {
                             </Button>
                         </div>
                     </form>
-
-
+                    
 
                     <div className='flex justify-between'>
                         <p className='mt-2 text-sm text-center text-gray-600 font-lato hover:underline hover:text-black'>
