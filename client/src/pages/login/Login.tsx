@@ -20,20 +20,20 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-white md:flex-row">
-            <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[--cor-primaria2] rounded-b-[50%] md:rounded-none">
+        <div className="flex flex-col min-h-screen max-h-screen bg-white md:flex-row">
+            <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
                 <img
-                    src="src/pages/login/foda-removebg-preview.png"
+                    src="src/pages/login/predios.png"
                     alt="Login visual"
-                    className="w-full h-full object-cover object-[center_20%] md:object-center rounded-b-[50%] md:rounded-none"
+                    className="w-full h-full object-cover object-[center_90%] md:object-center rounded-b-[50%] md:rounded-none"
                 />
             </div>
 
             <div className="flex items-center justify-center w-full p-8 md:w-1/2">
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-center">
-                        <h2 className="text-4xl font-bold text-[--cor-primaria2] font-montserrat" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>Bem-vindo!</h2>
-                        <p className="mt-2 text-lg text-gray-600 font-lato text-[--cor-primaria2]">Realize o Login pra continuar!</p>
+                        <h2 className="text-4xl font-bold text-[--cor-primaria2] font-montserrat">Bem-vindo!</h2>
+                        <p className="mt-2 text-lg text-gray-600 font-lato text-[--cor-primaria2]">Realize o login pra continuar!</p>
                     </div>
 
                     <form onSubmit={handleSubmit(handleSignIn)} className="mt-8 space-y-6 font-lato">
