@@ -26,7 +26,7 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
     @Override
     @PutMapping
     public ResponseEntity<EntityModel<ChamadoDTO>> update(@RequestBody ChamadoDTO dto) {
-        service.validateUserAccess(dto.getUsuarioId());
+        service.checkUserAccess(dto.getUsuarioId());
         EntityModel<ChamadoDTO> entityModel = service.update(dto);
         return ResponseEntity.ok(entityModel);
     }
@@ -36,7 +36,7 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Chamado entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi possível excluir os dados. O chamado não foi encontrado."));
-        service.validateUserAccess(entity.getUsuario().getId());
+        service.checkUserAccess(entity.getUsuario().getId());
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -44,7 +44,7 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
     @Override
     @PostMapping
     public ResponseEntity<EntityModel<ChamadoDTO>> create(@RequestBody ChamadoDTO dto) {
-        service.validateUserAccess(dto.getUsuarioId());
+        service.checkUserAccess(dto.getUsuarioId());
         EntityModel<ChamadoDTO> entityModel = service.create(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

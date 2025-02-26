@@ -73,7 +73,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     .then(response => {
                         setUser(response.data)
                     })
+<<<<<<< HEAD
                     .catch((error) => {
+=======
+                    .catch(() => {
+>>>>>>> 6be89f2416bd6e79584d617eb581a35fa3867467
                         setUser(null)
                         setUserRoles(null)
                     })
