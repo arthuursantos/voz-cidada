@@ -36,24 +36,24 @@ const Cadastro = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-100 p-8">
-            <div className="w-full max-w-xl mx-auto space-y-8 bg-white p-8 rounded-lg shadow-lg">
+        <div className="flex flex-col min-h-screen bg-gray-100 p-10">
+            <div className="w-full max-w-6xl mx-auto space-y-8 bg-white p-10 rounded-lg shadow-lg">
                 <div className="text-center">
-                    <h2 className="text-4xl font-bold text-[--cor-primaria2] font-montserrat">Crie sua conta</h2>
+                    <h2 className="text-5xl font-bold text-[--cor-primaria2] font-montserrat">Crie sua conta</h2>
                     <p className="mt-2 text-lg text-gray-600 font-lato text-[--cor-primaria2]">
                         Preencha os campos abaixo para se registrar.
                     </p>
                 </div>
 
                 {error && (
-                    <div className="text-red-500 text-center mb-4">
+                    <div className="text-red-500 text-center mb-6">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit(handleSignUp)} className="mt-8 space-y-6 font-lato">
+                <form onSubmit={handleSubmit(handleSignUp)} className="mt-8 space-y-8 font-lato">
                     {/* Linha 1: Nome e Sobrenome */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
                             <Label htmlFor="name" className="font-lato text-md">Nome</Label>
                             <Input
@@ -61,7 +61,7 @@ const Cadastro = () => {
                                 {...register('name')}
                                 type="text"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="Seu nome"
                             />
                         </div>
@@ -72,14 +72,14 @@ const Cadastro = () => {
                                 {...register('sobrenome')}
                                 type="text"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="Seu sobrenome"
                             />
                         </div>
                     </div>
 
                     {/* Linha 2: CPF e E-mail */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
                             <Label htmlFor="cpf" className="font-lato text-md">CPF</Label>
                             <Input
@@ -87,7 +87,7 @@ const Cadastro = () => {
                                 {...register('cpf')}
                                 type="text"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="000.000.000-00"
                             />
                         </div>
@@ -99,14 +99,14 @@ const Cadastro = () => {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="seu@email.com"
                             />
                         </div>
                     </div>
 
                     {/* Linha 3: CEP e Bairro */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
                             <Label htmlFor="cep" className="font-lato text-md">CEP</Label>
                             <Input
@@ -114,7 +114,7 @@ const Cadastro = () => {
                                 {...register('cep')}
                                 type="text"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="00000-000"
                             />
                         </div>
@@ -125,14 +125,14 @@ const Cadastro = () => {
                                 {...register('bairro')}
                                 type="text"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="Seu bairro"
                             />
                         </div>
                     </div>
 
                     {/* Linha 4: Rua e Cidade */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
                             <Label htmlFor="rua" className="font-lato text-md">Rua</Label>
                             <Input
@@ -140,7 +140,7 @@ const Cadastro = () => {
                                 {...register('rua')}
                                 type="text"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="Sua rua"
                             />
                         </div>
@@ -151,14 +151,14 @@ const Cadastro = () => {
                                 {...register('cidade')}
                                 type="text"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="Sua cidade"
                             />
                         </div>
                     </div>
 
                     {/* Linha 5: Senha e Confirmar Senha */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
                             <Label htmlFor="password" className="font-lato text-md">Senha</Label>
                             <Input
@@ -167,7 +167,7 @@ const Cadastro = () => {
                                 type="password"
                                 autoComplete="new-password"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -179,7 +179,7 @@ const Cadastro = () => {
                                 type="password"
                                 autoComplete="new-password"
                                 required
-                                className="mt-1 border-black font-lato"
+                                className="mt-2 border-black font-lato"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -192,28 +192,26 @@ const Cadastro = () => {
                     </div>
                 </form>
 
-                <div className="flex justify-between">
-                    <p className="mt-2 text-sm text-center text-gray-600 font-lato hover:underline hover:text-black">
+                <div className="flex justify-between mt-8">
+                    <p className="text-sm text-center text-gray-600 font-lato hover:underline hover:text-black">
                         <a >
                             Já tem uma conta? Faça login
                         </a>
                     </p>
 
-                    <p className="mt-2 text-sm text-center text-gray-600 font-lato">
+                    <p className="text-sm text-center text-gray-600 font-lato">
                         <Link to="/" className="font-medium text-[--cor-primaria2] hover:text-[--cor-primaria] hover:underline">
                             Voltar para o login
                         </Link>
                     </p>
                 </div>
 
-                {/* apenas para ver as paginas */}
-                <div className="mt-4 text-center">
-                    <div className="flex flex-wrap justify-center gap-2 mt-2">
+                <div className="mt-6 text-center">
+                    <div className="flex flex-wrap justify-center gap-4">
                         <Link to="/about" className="text-[--cor-primaria2] hover:underline">Sobre</Link>
                         <Link to="/contact" className="text-[--cor-primaria2] hover:underline">Contato</Link>
                     </div>
                 </div>
-                {/* apenas para ver as páginas */}
             </div>
         </div>
     );
