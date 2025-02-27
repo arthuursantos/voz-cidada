@@ -6,6 +6,8 @@ import { AuthContext } from "@/contexts/AuthContext.tsx";
 import { useContext, useState } from "react";
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
+
 
 export default function LoginForm() {
     interface SignInData {
@@ -93,24 +95,30 @@ export default function LoginForm() {
                             </Button>
                         </div>
                     </form>
-                    
+
 
                     <div className='flex justify-between'>
                         <p className='mt-2 text-sm text-center text-gray-600 font-lato hover:underline hover:text-black'>
-                            <a href="#">
+                        <Link
+                                to="/resetPassword"
+                                className="font-medium text-[--cor-primaria2] hover:text-[--cor-primaria] hover:underline"
+                            >
                                 Esqueceu a senha?
-                            </a>
+                            </Link>
                         </p>
 
                         <p className="mt-2 text-sm text-center text-gray-600 font-lato">
                             Não tem conta?{" "}
-                            <a href="#" className="font-medium text-[--cor-primaria2] hover:text-[--cor-primaria] hover:underline">
+                            <Link
+                                to="/cadastro"
+                                className="font-medium text-[--cor-primaria2] hover:text-[--cor-primaria] hover:underline"
+                            >
                                 Registre-se
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>
-            </div>  
+            </div>
         </div>
     );
 }
