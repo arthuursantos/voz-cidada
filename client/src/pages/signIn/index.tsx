@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 
 
-export default function LoginForm() {
+export default function SignIn() {
     interface SignInData {
         login: string;
         password: string;
@@ -96,7 +96,7 @@ export default function LoginForm() {
                         </div>
                     </form>
 
-
+    
                     <div className='flex justify-between'>
                         <p className='mt-2 text-sm text-center text-gray-600 font-lato hover:underline hover:text-black'>
                         <Link

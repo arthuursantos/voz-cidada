@@ -1,6 +1,5 @@
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginForm from './pages/login/Login.tsx';
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
 import Dashboard from "@/pages/dashboard";
 import AdminDashboard from "@/pages/adminDashboard";
@@ -8,6 +7,8 @@ import About from "@/pages/about/index.tsx";
 import Contact from "@/pages/contact/index.tsx";      
 import Cadastro from "@/pages/cadastro/index.tsx";    
 import ResetPassword from "@/pages/resetPassword/index.tsx";    
+import SignIn from "./pages/signIn/index.tsx";
+import SignUp from "./pages/signUp/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -22,7 +23,7 @@ const PrivateRoute = ({ children, requiredRole }: RouteProps) => {
     }
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" />
+        return <Navigate to="/signin" />
     }
 
     if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
@@ -53,10 +54,19 @@ const App = () => {
             <AuthProvider>
                 <Routes>
                     <Route
-                        path="/login"
+                        path="/signin"
                         element={
                             <PublicRoute>
-                                <LoginForm />
+                                <SignIn />
+                            </PublicRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/signup"
+                        element={
+                            <PublicRoute>
+                                <SignUp />
                             </PublicRoute>
                         }
                     />

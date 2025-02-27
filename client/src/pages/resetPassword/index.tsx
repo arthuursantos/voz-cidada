@@ -28,6 +28,7 @@ export default function ResetPassword() {
     return (
         
         
+        
         <div className="flex flex-col min-h-screen max-h-screen bg-white md:flex-row">
             
             {/* Container do alerta de erro */}
