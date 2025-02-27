@@ -7,7 +7,7 @@ import { useContext, useState } from "react";
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export default function LoginForm() {
+export default function SignIn() {
     interface SignInData {
         login: string;
         password: string;
@@ -93,8 +93,8 @@ export default function LoginForm() {
                             </Button>
                         </div>
                     </form>
-                    
 
+    
                     <div className='flex justify-between'>
                         <p className='mt-2 text-sm text-center text-gray-600 font-lato hover:underline hover:text-black'>
                             <a href="#">
