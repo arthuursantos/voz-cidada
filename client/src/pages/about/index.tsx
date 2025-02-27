@@ -38,7 +38,7 @@ const About = () => {
             </header>
 
             <div className="flex flex-col md:flex-row">
-                <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
+                <div className="relative w-full h-40 md:h-auto md:w-1/2 rounded-b-[50%] md:rounded-none">
                     <img
                         src="./images/predios2.png"
                         alt="Voz Cidadão"
@@ -50,7 +50,7 @@ const About = () => {
                 <img
                     src="./images/Nuvem.png"
                     alt="Imagem Nuvem"
-                    className="fixed bottom-0 right-0 w-32 h-32 object-contain m-4"
+                    className="absolutefixed bottom-0 right-0 w-32 h-32 object-contain m-4"
                 />*/}
 
                 <div className="flex items-center justify-center w-full pt-8 md:w-1/2">

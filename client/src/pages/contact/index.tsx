@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { FaInstagram, FaFacebookF, FaWhatsapp } from 'react-icons/fa'; // Exemplo de ícones com react-icons
-import { Bell, LogOut, User } from 'lucide-react'; // Adicionando os ícones necessários para o header
+import { FaInstagram, FaFacebookF, FaWhatsapp } from 'react-icons/fa'; 
+import { Bell, LogOut, User } from 'lucide-react'; 
 
 const Contact = () => {
     return (
@@ -39,9 +39,9 @@ const Contact = () => {
             </header>
 
             <div className="flex flex-col md:flex-row">
-                <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
+                <div className="relative w-full h-40 md:h-auto md:w-1/2  rounded-b-[50%] md:rounded-none">
                     <img
-                        src="./images/predios2.png"
+                        src="./images/predios2.png"/*imagem */
                         alt="Voz Cidadão"
                         className="w-full h-full object-cover object-[center_90%] md:object-center rounded-b-[50%] md:rounded-none"
                     />

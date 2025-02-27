@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
+import { Bell, LogOut, User } from 'lucide-react';
 
 export default function ResetPassword() {
     interface ResetPasswordData {
@@ -25,7 +26,10 @@ export default function ResetPassword() {
     };
 
     return (
+        
+        
         <div className="flex flex-col min-h-screen max-h-screen bg-white md:flex-row">
+            
             {/* Container do alerta de erro */}
             <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
                 {error && (
@@ -39,9 +43,9 @@ export default function ResetPassword() {
                 )}
             </div>
 
-            <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
+            <div className="relative w-full h-40 md:h-auto md:w-1/2  rounded-b-[50%] md:rounded-none">
                 <img
-                    src="./images/predios.png"
+                    src="./images/predios2.png"
                     alt="Redefinir Senha"
                     className="w-full h-full object-cover object-[center_90%] md:object-center rounded-b-[50%] md:rounded-none"
                 />
