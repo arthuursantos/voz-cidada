@@ -20,6 +20,13 @@ export default function SignUp() {
         cpf: "",
     })
 
+    const getCepInfo = async (cep: string) => {
+        const response = await api.get(`https://viacep.com.br/ws/${cep}/json/`)
+        return response.data;
+    }
+
+    const [error, setError] = useState<string | null>(null);
+
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((prev) => ({ ...prev, email: e.target.value }))
     }
@@ -50,6 +57,9 @@ export default function SignUp() {
 
     const handleNext = (e: React.FormEvent) => {
         e.preventDefault()
+        if (step === 1 && !passwordMatch()) {
+            return
+        }
         setStep((prev) => prev + 1)
     }
 
@@ -64,17 +74,20 @@ export default function SignUp() {
             password: formData.password,
             role: "USER"
         })
+
+        const cepInfo = await getCepInfo(formData.cep);
+
         await api.post(`/api/usuario`, {
             nome: formData.name,
             dataNascimento: formData.birthDate,
             cpf: formData.cpf,
             cep: formData.cep,
-            rua: "Rua",
-            numero: "N",
-            bairro: "Bairro",
-            complemento: "Complemento",
-            cidade: "Cidada",
-            uf: "UF",
+            rua: cepInfo.logradouro,
+            numero: null,
+            bairro: cepInfo.bairro,
+            complemento: cepInfo.complemento,
+            cidade: cepInfo.localidade,
+            uf: cepInfo.uf,
             dataCadastro: "datetime"
         })
         await signIn({
@@ -88,9 +101,12 @@ export default function SignUp() {
     }
 
     const passwordMatch = () => {
-        if(formData.password === formData.confirmPassword) {
-            
+        if(formData.password !== formData.confirmPassword) {
+            setError("As senhas não coincidem")
+            return false
         }
+        setError("")
+        return true
     }
 
     return (
@@ -103,8 +119,8 @@ export default function SignUp() {
 
                     <div className="space-y-6">
                         <div className="text-center">
-                            <h1 className="text-3xl font-bold text-[#504136]">Crie sua conta</h1>
-                            <p className="mt-2 text-[#504136]/70">
+                            <h1 className="text-3xl font-bold font-montserrat text-[#504136]">Crie sua conta</h1>
+                            <p className="mt-2 font-lato text-[#504136]/70">
                                 {step === 0
                                     ? "Etapa 1: Informe seu email"
                                     : step === 1
@@ -136,6 +152,7 @@ export default function SignUp() {
 
                             {step === 1 && (
                                 <div className="space-y-4">
+                                    <p className="text-[--cor-error] font-lato">{error}</p>
                                     <div className="space-y-2">
                                         <Label htmlFor="password" className="text-[#504136]">
                                             Senha
