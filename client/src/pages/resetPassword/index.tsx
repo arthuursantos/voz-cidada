@@ -6,7 +6,6 @@ import { useState } from "react";
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
-import { Bell, LogOut, User } from 'lucide-react';
 
 export default function ResetPassword() {
     interface ResetPasswordData {
@@ -16,7 +15,7 @@ export default function ResetPassword() {
     const { register, handleSubmit } = useForm<ResetPasswordData>();
     const [error, setError] = useState<string | null>(null);
 
-    const handleResetPassword: SubmitHandler<ResetPasswordData> = async (data) => {
+    const handleResetPassword: SubmitHandler<ResetPasswordData> = async () => {
         try {
             setError(null);
             // Simulação de envio de e-mail para redefinição de senha

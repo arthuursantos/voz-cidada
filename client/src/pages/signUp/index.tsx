@@ -20,9 +20,32 @@ export default function SignUp() {
         cpf: "",
     })
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setFormData((prev) => ({ ...prev, [name]: value }))
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, email: e.target.value }))
+    }
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, password: e.target.value }))
+    }
+
+    const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))
+    }
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, name: e.target.value }))
+    }
+
+    const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, birthDate: e.target.value }))
+    }
+
+    const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, cep: validNumericInputs(e.target.value) }))
+    }
+
+    const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, cpf: validNumericInputs(e.target.value) }))
     }
 
     const handleNext = (e: React.FormEvent) => {
@@ -60,6 +83,16 @@ export default function SignUp() {
         })
     }
 
+    const validNumericInputs = (value: string): string => {
+        return value.replace(/[^0-9]/g, '')
+    }
+
+    const passwordMatch = () => {
+        if(formData.password === formData.confirmPassword) {
+            
+        }
+    }
+
     return (
         <div className="flex min-h-screen w-full items-center bg-[url('/grid.svg')] bg-center py-20">
             <div className="mx-auto max-w-xl w-full px-4">
@@ -93,7 +126,7 @@ export default function SignUp() {
                                             type="email"
                                             required
                                             value={formData.email}
-                                            onChange={handleInputChange}
+                                            onChange={handleEmailChange}
                                             placeholder="seu@email.com"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
@@ -113,7 +146,7 @@ export default function SignUp() {
                                             type="password"
                                             required
                                             value={formData.password}
-                                            onChange={handleInputChange}
+                                            onChange={handlePasswordChange}
                                             placeholder="••••••••"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
@@ -128,7 +161,7 @@ export default function SignUp() {
                                             type="password"
                                             required
                                             value={formData.confirmPassword}
-                                            onChange={handleInputChange}
+                                            onChange={handleConfirmPasswordChange}
                                             placeholder="••••••••"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
@@ -147,7 +180,7 @@ export default function SignUp() {
                                             name="name"
                                             required
                                             value={formData.name}
-                                            onChange={handleInputChange}
+                                            onChange={handleNameChange}
                                             placeholder="João da Silva"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
@@ -162,7 +195,7 @@ export default function SignUp() {
                                             type="date"
                                             required
                                             value={formData.birthDate}
-                                            onChange={handleInputChange}
+                                            onChange={handleBirthDateChange}
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
                                     </div>
@@ -176,7 +209,8 @@ export default function SignUp() {
                                                 name="cep"
                                                 required
                                                 value={formData.cep}
-                                                onChange={handleInputChange}
+                                                onChange={handleCepChange}
+                                                maxLength={8}
                                                 placeholder="00000-000"
                                                 className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                             />
@@ -190,7 +224,8 @@ export default function SignUp() {
                                                 name="cpf"
                                                 required
                                                 value={formData.cpf}
-                                                onChange={handleInputChange}
+                                                maxLength={11}
+                                                onChange={handleCpfChange}
                                                 placeholder="000.000.000-00"
                                                 className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                             />
@@ -213,7 +248,7 @@ export default function SignUp() {
                                         </Button>
                                     )}
                                 </div>
-                                <Button type="submit" className="bg-[#689689] hover:bg-[#689689]/90 text-white px-8">
+                                <Button type="submit" className="bg-[--cor-primaria2] hover:bg-[--cor-primaria] text-white px-8">
                                     {step === 2 ? "Criar conta" : "Avançar"}
                                 </Button>
                             </div>
@@ -222,7 +257,7 @@ export default function SignUp() {
                         <div className="flex justify-end">
                             <p className="text-sm text-[#504136]/70">
                                 Já tem uma conta?{" "}
-                                <a href="/login" className="text-[#689689] hover:underline">
+                                <a href="/login" className="text-[--cor-primaria2] hover:underline">
                                     Faça login aqui
                                 </a>
                             </p>

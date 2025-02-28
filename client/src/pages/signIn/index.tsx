@@ -110,7 +110,7 @@ export default function SignIn() {
                         <p className="mt-2 text-sm text-center text-gray-600 font-lato">
                             Não tem conta?{" "}
                             <Link
-                                to="/cadastro"
+                                to="/signup"
                                 className="font-medium text-[--cor-primaria2] hover:text-[--cor-primaria] hover:underline"
                             >
                                 Registre-se

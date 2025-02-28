@@ -9,7 +9,7 @@ export default function ProgressBar({currentStep, totalSteps}: ProgressBarProps)
         <div className="w-full">
             <div className="h-2 w-full rounded-full bg-[#504136]/20">
                 <div
-                    className="h-full rounded-full bg-[#689689] transition-all duration-300 ease-in-out"
+                    className="h-full rounded-full bg-[--cor-primaria2] transition-all duration-300 ease-in-out"
                     style={{width: `${progress}%`}}
                 />
             </div>
