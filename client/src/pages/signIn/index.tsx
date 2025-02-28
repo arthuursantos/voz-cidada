@@ -7,7 +7,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
 import { useContext, useState } from "react";
 
-export default function LoginForm() {
+export default function SignIn() {
     interface SignInData {
         login: string;
         password: string;
@@ -101,7 +101,7 @@ export default function LoginForm() {
                     </form>
                     <p className="mt-6 text-sm text-center text-gray-600">
                         Não tem uma conta?{" "}
-                        <a href="#" className="font-medium text-[#689689] hover:text-[#504136] transition-colors duration-300">
+                        <a href="/signup" className="font-medium text-[#689689] hover:text-[#504136] transition-colors duration-300">
                             Registre-se
                         </a>
                     </p>

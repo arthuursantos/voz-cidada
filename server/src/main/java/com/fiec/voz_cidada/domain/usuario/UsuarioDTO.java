@@ -23,9 +23,7 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
     private LocalDateTime dataCadastro;
     private String cep;
     private String rua;
-    private String numero;
     private String bairro;
-    private String complemento;
     private String cidade;
     private String uf;
 
