@@ -1,21 +1,69 @@
-import {useContext, useState} from "react";
-import {SubmitHandler, useForm} from "react-hook-form"
 import ProgressBar from "@/pages/signUp/components/progressBar";
 import {Label} from "@/components/ui/label.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {ArrowLeft} from "lucide-react";
-import {SignUpData} from "@/contexts/AuthContext.tsx";
 import {AuthContext} from "@/contexts/AuthContext.tsx";
+import {FormEvent, useContext, useState} from "react";
+import {ArrowLeft} from "lucide-react";
+import {SubmitHandler, useForm} from "react-hook-form"
+import { z } from 'zod'
+import { zodResolver } from "@hookform/resolvers/zod";
+
 
 export default function SignUp() {
     const { signUp } = useContext(AuthContext)
-    const { register, handleSubmit } = useForm<SignUpData>()
     const [step, setStep] = useState(0)
 
-    const handleNext = (e: React.FormEvent) => {
-        e.preventDefault()
-        setStep((prev) => prev + 1)
+    const SignUpSchema = z.object({
+        email: z.string()
+            .nonempty("O email é obrigatório.")
+            .email("Formato de email inválido."),
+        password: z.string()
+            .min(6, "A senha precisa ter no minímo 6 caracteres."),
+        confirmPassword: z.string()
+            .min(6, "A confirmação de senha é obrigatória."),
+        name: z.string()
+            .nonempty("O nome completo é obrigatório")
+            .transform(name => {
+                return name.trim().split(' ').map((word) => {
+                    return word[0].toLocaleUpperCase().concat(word.substring(1))
+                }).join(' ')
+            }),
+        birthDate: z.string()
+            .nonempty("A data de nascimento é obrigatória."),
+        cep: z.string()
+            .nonempty("O CEP é obrigatório.")
+            .regex(/^\d{5}-?\d{3}$/, "Formato de CEP inválido. Use 00000-000 ou 00000000.")
+            .transform(cep => {
+                return cep.replace(/[^0-9]/g, "");
+            }),
+        cpf: z.string()
+            .nonempty("O CPF é obrigatório.")
+            .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "Formato de CPF inválido. Use 000.000.000-00 ou 00000000000.")
+            .transform(cpf => {
+                return cpf.replace(/[^0-9]/g, "");
+            }),
+    })
+        .refine(data => data.password === data.confirmPassword, {
+            message: "As senham precisam ser iguais.",
+            path: ["confirmPassword"]
+        })
+
+    type SignUpData = z.infer<typeof SignUpSchema>
+
+    const { register, handleSubmit, formState: {errors}, trigger } = useForm<SignUpData>({
+        resolver: zodResolver(SignUpSchema)
+    })
+
+    const handleNext = async (e: FormEvent) => {
+        e.preventDefault();
+        if (step === 0) {
+            const isValid = await trigger("email");
+            if (isValid) setStep((prev) => prev + 1);
+        } else if (step === 1) {
+            const isValid = await trigger(["password", "confirmPassword"]);
+            if (isValid) setStep((prev) => prev + 1);
+        }
     }
 
     const handleBack = () => {
@@ -23,11 +71,12 @@ export default function SignUp() {
     }
 
     const handleSignUp: SubmitHandler<SignUpData> = async (data) => {
+        console.log(data)
         await signUp(data)
     }
 
     return (
-        <div className="flex min-h-screen w-full items-center bg-[url('/grid.svg')] bg-center py-20">
+        <div className="flex min-h-screen w-full items-center justify-center bg-center">
             <div className="mx-auto max-w-xl w-full px-4">
                 <div className="relative rounded-xl border bg-background p-8 shadow-2xl">
                     <div className="mb-8">
@@ -61,6 +110,7 @@ export default function SignUp() {
                                             placeholder="seu@email.com"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
+                                        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                                     </div>
                                 </div>
                             )}
@@ -79,6 +129,7 @@ export default function SignUp() {
                                             placeholder="••••••••"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
+                                        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="confirmPassword" className="text-[#504136]">
@@ -92,6 +143,7 @@ export default function SignUp() {
                                             placeholder="••••••••"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
+                                        {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>}
                                     </div>
                                 </div>
                             )}
@@ -109,6 +161,7 @@ export default function SignUp() {
                                             placeholder="João da Silva"
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
+                                        {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="birthDate" className="text-[#504136]">
@@ -121,6 +174,7 @@ export default function SignUp() {
                                             required
                                             className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                         />
+                                        {errors.birthDate && <p className="text-red-500 text-sm">{errors.birthDate.message}</p>}
                                     </div>
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <div className="space-y-2">
@@ -134,6 +188,7 @@ export default function SignUp() {
                                                 placeholder="00000-000"
                                                 className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                             />
+                                            {errors.cep && <p className="text-red-500 text-sm">{errors.cep.message}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="cpf" className="text-[#504136]">
@@ -146,6 +201,7 @@ export default function SignUp() {
                                                 placeholder="000.000.000-00"
                                                 className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                             />
+                                            {errors.cpf && <p className="text-red-500 text-sm">{errors.cpf.message}</p>}
                                         </div>
                                     </div>
                                 </div>

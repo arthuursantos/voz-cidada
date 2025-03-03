@@ -2,18 +2,28 @@ import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { useForm, SubmitHandler } from "react-hook-form";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
 import { useContext, useState } from "react";
+import { AlertCircle } from "lucide-react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { z } from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function SignIn() {
-    interface SignInData {
-        login: string;
-        password: string;
-    }
 
-    const { register, handleSubmit } = useForm<SignInData>();
+    const SignInSchema = z.object({
+        login: z.string()
+            .nonempty("O email é obrigatório.")
+            .email("Formato de email inválido."),
+        password: z.string()
+            .nonempty("A senha é obrigatória.")
+    })
+
+    type SignInData = z.infer<typeof SignInSchema>;
+    const { register, handleSubmit, formState: {errors} } = useForm<SignInData>({
+        resolver: zodResolver(SignInSchema)
+    });
+
     const { signIn } = useContext(AuthContext);
     const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +38,6 @@ export default function SignIn() {
 
     return (
         <div className="flex flex-col min-h-screen bg-white md:flex-row">
-            {/* Container do alerta de erro */}
             <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
                 {error && (
                     <Alert
@@ -41,7 +50,6 @@ export default function SignIn() {
                 )}
             </div>
 
-            {/* Imagem (topo em mobile, direita em desktop) */}
             <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
                 <img
                     src="/images/login-bg.png"
@@ -50,7 +58,6 @@ export default function SignIn() {
                 />
             </div>
 
-            {/* Formulário de login */}
             <div className="flex items-center justify-center w-full p-8 md:w-1/2">
                 <div className="w-full max-w-md">
                     <div className="text-center">
@@ -60,7 +67,7 @@ export default function SignIn() {
 
                     <form onSubmit={handleSubmit(handleSignIn)} className="mt-8 space-y-6">
                         <div className="space-y-4">
-                            <div>
+                            <div className="space-y-2">
                                 <Label htmlFor="email" className="text-[#504136]">
                                     Email
                                 </Label>
@@ -73,8 +80,9 @@ export default function SignIn() {
                                     className="mt-1 border-[#689689]"
                                     placeholder="seu@email.com"
                                 />
+                                {errors.login && <p className="text-red-500 text-sm">{errors.login.message}</p>}
                             </div>
-                            <div>
+                            <div className="space-y-2">
                                 <Label htmlFor="password" className="text-[#504136]">
                                     Senha
                                 </Label>
@@ -87,6 +95,7 @@ export default function SignIn() {
                                     className="mt-1 border-[#689689]"
                                     placeholder="••••••••"
                                 />
+                                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                             </div>
                         </div>
 
