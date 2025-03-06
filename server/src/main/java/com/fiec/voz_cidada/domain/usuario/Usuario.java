@@ -30,9 +30,7 @@ public class Usuario implements Serializable {
     private String cpf;
     private String cep;
     private String rua;
-    private String numero;
     private String bairro;
-    private String complemento;
     private String cidade;
     private String uf;
     private LocalDateTime dataCadastro;

@@ -13,9 +13,7 @@ type User = {
     dataCadastro: string;
     cep: string;
     rua: string;
-    numero: string;
     bairro: string;
-    complemento?: string;
     cidade: string;
     uf: string;
 }
@@ -37,6 +35,16 @@ type SignInData = {
     password: string;
 }
 
+export type SignUpData = {
+    email: string,
+    password: string,
+    confirmPassword: string,
+    name: string,
+    birthDate: string,
+    cep: string,
+    cpf: string
+}
+
 type SignInResponse = AxiosResponse<SignInResponseData>
 
 type SignInResponseData = {
@@ -45,11 +53,12 @@ type SignInResponseData = {
 }
 
 type AuthContextType = {
-    isAuthenticated: boolean,
-    signIn: (data: SignInData) => Promise<void>,
     user: User | null;
-    loading: boolean;
     userRoles: string[] | null;
+    isAuthenticated: boolean,
+    loading: boolean;
+    signIn: (data: SignInData) => Promise<void>,
+    signUp: (data: SignUpData) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -90,41 +99,78 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }, [])
 
+    const setTokens = (accessToken: string, refreshToken: string) => {
+        setCookie(undefined, "vozcidada.accessToken", accessToken, {
+            maxAge: 60 * 60 * 1, // 1h
+        });
+
+        setCookie(undefined, "vozcidada.refreshToken", refreshToken, {
+            maxAge: 60 * 60 * 24, // 24h
+        });
+    }
+
     async function signIn({ login, password }: SignInData) {
-        try {
-            const response: SignInResponse = await api.post("/auth/login", {
-                login,
-                password
-            });
+        const response: SignInResponse = await api.post("/auth/login", {
+            login,
+            password
+        });
 
-            const { accessToken, refreshToken } = response.data;
+        const { accessToken, refreshToken } = response.data;
+        setTokens(accessToken, refreshToken)
 
-            setCookie(undefined, "vozcidada.accessToken", accessToken, {
-                maxAge: 60 * 60 * 1, // 1h
-            });
+        const decoded = jwtDecode<JWTClaims>(accessToken);
+        setUserRoles(decoded.roles);
 
-            setCookie(undefined, "vozcidada.refreshToken", refreshToken, {
-                maxAge: 60 * 60 * 24, // 24h
-            });
+        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+        setUser(userResponse.data);
 
-            const decoded = jwtDecode<JWTClaims>(accessToken);
-            setUserRoles(decoded.roles);
-
-            const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-            setUser(userResponse.data);
-
-            if (decoded.roles.includes("ROLE_ADMIN")) {
-                navigate("/admin/dashboard");
-            } else {
-                navigate("/dashboard");
-            }
-        } catch (error) {
-            throw error;
+        if (decoded.roles.includes("ROLE_ADMIN")) {
+            navigate("/admin/dashboard");
+        } else {
+            navigate("/home");
         }
     }
 
+    async function signUp(data: SignUpData) {
+
+        await api.post("/auth/register", {
+            login: data.email,
+            password: data.password,
+            role: "USER"
+        })
+
+        const response = await api.post("/auth/login", {
+            login: data.email,
+            password: data.password
+        })
+
+        const {accessToken, refreshToken} = response.data
+        setTokens(accessToken, refreshToken)
+
+        const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        await api.post("/api/usuario", {
+            nome: data.name,
+            dataNascimento: data.birthDate,
+            cpf: data.cpf,
+            cep: data.cep,
+            dataCadastro: dataCadastro
+        })
+
+        const decoded = jwtDecode<JWTClaims>(accessToken);
+        setUserRoles(decoded.roles);
+        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+        setUser(userResponse.data);
+
+        if (decoded.roles.includes("ROLE_ADMIN")) {
+            navigate("/admin/dashboard");
+        } else {
+            navigate("/home");
+        }
+
+    }
+
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, signIn, loading, userRoles }}>
+        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp }}>
             {children}
         </AuthContext.Provider>
     )
