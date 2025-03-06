@@ -7,9 +7,9 @@ import Cadastro from "@/pages/cadastro/index.tsx";
 import ResetPassword from "@/pages/resetPassword/index.tsx";    
 import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
-import { Home } from "lucide-react";
 import AdminDashboard from "./pages/admin/index.tsx";
 import Reports from "./pages/reports/index.tsx";
+import Dashboard from "./pages/homePage/homePage.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -73,7 +73,7 @@ const App = () => {
                     />
 
                     <Route
-                        path="/admin/home"
+                        path="/admin/dashboard"
                         element={
                             <PrivateRoute requiredRole="ROLE_ADMIN">
                                 <AdminDashboard />
@@ -81,12 +81,12 @@ const App = () => {
                         }
                     />
 
-                    <Route
-                        path="/home"
+<Route
+                        path="/dashboard"
                         element={
-                            <PublicRoute>
-                                <Home />
-                            </PublicRoute>
+                            <PrivateRoute>
+                                <Dashboard />
+                            </PrivateRoute>
                         }
                     />
 
@@ -134,8 +134,8 @@ const App = () => {
                         }
                     />
 
-                    <Route path="/" element={<Navigate to="/home" />} />
-                    <Route path="*" element={<Navigate to="/home" />} />
+                    <Route path="/" element={<Navigate to="/dashboard" />} />
+                    <Route path="*" element={<Navigate to="/dashboard" />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>

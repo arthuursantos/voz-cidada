@@ -4,10 +4,11 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
 import { useContext, useState } from "react";
-import { AlertCircle, Link } from "lucide-react";
+import { AlertCircle} from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "react-router-dom";
 
 export default function SignIn() {
 
