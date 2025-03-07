@@ -1,14 +1,20 @@
 import Sidebar from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
+import ReportsCarousel from "@/pages/home/components/ReportsCarousel.tsx";
 
 export default function Home() {
     return (
         <div className="flex h-screen bg-gray-100">
-            <Sidebar />
-            <div className="flex-1 overflow-auto">
-                <main className="min-h-screen">
-                    <div className="container mx-auto px-16 py-12">
+            {/* Sidebar fixa */}
+            <div className="fixed top-0 h-screen">
+                <Sidebar />
+            </div>
+
+            {/* Conteúdo principal com marginação para a sidebar */}
+            <div className="flex-1 ml-16">
+                <main>
+                    <div className="container mx-auto pt-24 py-20">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                             <div className="space-y-6">
                                 <h2 className="text-lg font-medium tracking-wider text-primary uppercase">SOBRE NÓS</h2>
@@ -22,7 +28,7 @@ export default function Home() {
                                 </p>
                                 <Link to="/chamados">
                                     <Button size="lg" className="mt-4 bg-teal hover:bg-teal/90">
-                                    Participe agora
+                                        Participe agora
                                     </Button>
                                 </Link>
                             </div>
@@ -40,6 +46,9 @@ export default function Home() {
                                 <div className="absolute -z-10 bottom-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
                             </div>
                         </div>
+                    </div>
+                    <div className="container mx-auto py-20">
+                        <ReportsCarousel/>
                     </div>
                 </main>
             </div>

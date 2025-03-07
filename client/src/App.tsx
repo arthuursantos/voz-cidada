@@ -9,7 +9,7 @@ import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import AdminDashboard from "./pages/admin/index.tsx";
 import Reports from "./pages/reports/index.tsx";
-import Dashboard from "./pages/homePage/homePage.tsx";
+import Home from "./pages/home/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -50,7 +50,7 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
 }
 
 const App = () => {
-    return (
+    return(
         <BrowserRouter>
             <AuthProvider>
                 <Routes>
@@ -73,7 +73,7 @@ const App = () => {
                     />
 
                     <Route
-                        path="/admin/dashboard"
+                        path="/admin/home"
                         element={
                             <PrivateRoute requiredRole="ROLE_ADMIN">
                                 <AdminDashboard />
@@ -82,11 +82,11 @@ const App = () => {
                     />
 
                     <Route
-                        path="/dashboard"
+                        path="/home"
                         element={
-                            <PrivateRoute>
-                                <Dashboard />
-                            </PrivateRoute>
+                            <PublicRoute>
+                                <Home />
+                            </PublicRoute>
                         }
                     />
 
