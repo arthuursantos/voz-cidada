@@ -127,7 +127,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
         } else {
-            navigate("/dashboard");
+            navigate("/home");
         }
     }
 
@@ -164,7 +164,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
         } else {
-            navigate("/dashboard");
+            navigate("/home");
         }
 
     }
