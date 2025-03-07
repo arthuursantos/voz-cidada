@@ -131,7 +131,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
+    const getCepApi = async (cep: string) =>{
+        return fetch(`https://viacep.com.br/ws/${cep}/json/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar CEP');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.erro) {
+                    throw new Error('CEP não encontrado.');
+                }
+                return data; // Retorna apenas o JSON
+            });
+    }
+
     async function signUp(data: SignUpData) {
+
+        const infoCep = await getCepApi(data.cep)
 
         await api.post("/auth/register", {
             login: data.email,
@@ -153,6 +171,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
             dataNascimento: data.birthDate,
             cpf: data.cpf,
             cep: data.cep,
+            rua: infoCep.logradouro,
+            bairro: infoCep.bairro,
+            cidade: infoCep.localidade,
+            uf: infoCep.uf,
             dataCadastro: dataCadastro
         })
 
