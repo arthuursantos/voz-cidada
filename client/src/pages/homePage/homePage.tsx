@@ -2,6 +2,7 @@
 
 import { MapPin, Search} from 'lucide-react';
 import Header from "@/components/header";
+import BotaoChamado from '@/components/botaoChamado';
 
 export default function Dashboard() {
   return (
@@ -70,9 +71,7 @@ export default function Dashboard() {
 
       {/* Open Call Button */}
       <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4">
-        <button className="bg-[--cor-secundaria4] font-montserrat text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
-          ABRIR CHAMADO
-        </button>
+        <BotaoChamado/>
       </div>
 
       {/* Decorative Waves */}

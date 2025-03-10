@@ -1,7 +1,11 @@
 import { Bell, LogOut, User } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import BotaoChamado from '../botaoChamado'
 
 function Header() {
+    const location = useLocation() 
+    const rotasOcultas = ["/dashboard"]
+
   return (
     <header className="bg-[#2B87B3] text-white p-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -12,7 +16,9 @@ function Header() {
                             <button className="text-xs hover:underline">
                                 <span className="flex items-center gap-1">
                                     <LogOut className="h-3 w-3" />
-                                    Finalizar Sessão
+                                    <Link to="/signin">
+                                        Finalizar Sessão
+                                    </Link>
                                 </span>
                             </button>
                         </div>
@@ -23,6 +29,10 @@ function Header() {
                         <Link to="/about" className="hover:underline font-montserrat">SOBRE NÓS</Link>
                         <Link to="/contact" className="hover:underline font-montserrat">FALE CONOSCO</Link>
                     </nav>
+
+                    {
+                        !rotasOcultas.includes(location.pathname) && (<BotaoChamado className="bg-[--cor-secundaria4] font-montserrat text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors"/>)
+                    }
 
                     <div className="flex items-center gap-4">
                         <div className="relative">
