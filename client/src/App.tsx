@@ -2,8 +2,7 @@ import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
 import About from "@/pages/about/index.tsx";          
-import Contact from "@/pages/contact/index.tsx";      
-import Cadastro from "@/pages/cadastro/index.tsx";    
+import Contact from "@/pages/contact/index.tsx";        
 import ResetPassword from "@/pages/resetPassword/index.tsx";    
 import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
@@ -84,47 +83,39 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Dashboard />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
                     <Route
                         path="/about" //por enquanto deixei publico apenas para teste
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <About />
-                            </PublicRoute> 
+                            </PrivateRoute> 
                         }
                     />
 
                     <Route
                         path="/contact" //por enquanto deixei publico apenas para teste
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Contact />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
                     <Route
                         path="/chamados"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Reports />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
-                    <Route
-                        path="/cadastro"
-                        element={
-                            <PublicRoute>
-                                <Cadastro />
-                            </PublicRoute>
-                        }
-                    />
                     <Route
                         path="/resetPassword"
                         element={
