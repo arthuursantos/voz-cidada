@@ -84,27 +84,27 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Dashboard />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
                     <Route
                         path="/about" //por enquanto deixei publico apenas para teste
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <About />
-                            </PrivateRoute> 
+                            </PublicRoute> 
                         }
                     />
 
                     <Route
                         path="/contact" //por enquanto deixei publico apenas para teste
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Contact />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 

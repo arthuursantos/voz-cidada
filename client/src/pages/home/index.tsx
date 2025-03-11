@@ -1,17 +1,14 @@
 import Sidebar from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom";
-import ReportsCarousel from "@/pages/home/components/ReportsCarousel.tsx";
+import ReportsCarousel from "@/pages/home/components/carousel.tsx";
 
 export default function Home() {
     return (
         <div className="flex h-screen bg-gray-100">
-            {/* Sidebar fixa */}
             <div className="fixed top-0 h-screen">
                 <Sidebar />
             </div>
-
-            {/* Conteúdo principal com marginação para a sidebar */}
             <div className="flex-1 ml-16">
                 <main>
                     <div className="container mx-auto pt-24 py-20">
