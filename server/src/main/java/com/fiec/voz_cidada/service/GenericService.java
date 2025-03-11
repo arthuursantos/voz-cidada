@@ -33,7 +33,7 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
     @Autowired
     private UsuarioRepository usuarioRepository;
     @Autowired
-    private PagedResourcesAssembler<D> assembler;
+    protected PagedResourcesAssembler<D> assembler;
 
     protected GenericService(
             GenericRepository<T, ID> repository,
