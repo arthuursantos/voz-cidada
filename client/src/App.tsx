@@ -4,7 +4,7 @@ import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
 import About from "@/pages/about/index.tsx";          
 import Contact from "@/pages/contact/index.tsx";      
 import Cadastro from "@/pages/cadastro/index.tsx";    
-import ResetPassword from "@/pages/resetPassword/index.tsx";    
+import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
 import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import AdminDashboard from "./pages/admin/index.tsx";
