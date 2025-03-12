@@ -1,10 +1,14 @@
 import { Bell, ChevronDown, ChevronUp, LogOut, Menu, User, X } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import BotaoChamado from '../botaoChamado'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { AuthContext } from '@/contexts/AuthContext'
 
 function Header() {
+    const {user, isAuthenticated, signOut} = useContext(AuthContext)
+
     const location = useLocation() 
+
     const rotasOcultas = ["/dashboard"]
 
     const [showMenu, setShowMenu] = useState(false);
@@ -16,11 +20,14 @@ return (
             <div className="hidden md:flex items-center gap-2">
                 <User className="h-8 w-8" />
                 <div className="flex flex-col">
-                    <span className="text-sm">Nome_cidadão</span>
-                    <button className="text-xs hover:underline">
+                    <span className="text-sm">{isAuthenticated && user? user.nome : 'Nome_Cidadao'}</span>
+                    <button className="text-xs hover:underline"
+                        onClick={() => {
+                            signOut(); // Chama a função signOut para deslogar o usuário
+                        }}>
                         <span className="flex items-center gap-1">
                             <LogOut className="h-3 w-3" />
-                            <Link to="/signin">Finalizar Sessão</Link>
+                            Finalizar Sessão
                         </span>
                     </button>
                 </div>
@@ -80,7 +87,11 @@ return (
                         <div className={`overflow-hidden transition-all duration-300 ${showConta ? 'max-h-40' : 'max-h-0'}`}>
                             <nav className='flex flex-col items-center gap-2 mt-2 text-sm'>
                                 <Link to="/" className="hover:underline">CONFIGURAÇÕES DA CONTA</Link>
-                                <Link to="/signin" className="hover:underline">FINALIZAR SESSÃO</Link>
+                                <button onClick={() => {
+                                            signOut(); // Chama a função signOut para deslogar o usuário
+                                        }} className="hover:underline">
+                                            FINALIZAR SESSÃO
+                                </button>
                             </nav>
                         </div>
                     </div>
