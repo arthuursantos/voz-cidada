@@ -1,6 +1,6 @@
 import Sidebar from "@/components/sidebar/index.tsx"
-import ReportsSection from "./components/getChamados.tsx"
-export default function Reports() {
+import GetUserChamados from "./components/getChamados.tsx"
+export default function Chamados() {
     return (
         <div className="flex h-screen bg-gray-50">
             <Sidebar />
@@ -8,7 +8,7 @@ export default function Reports() {
                 <main className="flex-1 overflow-y-auto">
                     <div className="flex flex-col h-full">
                         <div className="flex-1 min-h-[50%] overflow-y-auto">
-                            <ReportsSection/>
+                            <GetUserChamados/>
                         </div>
                     </div>
                 </main>

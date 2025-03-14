@@ -8,6 +8,7 @@ import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import AdminDashboard from "./pages/admin/index.tsx";
 import Reports from "./pages/reports/index.tsx";
+import Home from "./pages/home/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 
 type RouteProps = {
@@ -85,6 +86,15 @@ const App = () => {
                         element={
                             <PrivateRoute>
                                 <Dashboard />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/home"
+                        element={
+                            <PrivateRoute>
+                                <Home />
                             </PrivateRoute>
                         }
                     />
