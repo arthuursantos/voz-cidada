@@ -29,13 +29,15 @@ public class Chamado implements Serializable {
     @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
     private List<Avaliacao> avaliacao;
 
+    private String titulo;
+    private String descricao;
     private LocalDateTime dataAbertura;
     private String status;
     private String secretaria;
-    private String fotoUrl;
+    private String fotoAntesUrl;
+    private String fotoDepoisUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private String descricao;
 
     @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
     @Fetch(FetchMode.JOIN)

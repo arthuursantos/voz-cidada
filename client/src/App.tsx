@@ -2,9 +2,10 @@ import {ReactNode, useContext} from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from '@/pages/signIn';
 import {AuthContext, AuthProvider} from "@/contexts/AuthContext.tsx";
-import Dashboard from "@/pages/dashboard";
-import AdminDashboard from "@/pages/adminDashboard";
+import AdminDashboard from "@/pages/admin";
 import SignUp from "@/pages/signUp";
+import Chamados from "@/pages/chamados/index.tsx";
+import Home from "@/pages/home";
 
 type RouteProps = {
     children: ReactNode;
@@ -23,11 +24,11 @@ const PrivateRoute = ({ children, requiredRole }: RouteProps) => {
     }
 
     if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
-        return <Navigate to="/admin/dashboard" />
+        return <Navigate to="/admin/home" />
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {
-        return <Navigate to="/dashboard" />
+        return <Navigate to="/home" />
     }
 
     return children;
@@ -39,7 +40,7 @@ const PublicRoute = ({ children }: {children: ReactNode}) => {
         return "";
     }
     if (isAuthenticated) {
-        return <Navigate to={"/dashboard"}/>
+        return <Navigate to={"/home"}/>
     }
     return children;
 }
@@ -69,7 +70,7 @@ const App = () => {
                     />
 
                     <Route
-                        path="/admin/dashboard"
+                        path="/admin/home"
                         element={
                             <PrivateRoute requiredRole="ROLE_ADMIN">
                                 <AdminDashboard />
@@ -78,16 +79,25 @@ const App = () => {
                     />
 
                     <Route
-                        path="/dashboard"
+                        path="/home"
                         element={
                             <PrivateRoute>
-                                <Dashboard />
+                                <Home />
                             </PrivateRoute>
                         }
                     />
 
-                    <Route path="/" element={<Navigate to="/dashboard" />} />
-                    <Route path="*" element={<Navigate to="/dashboard" />} />
+                    <Route
+                        path="/chamados"
+                        element={
+                            <PrivateRoute>
+                                <Chamados />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    <Route path="/" element={<Navigate to="/home" />} />
+                    <Route path="*" element={<Navigate to="/home" />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
