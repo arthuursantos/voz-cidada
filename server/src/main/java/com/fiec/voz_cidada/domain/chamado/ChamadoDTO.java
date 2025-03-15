@@ -5,6 +5,7 @@ import com.fiec.voz_cidada.domain.historico.HistoricoDTO;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -18,14 +19,17 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
 
     private Long id;
     private Long usuarioId;
+    private String titulo;
+    private String descricao;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataAbertura;
     private String status;
-    private String fotoUrl;
+    private MultipartFile fotoAntesFile;
+    private String fotoAntesUrl;
+    private String fotoDepoisUrl;
     private String secretaria;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private String descricao;
     private List<HistoricoDTO> historicos;
 
 }

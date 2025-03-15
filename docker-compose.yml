@@ -9,6 +9,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/voz-cidada
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=admin
+    volumes:
+      - uploads-data:/app/uploads
 
   web:
     build: client
@@ -30,3 +32,4 @@ services:
 
 volumes:
   postgres-data:
+  uploads-data:
