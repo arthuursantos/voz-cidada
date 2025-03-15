@@ -111,41 +111,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     async function signIn({ login, password }: SignInData) {
-        const response: SignInResponse = await api.post("/auth/login", {
-            login,
-            password
-        });
+        try {
+            const response: SignInResponse = await api.post("/auth/login", {
+                login,
+                password
+            });
 
-        const { accessToken, refreshToken } = response.data;
-        setTokens(accessToken, refreshToken)
+            const { accessToken, refreshToken } = response.data;
+            setTokens(accessToken, refreshToken);
 
-        const decoded = jwtDecode<JWTClaims>(accessToken);
-        setUserRoles(decoded.roles);
+            const decoded = jwtDecode<JWTClaims>(accessToken);
+            setUserRoles(decoded.roles);
 
-        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-        setUser(userResponse.data);
+            const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+            setUser(userResponse.data);
 
-        if (decoded.roles.includes("ROLE_ADMIN")) {
-            navigate("/admin/dashboard");
-        } else {
-            navigate("/home");
+            navigate(decoded.roles.includes("ROLE_ADMIN") ? "/admin/dashboard" : "/home");
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+            alert("Erro ao fazer login. Verifique suas credenciais.");
         }
     }
 
     const getCepApi = async (cep: string) =>{
-        return fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao buscar CEP');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.erro) {
-                    throw new Error('CEP não encontrado.');
-                }
-                return data; // Retorna apenas o JSON
-            });
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            if (!response.ok) throw new Error("Erro ao buscar CEP");
+
+            const data = await response.json();
+            if (data.erro) throw new Error("CEP não encontrado");
+
+            return data;
+        } catch (error) {
+            if (error instanceof Error) {
+                console.warn(error.message);
+            } else {
+                console.warn("Unknown error occurred");
+            }
+            return null;
+        }
     }
 
     // Dentro do AuthContext
@@ -164,46 +168,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     async function signUp(data: SignUpData) {
 
-        const infoCep = await getCepApi(data.cep)
+        try {
+            const infoCep = await getCepApi(data.cep);
+            if (!infoCep) {
+                alert("CEP inválido. Verifique e tente novamente.");
+                return;
+            }
 
-        await api.post("/auth/register", {
-            login: data.email,
-            password: data.password,
-            role: "USER"
-        })
+            await api.post("/auth/register", {
+                login: data.email,
+                password: data.password,
+                role: "USER"
+            });
 
-        const response = await api.post("/auth/login", {
-            login: data.email,
-            password: data.password
-        })
+            const dataCadastro = new Date().toISOString().slice(0, 19).replace("T", " ");
+            await api.post("/api/usuario", {
+                nome: data.name,
+                dataNascimento: data.birthDate,
+                cpf: data.cpf,
+                cep: data.cep,
+                rua: infoCep.logradouro,
+                bairro: infoCep.bairro,
+                cidade: infoCep.localidade,
+                uf: infoCep.uf,
+                dataCadastro: dataCadastro
+            });
 
-        const {accessToken, refreshToken} = response.data
-        setTokens(accessToken, refreshToken)
+            // Após cadastro completo, fazer login automaticamente
+            await signIn({ login: data.email, password: data.password });
 
-        const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        await api.post("/api/usuario", {
-            nome: data.name,
-            dataNascimento: data.birthDate,
-            cpf: data.cpf,
-            cep: data.cep,
-            rua: infoCep.logradouro,
-            bairro: infoCep.bairro,
-            cidade: infoCep.localidade,
-            uf: infoCep.uf,
-            dataCadastro: dataCadastro
-        })
-
-        const decoded = jwtDecode<JWTClaims>(accessToken);
-        setUserRoles(decoded.roles);
-        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-        setUser(userResponse.data);
-
-        if (decoded.roles.includes("ROLE_ADMIN")) {
-            navigate("/admin/dashboard");
-        } else {
-            navigate("/home");
+        } catch (error) {
+            console.error("Erro no cadastro:", error);
+            alert("Erro ao cadastrar usuário. Tente novamente.");
         }
-
     }
 
     return (
