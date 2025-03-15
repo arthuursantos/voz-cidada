@@ -25,7 +25,7 @@ interface NovoChamadoDialogProps {
 export default function DialogCreateChamado({ open, onOpenChange, onSuccess }: NovoChamadoDialogProps) {
     const [titulo, setTitulo] = useState("")
     const [descricao, setDescricao] = useState("")
-    const [foto, setFoto] = useState<File | null>(null)
+    const [fotoAntesFile, setFotoAntesFile] = useState<File | null>(null)
     const [fotoPreview, setFotoPreview] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -35,7 +35,7 @@ export default function DialogCreateChamado({ open, onOpenChange, onSuccess }: N
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0]
-            setFoto(file)
+            setFotoAntesFile(file)
 
             const reader = new FileReader()
             reader.onload = (event) => {
@@ -46,7 +46,7 @@ export default function DialogCreateChamado({ open, onOpenChange, onSuccess }: N
     }
 
     const handleRemoveFoto = () => {
-        setFoto(null)
+        setFotoAntesFile(null)
         setFotoPreview(null)
         if (fileInputRef.current) {
             fileInputRef.current.value = ""
@@ -72,8 +72,8 @@ export default function DialogCreateChamado({ open, onOpenChange, onSuccess }: N
             formData.append("usuarioId", user?.id.toString() || "")
             formData.append('status', 'PENDENTE');
 
-            if (foto) {
-                formData.append("foto", foto)
+            if (fotoAntesFile) {
+                formData.append("fotoAntesFile", fotoAntesFile)
             }
 
             await api.post("/api/chamado/upload", formData, {
@@ -89,7 +89,7 @@ export default function DialogCreateChamado({ open, onOpenChange, onSuccess }: N
             // Reset form
             setTitulo("")
             setDescricao("")
-            setFoto(null)
+            setFotoAntesFile(null)
             setFotoPreview(null)
 
             // Close dialog

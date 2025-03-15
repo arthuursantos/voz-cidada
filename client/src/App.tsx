@@ -82,19 +82,19 @@ const App = () => {
                     />
 
                     <Route
-                        path="/dashboard"
+                        path="/home"
                         element={
                             <PrivateRoute>
-                                <Dashboard />
+                                <Home />
                             </PrivateRoute>
                         }
                     />
 
                     <Route
-                        path="/home"
+                        path="/dashboard"
                         element={
                             <PrivateRoute>
-                                <Home />
+                                <Dashboard />
                             </PrivateRoute>
                         }
                     />

@@ -1,7 +1,8 @@
-"use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import {useEffect, useState} from "react";
+import api from "@/lib/axios.ts";
 
 type ChamadoDialogProps = {
     chamado: {
@@ -33,6 +34,31 @@ const statusColors: Record<string, string> = {
 }
 
 export default function DialogGetChamado({ chamado, open, onOpenChange }: ChamadoDialogProps) {
+
+    const [imagemAntes, setImagemAntes] = useState<string | null>(null);
+    const [imagemDepois, setImagemDepois] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (chamado?.fotoAntesUrl) {
+            api.get(chamado.fotoAntesUrl, { responseType: 'blob' })
+                .then(response => {
+                    setImagemAntes(URL.createObjectURL(response.data));
+                });
+        }
+
+        if (chamado?.fotoDepoisUrl) {
+            api.get(chamado.fotoDepoisUrl, { responseType: 'blob' })
+                .then(response => {
+                    setImagemDepois(URL.createObjectURL(response.data));
+                });
+        }
+
+        return () => {
+            if (imagemAntes) URL.revokeObjectURL(imagemAntes);
+            if (imagemDepois) URL.revokeObjectURL(imagemDepois);
+        };
+    }, [chamado]);
+
     const formatDate = (dateString: string) => {
         try {
             const date = new Date(dateString)
@@ -54,7 +80,6 @@ export default function DialogGetChamado({ chamado, open, onOpenChange }: Chamad
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] max-h-[90vh] p-0 overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-                    {/* Left column - Information */}
                     <div className="p-6 overflow-y-auto max-h-[80vh]">
                         <DialogHeader>
                             <div className="flex items-center justify-between mb-2">
@@ -74,7 +99,6 @@ export default function DialogGetChamado({ chamado, open, onOpenChange }: Chamad
                         </div>
                     </div>
 
-                    {/* Right column - Photos */}
                     {hasAnyPhotos ? (
                         <div className="bg-muted border-l h-full flex flex-col">
                             <Tabs defaultValue={hasFotoAntes ? "antes" : "depois"} className="h-full flex flex-col">
@@ -90,22 +114,22 @@ export default function DialogGetChamado({ chamado, open, onOpenChange }: Chamad
                                     </TabsList>
                                 </div>
                                 <div className="flex-1 px-6 pb-6 overflow-y-auto">
-                                    {hasFotoAntes && (
+                                    {hasFotoAntes && imagemAntes && (
                                         <TabsContent value="antes" className="h-full">
                                             <div className="relative w-full rounded-md flex items-center justify-center">
                                                 <img
-                                                    src={chamado.fotoAntesUrl! || "https://placehold.co/400"}
+                                                    src={imagemAntes}
                                                     alt="Foto antes"
                                                     className="max-w-full object-contain"
                                                 />
                                             </div>
                                         </TabsContent>
                                     )}
-                                    {hasFotoDepois && (
+                                    {hasFotoDepois && imagemDepois && (
                                         <TabsContent value="depois" className="h-full">
                                             <div className="relative w-full rounded-md flex items-center justify-center">
                                                 <img
-                                                    src={chamado.fotoDepoisUrl! || "https://placehold.co/400"}
+                                                    src={imagemDepois}
                                                     alt="Foto depois"
                                                     className="max-w-full object-contain"
                                                 />
