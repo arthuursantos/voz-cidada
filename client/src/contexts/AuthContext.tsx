@@ -1,9 +1,9 @@
 import {createContext, ReactNode, useEffect, useState} from "react";
 import api from "@/lib/axios.ts";
-import { setCookie, parseCookies, destroyCookie } from "nookies";
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode";
 import {AxiosResponse} from "axios";
+import { parseCookies, setCookie, destroyCookie } from "nookies";
 
 type User = {
     id: number;
@@ -168,38 +168,44 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     async function signUp(data: SignUpData) {
 
-        try {
-            const infoCep = await getCepApi(data.cep);
-            if (!infoCep) {
-                alert("CEP inválido. Verifique e tente novamente.");
-                return;
-            }
+        const infoCep = await getCepApi(data.cep)
 
-            await api.post("/auth/register", {
-                login: data.email,
-                password: data.password,
-                role: "USER"
-            });
+        await api.post("/auth/register", {
+            login: data.email,
+            password: data.password,
+            role: "USER"
+        })
 
-            const dataCadastro = new Date().toISOString().slice(0, 19).replace("T", " ");
-            await api.post("/api/usuario", {
-                nome: data.name,
-                dataNascimento: data.birthDate,
-                cpf: data.cpf,
-                cep: data.cep,
-                rua: infoCep.logradouro,
-                bairro: infoCep.bairro,
-                cidade: infoCep.localidade,
-                uf: infoCep.uf,
-                dataCadastro: dataCadastro
-            });
+        const response = await api.post("/auth/login", {
+            login: data.email,
+            password: data.password
+        })
 
-            // Após cadastro completo, fazer login automaticamente
-            await signIn({ login: data.email, password: data.password });
+        const {accessToken, refreshToken} = response.data
+        setTokens(accessToken, refreshToken)
 
-        } catch (error) {
-            console.error("Erro no cadastro:", error);
-            alert("Erro ao cadastrar usuário. Tente novamente.");
+        const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        await api.post("/api/usuario", {
+            nome: data.name,
+            dataNascimento: data.birthDate,
+            cpf: data.cpf,
+            cep: data.cep,
+            rua: infoCep.logradouro,
+            bairro: infoCep.bairro,
+            cidade: infoCep.localidade,
+            uf: infoCep.uf,
+            dataCadastro: dataCadastro
+        })
+
+        const decoded = jwtDecode<JWTClaims>(accessToken);
+        setUserRoles(decoded.roles);
+        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+        setUser(userResponse.data);
+
+        if (decoded.roles.includes("ROLE_ADMIN")) {
+            navigate("/admin/dashboard");
+        } else {
+            navigate("/home");
         }
     }
 
