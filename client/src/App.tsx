@@ -10,6 +10,7 @@ import AdminDashboard from "./pages/admin/index.tsx";
 import Reports from "./pages/reports/index.tsx";
 import Home from "./pages/home/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
+import Profile from "./pages/Profile/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -93,9 +94,9 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Dashboard />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
@@ -120,9 +121,9 @@ const App = () => {
                     <Route
                         path="/chamados"
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Reports />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
@@ -131,6 +132,15 @@ const App = () => {
                         element={
                             <PublicRoute>
                                 <ResetPassword />
+                            </PublicRoute>
+                        }
+                    />
+
+                    <Route 
+                        path="/conta"
+                        element={
+                            <PublicRoute>
+                                <Profile />
                             </PublicRoute>
                         }
                     />

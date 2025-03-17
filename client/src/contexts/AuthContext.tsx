@@ -18,6 +18,19 @@ type User = {
     uf: string;
 }
 
+export type UpdateUserData = {
+    id: number;
+    nome: string;
+    cpf: string;
+    dataNascimento: string;
+    dataCadastro: string;
+    cep: string;
+    rua: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+}
+
 type JWTClaims = {
     sub: string;
     iss: string;
@@ -59,7 +72,9 @@ type AuthContextType = {
     loading: boolean;
     signIn: (data: SignInData) => Promise<void>,
     signUp: (data: SignUpData) => Promise<void>,
-    signOut: () => void
+    signOut: () => void,
+    getCepApi: (cep: string) => Promise<any>,
+    updateUser: (data: UpdateUserData) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -209,8 +224,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
+    async function updateUser(data: UpdateUserData) {
+        try {
+            const response = await api.put("/api/usuario", data);
+            setUser(response.data);
+        }
+        catch (error) {
+            console.error("Erro ao atualizar usuário:", error);
+            alert("Erro ao atualizar usuário. Tente novamente.");
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signOut }}>
+        <AuthContext.Provider value={{ user, userRoles, isAuthenticated, loading, signIn, signUp, signOut, getCepApi, updateUser }}>
             {children}
         </AuthContext.Provider>
     )
