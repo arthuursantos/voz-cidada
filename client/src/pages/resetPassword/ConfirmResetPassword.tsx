@@ -4,8 +4,8 @@ import { Label } from "@/components/ui/label";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+//import { AlertCircle } from 'lucide-react';
+//import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 import ProgressBar from "@/pages/signUp/components/progressBar";
 

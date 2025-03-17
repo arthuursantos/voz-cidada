@@ -1,6 +1,6 @@
 import {createContext, ReactNode, useEffect, useState} from "react";
 import api from "@/lib/axios.ts";
-import { setCookie, parseCookies } from "nookies";
+import { setCookie, parseCookies, destroyCookie } from "nookies";
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode";
 import {AxiosResponse} from "axios";
@@ -58,7 +58,8 @@ type AuthContextType = {
     isAuthenticated: boolean,
     loading: boolean;
     signIn: (data: SignInData) => Promise<void>,
-    signUp: (data: SignUpData) => Promise<void>
+    signUp: (data: SignUpData) => Promise<void>,
+    signOut: () => void
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -147,6 +148,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
     }
 
+    // Dentro do AuthContext
+    async function signOut() {
+        // Remove os cookies de acesso
+        destroyCookie(null, "vozcidada.accessToken");
+        destroyCookie(null, "vozcidada.refreshToken");
+        
+        // Limpa o estado do usuário e roles
+        setUser(null);
+        setUserRoles(null);
+
+        // Redireciona para a página de login
+        navigate("/signin");
+    }
+
     async function signUp(data: SignUpData) {
 
         const infoCep = await getCepApi(data.cep)
@@ -192,7 +207,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp }}>
+        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signOut }}>
             {children}
         </AuthContext.Provider>
     )

@@ -2,14 +2,14 @@ import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
 import About from "@/pages/about/index.tsx";          
-import Contact from "@/pages/contact/index.tsx";      
-import Cadastro from "@/pages/cadastro/index.tsx";    
+import Contact from "@/pages/contact/index.tsx";        
 import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
 import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import AdminDashboard from "./pages/admin/index.tsx";
 import Reports from "./pages/reports/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
+import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
 
 type RouteProps = {
     children: ReactNode;
@@ -84,27 +84,27 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Dashboard />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
                     <Route
-                        path="/about" //por enquanto deixei publico apenas para teste
+                        path="/about" // por enquanto público apenas para teste
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <About />
-                            </PrivateRoute> 
+                            </PublicRoute> 
                         }
                     />
 
                     <Route
-                        path="/contact" //por enquanto deixei publico apenas para teste
+                        path="/contact" // por enquanto público apenas para teste
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Contact />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
@@ -118,13 +118,14 @@ const App = () => {
                     />
 
                     <Route
-                        path="/cadastro"
+                        path="/abrir-chamado" // Rota para Abrir Chamado
                         element={
                             <PublicRoute>
-                                <Cadastro />
+                                <AbrirChamado />
                             </PublicRoute>
                         }
                     />
+
                     <Route
                         path="/resetPassword"
                         element={
