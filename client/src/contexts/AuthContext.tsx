@@ -1,9 +1,9 @@
 import {createContext, ReactNode, useEffect, useState} from "react";
 import api from "@/lib/axios.ts";
-import { setCookie, parseCookies, destroyCookie } from "nookies";
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode";
 import {AxiosResponse} from "axios";
+import { parseCookies, setCookie, destroyCookie } from "nookies";
 
 type User = {
     id: number;
@@ -111,41 +111,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     async function signIn({ login, password }: SignInData) {
-        const response: SignInResponse = await api.post("/auth/login", {
-            login,
-            password
-        });
+        try {
+            const response: SignInResponse = await api.post("/auth/login", {
+                login,
+                password
+            });
 
-        const { accessToken, refreshToken } = response.data;
-        setTokens(accessToken, refreshToken)
+            const { accessToken, refreshToken } = response.data;
+            setTokens(accessToken, refreshToken);
 
-        const decoded = jwtDecode<JWTClaims>(accessToken);
-        setUserRoles(decoded.roles);
+            const decoded = jwtDecode<JWTClaims>(accessToken);
+            setUserRoles(decoded.roles);
 
-        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-        setUser(userResponse.data);
+            const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+            setUser(userResponse.data);
 
-        if (decoded.roles.includes("ROLE_ADMIN")) {
-            navigate("/admin/dashboard");
-        } else {
-            navigate("/home");
+            navigate(decoded.roles.includes("ROLE_ADMIN") ? "/admin/dashboard" : "/home");
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+            alert("Erro ao fazer login. Verifique suas credenciais.");
         }
     }
 
     const getCepApi = async (cep: string) =>{
-        return fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao buscar CEP');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.erro) {
-                    throw new Error('CEP não encontrado.');
-                }
-                return data; // Retorna apenas o JSON
-            });
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            if (!response.ok) throw new Error("Erro ao buscar CEP");
+
+            const data = await response.json();
+            if (data.erro) throw new Error("CEP não encontrado");
+
+            return data;
+        } catch (error) {
+            if (error instanceof Error) {
+                console.warn(error.message);
+            } else {
+                console.warn("Unknown error occurred");
+            }
+            return null;
+        }
     }
 
     // Dentro do AuthContext
@@ -203,7 +207,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } else {
             navigate("/home");
         }
-
     }
 
     return (

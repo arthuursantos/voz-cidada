@@ -19,7 +19,7 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    @Value("${security.token.secret")
+    @Value("${security.token.secret}")
     private String secret;
     @Value("${security.token.expire-length}")
     private Long expireLength;

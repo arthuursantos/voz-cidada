@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import com.fiec.voz_cidada.config.security.TokenService;
 import java.util.List;
 
 @Component

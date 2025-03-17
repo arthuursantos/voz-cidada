@@ -13,6 +13,8 @@ WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
 
+RUN mkdir -p /app/uploads && chmod 777 /app/uploads
+
 EXPOSE 8080
 
 ENV SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/voz-cidada

@@ -1,16 +1,20 @@
-import {useState, useEffect, useContext} from "react"
+"use client"
+
+import api from "@/lib/axios.ts"
+import { AuthContext } from "@/contexts/AuthContext.tsx"
+import DialogChamados from "./dialogGetChamado.tsx"
+import { useState, useEffect, useContext } from "react"
 import { Button } from "@/components/ui/button.tsx"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx"
 import { Badge } from "@/components/ui/badge.tsx"
-import { FileText, Filter, Plus } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuCheckboxItem,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx"
-import api from "@/lib/axios.ts"
-import {AuthContext} from "@/contexts/AuthContext.tsx";
+import { FileText, Filter, Plus } from "lucide-react"
+import DialogCreateChamado from "./dialogCreateChamado.tsx"
 
 type Status = "concluído" | "em andamento" | "pendente"
 
@@ -22,9 +26,9 @@ const statusColors: Record<Status, string> = {
 
 const statusMapping = (apiStatus: string): Status => {
     const statusMap: Record<string, Status> = {
-        "CONCLUIDO": "concluído",
-        "EM_ANDAMENTO": "em andamento",
-        "PENDENTE": "pendente",
+        CONCLUIDO: "concluído",
+        EM_ANDAMENTO: "em andamento",
+        PENDENTE: "pendente",
     }
     return statusMap[apiStatus] || "pendente"
 }
@@ -48,13 +52,16 @@ type ApiResponse = {
     }
 }
 
-export default function ReportsSection() {
+export default function GetUserChamados() {
     const [chamados, setChamados] = useState<Chamado[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [statusFilter, setStatusFilter] = useState<Status[]>(["concluído", "em andamento", "pendente"])
+    const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [novoChamadoDialogOpen, setNovoChamadoDialogOpen] = useState(false)
 
-    const { user } = useContext(AuthContext);
+    const { user } = useContext(AuthContext)
 
     useEffect(() => {
         const fetchChamados = async () => {
@@ -67,8 +74,8 @@ export default function ReportsSection() {
                     setChamados([])
                 }
             } catch (err) {
-                setError('Erro ao carregar chamados')
-                console.error('Erro ao buscar chamados:', err)
+                setError("Erro ao carregar chamados")
+                console.error("Erro ao buscar chamados:", err)
             } finally {
                 setLoading(false)
             }
@@ -87,15 +94,13 @@ export default function ReportsSection() {
     const formatDate = (dateString: string) => {
         try {
             const date = new Date(dateString)
-            return date.toLocaleDateString('pt-BR')
+            return date.toLocaleDateString("pt-BR")
         } catch (e) {
             return dateString
         }
     }
 
-    const filteredChamados = chamados.filter((chamado) =>
-        statusFilter.includes(statusMapping(chamado.status))
-    )
+    const filteredChamados = chamados.filter((chamado) => statusFilter.includes(statusMapping(chamado.status)))
 
     if (loading) {
         return (
@@ -125,7 +130,7 @@ export default function ReportsSection() {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="border-teal text-teal">
-                                <Filter className="mr-2 h-4 w-4"/> Filtrar
+                                <Filter className="mr-2 h-4 w-4" /> Filtrar
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -159,8 +164,8 @@ export default function ReportsSection() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button className="bg-teal hover:bg-teal/90">
-                        <Plus className="mr-1 h-4 w-4"/> Novo Chamado
+                    <Button className="bg-teal hover:bg-teal/90" onClick={() => setNovoChamadoDialogOpen(true)}>
+                        <Plus className="mr-1 h-4 w-4" /> Novo Chamado
                     </Button>
                 </div>
             </div>
@@ -170,7 +175,7 @@ export default function ReportsSection() {
                     <Card key={chamado.id} className="hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                             <CardTitle className="text-md font-medium">{chamado.titulo}</CardTitle>
-                            <FileText className="h-4 w-4 text-muted-foreground"/>
+                            <FileText className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="flex justify-between items-center mb-2">
@@ -179,7 +184,15 @@ export default function ReportsSection() {
                                     {statusMapping(chamado.status).charAt(0).toUpperCase() + statusMapping(chamado.status).slice(1)}
                                 </Badge>
                             </div>
-                            <Button variant="outline" size="sm" className="mt-2 w-full text-teal border-teal hover:bg-teal hover:text-white">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 w-full text-teal border-teal hover:bg-teal hover:text-white"
+                                onClick={() => {
+                                    setSelectedChamado(chamado)
+                                    setDialogOpen(true)
+                                }}
+                            >
                                 Abrir Chamado
                             </Button>
                         </CardContent>
@@ -192,6 +205,31 @@ export default function ReportsSection() {
                     Nenhum chamado encontrado com os filtros selecionados.
                 </div>
             )}
+            <DialogChamados chamado={selectedChamado} open={dialogOpen} onOpenChange={setDialogOpen} />
+            <DialogCreateChamado
+                open={novoChamadoDialogOpen}
+                onOpenChange={setNovoChamadoDialogOpen}
+                onSuccess={() => {
+                    const fetchChamados = async () => {
+                        try {
+                            setLoading(true)
+                            const response = await api.get<ApiResponse>(`/api/chamado/user/${user?.id}`)
+                            if (response.data._embedded && response.data._embedded.chamadoDTOList) {
+                                setChamados(response.data._embedded.chamadoDTOList)
+                            } else {
+                                setChamados([])
+                            }
+                        } catch (err) {
+                            setError("Erro ao carregar chamados")
+                            console.error("Erro ao buscar chamados:", err)
+                        } finally {
+                            setLoading(false)
+                        }
+                    }
+                    fetchChamados()
+                }}
+            />
         </div>
     )
 }
+
