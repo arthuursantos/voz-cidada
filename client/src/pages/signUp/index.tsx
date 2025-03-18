@@ -1,4 +1,3 @@
-import ProgressBar from "@/pages/signUp/components/progressBar";
 import {Label} from "@/components/ui/label.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -8,6 +7,7 @@ import {SubmitHandler, useForm} from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormEvent, useContext, useState } from "react";
+import ProgressBar from "@/components/progressBar";
 
 
 export default function SignUp() {
