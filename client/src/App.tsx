@@ -96,7 +96,7 @@ const App = () => {
                         path="/dashboard"
                         element={
                             <PrivateRoute>
-                                <Dashboard />
+                                <Home />
                             </PrivateRoute>
                         }
                     />

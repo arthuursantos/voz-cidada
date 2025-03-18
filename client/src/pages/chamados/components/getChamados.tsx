@@ -1,5 +1,3 @@
-"use client"
-
 import api from "@/lib/axios.ts"
 import { AuthContext } from "@/contexts/AuthContext.tsx"
 import DialogChamados from "./dialogGetChamado.tsx"
@@ -104,7 +102,7 @@ export default function GetUserChamados() {
 
     if (loading) {
         return (
-            <div className="p-6">
+            <div className="container p-4 max-w-7xl">
                 <div className="flex items-center justify-center min-h-[300px]">
                     <p>Carregando chamados...</p>
                 </div>
@@ -114,7 +112,7 @@ export default function GetUserChamados() {
 
     if (error) {
         return (
-            <div className="p-6">
+            <div className="container p-4 max-w-7xl">
                 <div className="flex items-center justify-center min-h-[300px]">
                     <p className="text-red-500">Erro: {error}</p>
                 </div>
@@ -123,8 +121,8 @@ export default function GetUserChamados() {
     }
 
     return (
-        <div className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <div className="container py-20 max-w-7xl">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
                 <h2 className="text-lg font-medium tracking-wider text-primary uppercase">Meus Chamados</h2>
                 <div className="flex gap-2">
                     <DropdownMenu>
@@ -170,7 +168,7 @@ export default function GetUserChamados() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredChamados.map((chamado) => (
                     <Card key={chamado.id} className="hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -201,7 +199,7 @@ export default function GetUserChamados() {
             </div>
 
             {filteredChamados.length === 0 && (
-                <div className="text-center py-10 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground">
                     Nenhum chamado encontrado com os filtros selecionados.
                 </div>
             )}
@@ -232,4 +230,3 @@ export default function GetUserChamados() {
         </div>
     )
 }
-

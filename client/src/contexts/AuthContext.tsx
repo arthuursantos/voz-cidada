@@ -136,10 +136,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
 
-            navigate(decoded.roles.includes("ROLE_ADMIN") ? "/admin/dashboard" : "/home");
-        } catch (error) {
+            if (decoded.roles.includes("ROLE_ADMIN")) {
+                navigate("/admin/dashboard");
+            } else {
+                navigate("/dashboard");
+            }
+        }
+        catch (error) {
             console.error("Erro ao fazer login:", error);
-            alert("Erro ao fazer login. Verifique suas credenciais.");
+            alert("Erro ao fazer login. Verifique suas credenciais e tente novamente.");
         }
     }
 

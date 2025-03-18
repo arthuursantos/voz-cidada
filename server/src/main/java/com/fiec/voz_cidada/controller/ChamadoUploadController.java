@@ -54,10 +54,8 @@ public class ChamadoUploadController {
     @PostMapping
     public ResponseEntity<EntityModel<ChamadoDTO>> createWithImage(ChamadoDTO dto) {
         service.checkUserAccess(dto.getUsuarioId());
-
         String fotoAntesUrl = saveImage(dto.getFotoAntesFile());
         dto.setFotoAntesUrl(fotoAntesUrl);
-
         EntityModel<ChamadoDTO> entityModel = service.create(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
