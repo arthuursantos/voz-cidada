@@ -94,9 +94,9 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Dashboard />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
@@ -121,9 +121,9 @@ const App = () => {
                     <Route
                         path="/chamados"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Reports />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
@@ -139,9 +139,9 @@ const App = () => {
                     <Route 
                         path="/conta"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Profile />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 

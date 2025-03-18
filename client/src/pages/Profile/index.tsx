@@ -13,11 +13,15 @@ import { z } from 'zod'
 const Profile = () => {
   const { user, getCepApi, updateUser } = useContext(AuthContext)
 
-  const [cep, setCep] = useState(user? user.cep : "12345-678")
-  const [rua, setRua] = useState(user? user.rua : "")
-  const [bairro, setBairro] = useState(user? user.bairro : "")
-  const [cidade, setCidade] = useState(user? user.cidade : "")
-  const [uf, setUf] = useState(user? user.uf : "")
+  const [cep, setCep] = useState(user?.cep || "12345-678");
+  const [rua, setRua] = useState(user?.rua || "");
+  const [bairro, setBairro] = useState(user?.bairro || "");
+  const [cidade, setCidade] = useState(user?.cidade || "");
+  const [uf, setUf] = useState(user?.uf || "");
+
+  const message = "Formato de CEP inválido. Use 00000-000 ou 00000000."
+
+  const [isError, setIsError] = useState(false)
 
   const updateUserSchema = z.object({
     cep: z.string()
@@ -38,7 +42,7 @@ const Profile = () => {
 
   type updateUserData = z.infer<typeof updateUserSchema>
 
-  const { register, handleSubmit, formState: {errors} } = useForm<updateUserData>({
+  const { register, handleSubmit  } = useForm<updateUserData>({
           resolver: zodResolver(updateUserSchema)
       })
 
@@ -53,10 +57,27 @@ const Profile = () => {
     }
   }
 
+  const validateCep = (cep: string) => {
+    const cepRegex = /^\d{5}-?\d{3}$/;
+    if (!cepRegex.test(cep)) {
+      setIsError(true);
+      return cep; // Return the invalid CEP to avoid setting it to undefined
+    }
+    setIsError(false);
+    return cep.replace(/[^0-9]/g, ""); // Return the cleaned CEP
+  };
+  
+  // Update the onChange handler for the CEP input
+  
+
   const changeAddress = async (cep: string) => {
     if (!cep) {
       console.error('CEP inválido.')
       return null
+    }
+
+    if (isError) {
+      return;
     }
   
     try {
@@ -143,19 +164,21 @@ const Profile = () => {
             <CardContent>
            
               <div className="grid gap-2">
-              <form onSubmit={handleSubmit(async() => {
+              <form onSubmit={async(e) => {
+                e.preventDefault();
                 await changeAddress(cep)
-              })}>
+              }}>
                 <label htmlFor="cep">CEP</label>
 
                 <div className='flex items-center gap-2'>
                   <Input {...register('cep')} id="cep" value={cep} onChange={(e) => {
-                    setCep(e.target.value)
-                    enableCepSubmit()
+                      const validatedCep = validateCep(e.target.value);
+                      setCep(validatedCep);
+                      enableCepSubmit();
                     }} type='text' maxLength={9} placeholder="00000-000" className='w-32' />
                     
                     <Button disabled id='cepChangeBtn' className='bg-[--cor-primaria] hover:bg-[#162547]'>Trocar Cep</Button>
-                    {errors.cep && <span className='text-red-500 text-sm'> {errors.cep.message} </span>}
+                    {isError && <span className='text-red-500 text-sm'> {message} </span>}
                 </div>
 
                 
