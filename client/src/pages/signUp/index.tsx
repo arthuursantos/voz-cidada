@@ -1,4 +1,4 @@
-import ProgressBar from "@/pages/signUp/components/progressBar";
+import ProgressBar from "@/components/progressBar/index.tsx";
 import {Label} from "@/components/ui/label.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
