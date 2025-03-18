@@ -11,6 +11,7 @@ import Reports from "./pages/reports/index.tsx";
 import Home from "./pages/home/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
+import Profile from "./pages/Profile/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -142,6 +143,15 @@ const App = () => {
                             <PublicRoute>
                                 <ResetPassword />
                             </PublicRoute>
+                        }
+                    />
+
+                    <Route 
+                        path="/conta"
+                        element={
+                            <PrivateRoute>
+                                <Profile />
+                            </PrivateRoute>
                         }
                     />
 
