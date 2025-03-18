@@ -197,7 +197,7 @@ const Profile = () => {
               </div>
               <CardFooter className="flex justify-end space-x-2">
                 <Button variant="outline">Cancelar</Button>
-                <Button type='submit' className='bg-[--cor-primaria] hover:bg-[#162547]'>Salvar Mudanças</Button>
+                <Button type='submit' className='bg-[--cor-primaria] hover:bg-[#162547]'>Salvar alterações</Button>
               </CardFooter>
             </form>
             </CardContent>
