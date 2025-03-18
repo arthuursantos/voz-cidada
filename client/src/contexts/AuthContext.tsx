@@ -19,11 +19,6 @@ type User = {
 }
 
 export type UpdateUserData = {
-    id: number;
-    nome: string;
-    cpf: string;
-    dataNascimento: string;
-    dataCadastro: string;
     cep: string;
     rua: string;
     bairro: string;
@@ -226,7 +221,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     async function updateUser(data: UpdateUserData) {
         try {
-            const response = await api.put("/api/usuario", data);
+            const response = await api.put("/api/usuario", {
+                id: user?.id,
+                nome: user?.nome,
+                cpf: user?.cpf,
+                dataNascimento: user?.dataNascimento,
+                dataCadastro: user?.dataCadastro,
+                cep: data.cep,
+                rua: data.rua,
+                bairro: data.bairro,
+                cidade: data.cidade,
+                uf: data.uf
+            });
             setUser(response.data);
         }
         catch (error) {

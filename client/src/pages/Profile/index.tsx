@@ -28,16 +28,11 @@ const Profile = () => {
           .min(8)
           .max(9)
           .regex(/^\d{5}-?\d{3}$/, "Formato de CEP inválido. Use 00000-000 ou 00000000.")
-          .transform((cep) => cep.replace(/[^0-9]/g, "")).optional(),
+          .transform((cep) => cep.replace(/[^0-9]/g, "")),
     rua: z.string(),
     bairro: z.string(),
     cidade: z.string(),
-    uf: z.string(),
-    id: z.number(),
-    nome: z.string(),
-    cpf: z.string(),
-    dataNascimento: z.string(),
-    dataCadastro: z.string()
+    uf: z.string()
   })
 
   type updateUserData = z.infer<typeof updateUserSchema>
@@ -109,14 +104,7 @@ const Profile = () => {
 
   const handleUpdateUser: SubmitHandler<updateUserData> = async (data) => {
     console.log(data)
-    await updateUser({
-      ...data,
-      cep: cep,
-      rua: rua,
-      bairro: bairro,
-      cidade: cidade,
-      uf: uf,
-    })
+    await updateUser(data)
   }
 
   return (
