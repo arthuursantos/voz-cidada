@@ -9,6 +9,7 @@ import { LockIcon } from 'lucide-react'
 import { useContext, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import BlocoConfirmacao from './Components/BlocoDeConfirmacao.tsx'
 
 const Profile = () => {
   const { user, getCepApi, updateUser } = useContext(AuthContext)
@@ -22,6 +23,7 @@ const Profile = () => {
   const message = "Formato de CEP inválido. Use 00000-000 ou 00000000."
 
   const [isError, setIsError] = useState(false)
+  const [confirmation, setConfirmation] = useState(false)
 
   const updateUserSchema = z.object({
     cep: z.string()
@@ -174,7 +176,7 @@ const Profile = () => {
               </form>
               </div>
 
-            <form onSubmit={handleSubmit(handleUpdateUser)}>
+            <form>
               <div className="grid gap-2">
                 <Label htmlFor="street">Rua</Label>
                 <Input {...register('rua')} id="street" value={rua} disabled placeholder="Digite sua rua" />
@@ -197,12 +199,14 @@ const Profile = () => {
               </div>
               <CardFooter className="flex justify-end space-x-2">
                 <Button variant="outline">Cancelar</Button>
-                <Button type='submit' className='bg-[--cor-primaria] hover:bg-[#162547]'>Salvar alterações</Button>
+                <Button type="button" onClick={(e) => {
+                  e.preventDefault()
+                  setConfirmation(true)
+                }} className='bg-[--cor-primaria] hover:bg-[#162547]'>Salvar alterações</Button>
               </CardFooter>
+              {confirmation && <BlocoConfirmacao setConfirmation={setConfirmation} />}
             </form>
             </CardContent>
-            
-          
         </div>
       </div>
     </div>
