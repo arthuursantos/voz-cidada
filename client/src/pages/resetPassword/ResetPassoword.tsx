@@ -16,7 +16,7 @@ export default function ResetPassword() {
     const [step, setStep] = useState(0);
 
     // FUNÇÃO: Integrar a API que envia o e-mail de redefinição
-    const handleResetPassword: SubmitHandler<ResetPasswordData> = async (data) => {
+    const handleResetPassword: SubmitHandler<ResetPasswordData> = async (/*data*/) => {
         try {
             setError(null);
             // COLOCAR A API que envia o e-mail de redefinição abaixo (ex: com fetch ou axios)
