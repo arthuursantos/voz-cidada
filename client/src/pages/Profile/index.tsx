@@ -84,9 +84,9 @@ const Profile = () => {
       setBairro(response.bairro);
       setCidade(response.localidade);
       setUf(response.uf);
-  
+      
+      setHasChanges(false)
       // Verifica se há mudanças após atualizar os campos
-      checkForChanges();
     } catch (error) {
       console.error('Erro ao buscar o CEP:', error);
       return null;
@@ -97,6 +97,7 @@ const Profile = () => {
     console.log(data)
     await updateUser(data)
     setConfirmation(false) // Fechar o pop-up após a confirmação
+    setHasChanges(true)
   }
 
   const resetForm = () => {
