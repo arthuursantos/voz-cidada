@@ -96,7 +96,7 @@ const App = () => {
                         path="/dashboard"
                         element={
                             <PrivateRoute>
-                                <Home />
+                                <Dashboard />
                             </PrivateRoute>
                         }
                     />
@@ -113,9 +113,9 @@ const App = () => {
                     <Route
                         path="/contact" // por enquanto público apenas para teste
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Contact />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 

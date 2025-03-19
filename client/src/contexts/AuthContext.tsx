@@ -20,10 +20,6 @@ type User = {
 
 export type UpdateUserData = {
     cep: string;
-    rua: string;
-    bairro: string;
-    cidade: string;
-    uf: string;
 }
 
 type JWTClaims = {
@@ -225,19 +221,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     async function updateUser(data: UpdateUserData) {
-        try {
-            const response = await api.put("/api/usuario", {
-                id: user?.id,
-                nome: user?.nome,
-                cpf: user?.cpf,
-                dataNascimento: user?.dataNascimento,
-                dataCadastro: user?.dataCadastro,
-                cep: data.cep,
-                rua: data.rua,
-                bairro: data.bairro,
-                cidade: data.cidade,
-                uf: data.uf
-            });
+
+        const novoEndereco = await getCepApi(data.cep);
+
+        const userAtualizado = {
+            id: user?.id,
+            nome: user?.nome,
+            cpf: user?.cpf,
+            dataNascimento: user?.dataNascimento,
+            dataCadastro: user?.dataCadastro,
+            cep: data.cep,
+            rua: novoEndereco.logradouro,
+            bairro: novoEndereco.bairro,
+            cidade: novoEndereco.localidade,
+            uf: novoEndereco.uf
+        }
+
+        try {      
+            const response = await api.put("/api/usuario", userAtualizado);
+    
             setUser(response.data);
         }
         catch (error) {

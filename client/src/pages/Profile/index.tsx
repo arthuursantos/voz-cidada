@@ -24,6 +24,7 @@ const Profile = () => {
 
   const [isError, setIsError] = useState(false)
   const [confirmation, setConfirmation] = useState(false)
+  const [hasChanges, setHasChanges] = useState(true)
 
   const updateUserSchema = z.object({
     cep: z.string()
@@ -31,10 +32,6 @@ const Profile = () => {
           .max(9)
           .regex(/^\d{5}-?\d{3}$/, "Formato de CEP inválido. Use 00000-000 ou 00000000.")
           .transform((cep) => cep.replace(/[^0-9]/g, "")),
-    rua: z.string(),
-    bairro: z.string(),
-    cidade: z.string(),
-    uf: z.string()
   })
 
   type updateUserData = z.infer<typeof updateUserSchema>
@@ -64,50 +61,63 @@ const Profile = () => {
     return cep.replace(/[^0-9]/g, ""); // Return the cleaned CEP
   };
   
-  // Update the onChange handler for the CEP input
-  
-
   const changeAddress = async (cep: string) => {
     if (!cep) {
-      console.error('CEP inválido.')
-      return null
+      console.error('CEP inválido.');
+      return null;
     }
-
+  
     if (isError) {
       return;
     }
   
     try {
-      // Aguarda a resposta da API antes de prosseguir
-      const response = await getCepApi(cep)
+      const response = await getCepApi(cep);
   
       if (!response) {
-        console.error('CEP não encontrado.')
-        return null
+        console.error('CEP não encontrado.');
+        return null;
       }
-
-      if(user){
-        user.cep = cep
-        user.rua = response.logradouro
-        user.bairro = response.bairro
-        user.cidade = response.localidade
-        user.uf = response.uf
-      }
-      
-      setRua(response.logradouro)
-      setBairro(response.bairro)
-      setCidade(response.localidade)
-      setUf(response.uf)
+  
+      // Atualiza os campos de endereço
+      setRua(response.logradouro);
+      setBairro(response.bairro);
+      setCidade(response.localidade);
+      setUf(response.uf);
+  
+      // Verifica se há mudanças após atualizar os campos
+      checkForChanges();
     } catch (error) {
-      console.error('Erro ao buscar o CEP:', error)
-      return null
+      console.error('Erro ao buscar o CEP:', error);
+      return null;
     }
-  }
+  };
 
   const handleUpdateUser: SubmitHandler<updateUserData> = async (data) => {
     console.log(data)
     await updateUser(data)
+    setConfirmation(false) // Fechar o pop-up após a confirmação
   }
+
+  const resetForm = () => {
+    setCep(user?.cep || "12345-678");
+    setRua(user?.rua || "");
+    setBairro(user?.bairro || "");
+    setCidade(user?.cidade || "");
+    setUf(user?.uf || "");
+
+    setHasChanges(true);
+  };
+
+  const checkForChanges = () => {
+    const hasChanges =
+      rua !== (user?.rua || "") ||
+      bairro !== (user?.bairro || "") ||
+      cidade !== (user?.cidade || "") ||
+      uf !== (user?.uf || "");
+  
+    setHasChanges(hasChanges);
+  };
 
   return (
     <div className='flex flex-col min-h-screen'>
@@ -176,35 +186,44 @@ const Profile = () => {
               </form>
               </div>
 
-            <form>
+            <form onSubmit={handleSubmit(handleUpdateUser)}>
               <div className="grid gap-2">
                 <Label htmlFor="street">Rua</Label>
-                <Input {...register('rua')} id="street" value={rua} disabled placeholder="Digite sua rua" />
+                <Input  id="street" value={rua} onChange={(e) => {
+                                                                        setRua(e.target.value);
+                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
+                                                                      }} disabled placeholder="Digite sua rua" />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="bairro">Bairro</Label>
-                <Input {...register('bairro')} id="bairro" value={bairro} disabled placeholder="Digite seu bairro" />
+                <Input  id="bairro" value={bairro} onChange={(e) => {
+                                                                        setBairro(e.target.value);
+                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
+                                                                      }} disabled placeholder="Digite seu bairro" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="city">Cidade</Label>
-                  <Input {...register('cidade')} id="city" value={cidade} disabled placeholder="Digite sua cidade" />
+                  <Input  id="city" value={cidade} onChange={(e) => {
+                                                                        setCidade(e.target.value);
+                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
+                                                                      }} disabled placeholder="Digite sua cidade" />
                 </div>
                 <div className="grid gap-2 w-28">
                   <Label htmlFor="state">UF</Label>
-                  <Input {...register("uf")} id='estado' value={uf} disabled placeholder='Digite o UF'/>
+                  <Input  id='estado' value={uf} onChange={(e) => {
+                                                                        setUf(e.target.value);
+                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
+                                                                      }} disabled placeholder='Digite o UF'/>
                 </div>
               </div>
               <CardFooter className="flex justify-end space-x-2">
-                <Button variant="outline">Cancelar</Button>
-                <Button type="button" onClick={(e) => {
-                  e.preventDefault()
-                  setConfirmation(true)
-                }} className='bg-[--cor-primaria] hover:bg-[#162547]'>Salvar alterações</Button>
+                <Button type='button' onClick={resetForm} variant="outline">Cancelar</Button>
+                <Button type="button" onClick={() => setConfirmation(true)} disabled={hasChanges} className='bg-[--cor-primaria] hover:bg-[#162547]'>Salvar alterações</Button>
               </CardFooter>
-              {confirmation && <BlocoConfirmacao setConfirmation={setConfirmation} />}
+              {confirmation && <BlocoConfirmacao setConfirmation={setConfirmation} onConfirm={handleSubmit(handleUpdateUser)} />}
             </form>
             </CardContent>
         </div>
