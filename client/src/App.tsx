@@ -7,11 +7,11 @@ import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";
 import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import AdminDashboard from "./pages/admin/index.tsx";
-import Reports from "./pages/reports/index.tsx";
 import Home from "./pages/home/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
 import Profile from "./pages/Profile/index.tsx";
+import Chamados from "./pages/chamados/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -123,10 +123,11 @@ const App = () => {
                         path="/chamados"
                         element={
                             <PrivateRoute>
-                                <Reports />
+                                <Chamados />
                             </PrivateRoute>
                         }
                     />
+
 
                     <Route
                         path="/abrir-chamado" // Rota para Abrir Chamado

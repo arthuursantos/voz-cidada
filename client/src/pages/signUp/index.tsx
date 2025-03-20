@@ -9,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormEvent, useContext, useState } from "react";
 import ProgressBar from "@/components/progressBar";
 
-
 export default function SignUp() {
     const { signUp } = useContext(AuthContext)
     const [step, setStep] = useState(0)

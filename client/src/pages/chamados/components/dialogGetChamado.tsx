@@ -78,7 +78,7 @@ export default function DialogGetChamado({ chamado, open, onOpenChange }: Chamad
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[800px] max-h-[90vh] p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-[800px] max-h-[90vh] p-0 overflow-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
                     <div className="p-6 overflow-y-auto max-h-[80vh]">
                         <DialogHeader>
@@ -115,23 +115,23 @@ export default function DialogGetChamado({ chamado, open, onOpenChange }: Chamad
                                 </div>
                                 <div className="flex-1 px-6 pb-6 overflow-y-auto">
                                     {hasFotoAntes && imagemAntes && (
-                                        <TabsContent value="antes" className="h-full">
+                                        <TabsContent value="antes" className="h-full overflow-auto">
                                             <div className="relative w-full rounded-md flex items-center justify-center">
                                                 <img
                                                     src={imagemAntes}
                                                     alt="Foto antes"
-                                                    className="max-w-full object-contain"
+                                                    className="max-w-full object-contain max-h-[70vh]"
                                                 />
                                             </div>
                                         </TabsContent>
                                     )}
                                     {hasFotoDepois && imagemDepois && (
-                                        <TabsContent value="depois" className="h-full">
+                                        <TabsContent value="depois" className="h-full overflow-auto">
                                             <div className="relative w-full rounded-md flex items-center justify-center">
                                                 <img
                                                     src={imagemDepois}
                                                     alt="Foto depois"
-                                                    className="max-w-full object-contain"
+                                                    className="max-w-full object-contain max-h-[70vh]"
                                                 />
                                             </div>
                                         </TabsContent>

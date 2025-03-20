@@ -102,7 +102,7 @@ export default function GetUserChamados() {
 
     if (loading) {
         return (
-            <div className="container p-4 max-w-7xl">
+            <div className="container py-8 max-w-7xl">
                 <div className="flex items-center justify-center min-h-[300px]">
                     <p>Carregando chamados...</p>
                 </div>
@@ -112,7 +112,7 @@ export default function GetUserChamados() {
 
     if (error) {
         return (
-            <div className="container p-4 max-w-7xl">
+            <div className="container py-8 max-w-7xl">
                 <div className="flex items-center justify-center min-h-[300px]">
                     <p className="text-red-500">Erro: {error}</p>
                 </div>
@@ -121,7 +121,7 @@ export default function GetUserChamados() {
     }
 
     return (
-        <div className="container py-20 max-w-7xl">
+        <div className="container py-8 max-w-7xl">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
                 <h2 className="text-lg font-medium tracking-wider text-primary uppercase">Meus Chamados</h2>
                 <div className="flex gap-2">

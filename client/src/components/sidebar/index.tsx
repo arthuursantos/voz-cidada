@@ -4,12 +4,14 @@ import { Separator } from "@/components/ui/separator.tsx"
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, Home, Settings, Users, LogOut } from "lucide-react"
 import { useState, useEffect } from "react";
+import { ProfileDialog } from "@/pages/perfil/dialogProfile.tsx";
 
 interface NavItemProps {
     icon: React.ElementType;
     title: string;
-    path: string;
+    path?: string;
     collapsed: boolean;
+    isDialog?: boolean;
 }
 
 const navItems = [
@@ -26,7 +28,7 @@ const navItems = [
     {
         icon: Users,
         title: "Perfil",
-        path: "/perfil"
+        isDialog: true
     },
     {
         icon: Settings,
@@ -35,9 +37,15 @@ const navItems = [
     }
 ];
 
-function NavItem({ icon: Icon, title, path, collapsed }: NavItemProps) {
+function NavItem({ icon: Icon, title, path, collapsed, isDialog }: NavItemProps) {
     const location = useLocation()
-    const isActive = location.pathname === path
+    const isActive = path && location.pathname === path
+
+    if (isDialog) {
+        return (
+            <ProfileDialog collapsed={collapsed}/>
+        )
+    }
 
     return (
         <Button
@@ -50,7 +58,7 @@ function NavItem({ icon: Icon, title, path, collapsed }: NavItemProps) {
             asChild
             title={collapsed ? title : undefined}
         >
-            <Link to={path} className={collapsed ? "flex justify-center" : ""}>
+            <Link to={path!} className={collapsed ? "flex justify-center" : ""}>
                 <Icon className="h-5 w-5" />
                 {!collapsed && <span>{title}</span>}
             </Link>
@@ -109,11 +117,12 @@ export default function Sidebar({ className }: React.HTMLAttributes<HTMLDivEleme
                 <nav className={cn("space-y-2", collapsed ? "px-1" : "px-2")}>
                     {navItems.map((item) => (
                         <NavItem
-                            key={item.path}
+                            key={item.title}
                             icon={item.icon}
                             title={item.title}
                             path={item.path}
                             collapsed={collapsed}
+                            isDialog={item.isDialog}
                         />
                     ))}
                 </nav>

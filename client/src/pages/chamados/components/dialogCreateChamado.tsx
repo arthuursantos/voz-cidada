@@ -1,6 +1,7 @@
 import { useState, useRef, useContext } from "react"
 import { AuthContext } from "@/contexts/AuthContext"
 import api from "@/lib/axios"
+import ProgressBar from "@/components/progressBar/index.tsx"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -15,7 +16,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { ArrowLeft, Camera, Upload, X } from "lucide-react"
-import ProgressBar from "src/components/progressBar"
 
 interface NovoChamadoDialogProps {
     open: boolean
@@ -158,7 +158,7 @@ export default function DialogCreateChamado({ open, onOpenChange, onSuccess }: N
                             <>
                                 <div className="grid gap-2">
                                     <Label htmlFor="titulo" className="text-teal">
-                                        Qual é o assunto do sua solicitação?
+                                        Qual é o assunto da sua solicitação?
                                     </Label>
                                     <Input
                                         id="titulo"
