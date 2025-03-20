@@ -33,7 +33,7 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
     @Autowired
     private UsuarioRepository usuarioRepository;
     @Autowired
-    private PagedResourcesAssembler<D> assembler;
+    protected PagedResourcesAssembler<D> assembler;
 
     protected GenericService(
             GenericRepository<T, ID> repository,
@@ -99,11 +99,11 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         }
     }
 
-    protected D convertToDto(T entity) {
+    public D convertToDto(T entity) {
         return mapper.map(entity, dtoClass);
     }
 
-    protected T convertToEntity(D dto) {
+    public T convertToEntity(D dto) {
         return mapper.map(dto, entityClass);
     }
 
