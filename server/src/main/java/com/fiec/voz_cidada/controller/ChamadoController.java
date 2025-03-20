@@ -5,7 +5,11 @@ import com.fiec.voz_cidada.domain.chamado.Chamado;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.service.ChamadoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,9 +22,19 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
 
     private final ChamadoRepository repository;
 
+    @Autowired
+    private ChamadoService service;
+
     public ChamadoController(ChamadoService service, ChamadoRepository repository) {
         super(service);
         this.repository = repository;
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findByUser(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.findMy(userId, pageable));
     }
 
     @Override

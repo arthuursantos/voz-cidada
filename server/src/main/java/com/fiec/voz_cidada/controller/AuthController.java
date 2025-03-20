@@ -3,6 +3,7 @@ package com.fiec.voz_cidada.controller;
 import com.fiec.voz_cidada.config.security.TokenService;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.auth_user.AuthenticationDTO;
+import com.fiec.voz_cidada.domain.auth_user.ChangePasswordDTO;
 import com.fiec.voz_cidada.domain.auth_user.RegisterDTO;
 import com.fiec.voz_cidada.exceptions.InvalidAuthenticationException;
 import com.fiec.voz_cidada.repository.AuthRepository;
@@ -35,7 +36,6 @@ public class AuthController {
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Seu login ou senha estão incorretos!");
         }
-
     }
 
     @PostMapping("/register")
@@ -44,6 +44,27 @@ public class AuthController {
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         AuthUser newUser = new AuthUser(data.login(), encryptedPassword, data.role());
         repository.save(newUser);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token, @RequestBody ChangePasswordDTO data) {
+        String id = tokenService.validateAccessToken(token.replace("Bearer ", ""));
+        if (id == null) {
+            throw new InvalidAuthenticationException("Token inválido ou expirado.");
+        }
+
+        var user = repository.findById(Long.valueOf(id))
+                .orElseThrow(() -> new InvalidAuthenticationException("Usuário não encontrado."));
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        if (!passwordEncoder.matches(data.currentPassword(), user.getPassword())) {
+            throw new InvalidAuthenticationException("Senha atual incorreta.");
+        }
+
+        String encryptedPassword = passwordEncoder.encode(data.newPassword());
+        user.changePassword(encryptedPassword);
+        repository.save(user);
         return ResponseEntity.ok().build();
     }
 
