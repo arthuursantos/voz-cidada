@@ -1,4 +1,4 @@
-import ProgressBar from "@/pages/signUp/components/progressBar";
+import ProgressBar from "@/components/progressBar/index.tsx";
 import {Label} from "@/components/ui/label.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -8,7 +8,6 @@ import {ArrowLeft} from "lucide-react";
 import {SubmitHandler, useForm} from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod";
-
 
 export default function SignUp() {
     const { signUp } = useContext(AuthContext)
