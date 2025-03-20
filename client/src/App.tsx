@@ -150,9 +150,9 @@ const App = () => {
                     <Route 
                         path="/conta"
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Profile />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
