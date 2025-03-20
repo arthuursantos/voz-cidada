@@ -128,7 +128,7 @@ const App = () => {
                     />
 
                     <Route
-                        path="/abrir-chamado" // Rota para Abrir Chamado
+                        path="/abrir-chamado" 
                         element={
                             <PrivateRoute>
                                 <AbrirChamado />
@@ -144,6 +144,8 @@ const App = () => {
                             </PublicRoute>
                         }
                     />
+
+                    
 
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                     <Route path="*" element={<Navigate to="/dashboard" />} />
