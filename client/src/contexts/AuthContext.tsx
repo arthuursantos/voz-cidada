@@ -18,6 +18,10 @@ type User = {
     uf: string;
 }
 
+export type UpdateUserData = {
+    cep: string;
+}
+
 type JWTClaims = {
     sub: string;
     iss: string;
@@ -59,7 +63,9 @@ type AuthContextType = {
     loading: boolean;
     signIn: (data: SignInData) => Promise<void>,
     signUp: (data: SignUpData) => Promise<void>,
-    signOut: () => void
+    signOut: () => void,
+    getCepApi: (cep: string) => Promise<any>,
+    updateUser: (data: UpdateUserData) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -126,10 +132,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
 
-            navigate(decoded.roles.includes("ROLE_ADMIN") ? "/admin/dashboard" : "/home");
-        } catch (error) {
+            if (decoded.roles.includes("ROLE_ADMIN")) {
+                navigate("/admin/dashboard");
+            } else {
+                navigate("/dashboard");
+            }
+        }
+        catch (error) {
             console.error("Erro ao fazer login:", error);
-            alert("Erro ao fazer login. Verifique suas credenciais.");
+            alert("Erro ao fazer login. Verifique suas credenciais e tente novamente.");
         }
     }
 
@@ -209,8 +220,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
+    async function updateUser(data: UpdateUserData) {
+
+        const novoEndereco = await getCepApi(data.cep);
+
+        const userAtualizado = {
+            id: user?.id,
+            nome: user?.nome,
+            cpf: user?.cpf,
+            dataNascimento: user?.dataNascimento,
+            dataCadastro: user?.dataCadastro,
+            cep: data.cep,
+            rua: novoEndereco.logradouro,
+            bairro: novoEndereco.bairro,
+            cidade: novoEndereco.localidade,
+            uf: novoEndereco.uf
+        }
+
+        try {      
+            const response = await api.put("/api/usuario", userAtualizado);
+    
+            setUser(response.data);
+        }
+        catch (error) {
+            console.error("Erro ao atualizar usuário:", error);
+            alert("Erro ao atualizar usuário. Tente novamente.");
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signOut }}>
+        <AuthContext.Provider value={{ user, userRoles, isAuthenticated, loading, signIn, signUp, signOut, getCepApi, updateUser }}>
             {children}
         </AuthContext.Provider>
     )

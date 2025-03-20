@@ -7,7 +7,7 @@ import { useSearchParams } from "react-router-dom";
 //import { AlertCircle } from 'lucide-react';
 //import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
-import ProgressBar from "@/pages/signUp/components/progressBar";
+import ProgressBar from '@/components/progressBar';
 
 export default function ConfirmResetPassword() {
     interface ResetPasswordData {
@@ -15,7 +15,7 @@ export default function ConfirmResetPassword() {
         confirmPassword: string;
     }
 
-    const { register, handleSubmit, watch } = useForm<ResetPasswordData>();
+    const { register, handleSubmit, /*watch*/ } = useForm<ResetPasswordData>();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
