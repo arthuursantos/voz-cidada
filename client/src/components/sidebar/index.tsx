@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator.tsx"
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, Home, Settings, Users, LogOut } from "lucide-react"
 import { useState, useEffect } from "react";
-import { ProfileDialog } from "@/pages/perfil/dialogProfile.tsx";
+import { ProfileDialog } from "@/components/dialogs/ProfileDialog";
 
 interface NavItemProps {
     icon: React.ElementType;
