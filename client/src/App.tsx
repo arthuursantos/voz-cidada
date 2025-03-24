@@ -1,3 +1,4 @@
+
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
@@ -12,7 +13,7 @@ import Profile from "./pages/Profile/index.tsx";
 import Chamados from "./pages/chamados/index.tsx";
 import SignIn from "./pages/SignIn/index.tsx";
 import SignUp from "./pages/SignUp/index.tsx";
-
+ 
 type RouteProps = {
     children: ReactNode;
     requiredRole?: string;
@@ -165,3 +166,16 @@ const App = () => {
 };
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
