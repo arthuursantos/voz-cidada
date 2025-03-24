@@ -128,10 +128,10 @@ const Profile = () => {
         {/* div info pessoal */}
         <div className='flex flex-col gap-4 w-xl pb-4 border-b-2 md:border-r-2 border-grey'>
           <CardHeader>
-            <CardTitle><h1 className='text-[--cor-primaria2] text-3xl'>Informações Pessoais</h1></CardTitle>
-            <CardDescription><p className='text-lg'>Suas informações pessoais não podem ser modificadas.</p></CardDescription>
+            <CardTitle><h1 className='font-montserrat text-[--cor-primaria2] text-2xl'>Informações Pessoais</h1></CardTitle>
+            <CardDescription><p className='font-lato text-md sm:text-md md:text-lg'>Suas informações pessoais não podem ser modificadas.</p></CardDescription>
           </CardHeader>
-          <div className="grid gap-2 pl-8 pr-8">
+          <div className="grid font-lato gap-2 pl-8 pr-8">
             <div className="flex items-center justify-between">
               <Label htmlFor="name">Nome Completo</Label>
               <LockIcon className="h-4 w-4 text-muted-foreground" />
@@ -139,7 +139,7 @@ const Profile = () => {
             <Input id="name" value={user? user.nome : 'Nome_Cidadão'} disabled className="bg-muted/50" />
           </div>
           
-          <div className="grid gap-2 pl-8 pr-8">
+          <div className="grid font-lato gap-2 pl-8 pr-8">
             <div className="flex items-center justify-between">
               <Label htmlFor="cpf">CPF</Label>
               <LockIcon className="h-4 w-4 text-muted-foreground" />
@@ -147,7 +147,7 @@ const Profile = () => {
             <Input id="cpf" value={user? user.cpf : '123.456.789-00'} disabled className="bg-muted/50" />
           </div>
 
-          <div className="grid gap-2 pl-8 pr-8">
+          <div className="grid font-lato gap-2 pl-8 pr-8">
             <div className="flex items-center justify-between">
               <Label htmlFor="name">Data de Nascimento</Label>
               <LockIcon className="h-4 w-4 text-muted-foreground" />
@@ -160,11 +160,11 @@ const Profile = () => {
         <div className='flex flex-col gap-4 w-full'>
         
           <CardHeader>
-            <CardTitle><p className='text-[--cor-primaria2] text-3xl text-center'>Informação de endereço</p></CardTitle>
+            <CardTitle><p className='font-montserrat text-[--cor-primaria2] text-2xl md:text-3xl text-center'>Informação de endereço</p></CardTitle>
           </CardHeader>
             <CardContent>
            
-              <div className="grid gap-2">
+              <div className="grid font-lato gap-2">
               <form onSubmit={async(e) => {
                 e.preventDefault();
                 await changeAddress(cep)
@@ -187,7 +187,7 @@ const Profile = () => {
               </form>
               </div>
 
-            <form onSubmit={handleSubmit(handleUpdateUser)}>
+            <form className='font-lato' onSubmit={handleSubmit(handleUpdateUser)}>
               <div className="grid gap-2">
                 <Label htmlFor="street">Rua</Label>
                 <Input  id="street" value={rua} onChange={(e) => {

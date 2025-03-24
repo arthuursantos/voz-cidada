@@ -4,14 +4,14 @@ import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
 import About from "@/pages/about/index.tsx";          
 import Contact from "@/pages/contact/index.tsx";        
 import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
-import SignIn from "./pages/signIn/index.tsx";
-import SignUp from "./pages/signUp/index.tsx";
 import AdminDashboard from "./pages/admin/index.tsx";
 import Home from "./pages/home/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
 import Profile from "./pages/Profile/index.tsx";
 import Chamados from "./pages/chamados/index.tsx";
+import SignIn from "./pages/SignIn/index.tsx";
+import SignUp from "./pages/SignUp/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -150,9 +150,9 @@ const App = () => {
                     <Route 
                         path="/conta"
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Profile />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
