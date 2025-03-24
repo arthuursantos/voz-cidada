@@ -10,8 +10,9 @@ import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
 import Profile from "./pages/Profile/index.tsx";
 import Chamados from "./pages/chamados/index.tsx";
-import SignIn from "./pages/SignIn/index.tsx";
-import SignUp from "./pages/SignUp/index.tsx";
+import SignIn from "./pages/signIn/index.tsx";
+import SignUp from "./pages/signUp/index.tsx";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 type RouteProps = {
     children: ReactNode;
@@ -53,6 +54,7 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
 
 const App = () => {
     return(
+        <GoogleOAuthProvider clientId="228855543474-nutoar446b7vsmsf673q0cj0shinmlco.apps.googleusercontent.com">
         <BrowserRouter>
             <AuthProvider>
                 <Routes>
@@ -161,6 +163,7 @@ const App = () => {
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
+        </GoogleOAuthProvider>
     );
 };
 

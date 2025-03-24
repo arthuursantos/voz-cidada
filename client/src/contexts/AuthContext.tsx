@@ -248,6 +248,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
+    async function loginWithGoogle() {
+        // Implementar login com Google
+    }
+
     return (
         <AuthContext.Provider value={{ user, userRoles, isAuthenticated, loading, signIn, signUp, signOut, getCepApi, updateUser }}>
             {children}
