@@ -124,16 +124,7 @@ export default function SignIn() {
                                 }}
                     />
     
-                    <div className='flex justify-between'>
-                        <p className='mt-2 text-sm text-center text-gray-600 font-lato hover:underline hover:text-black'>
-                        <Link
-                                to="/resetPassword"
-                                className="font-medium text-[--cor-primaria2] hover:text-[--cor-primaria] hover:underline"
-                            >
-                                Esqueceu a senha?
-                            </Link>
-                        </p>
-
+                    <div className='flex justify-end'>
                         <p className="mt-2 text-sm text-center text-gray-600 font-lato">
                             Não tem conta?{" "}
                             <Link
