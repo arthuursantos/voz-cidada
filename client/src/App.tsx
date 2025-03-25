@@ -1,3 +1,4 @@
+
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
@@ -139,7 +140,7 @@ const App = () => {
 
 
                     <Route
-                        path="/abrir-chamado" // Rota para Abrir Chamado
+                        path="/abrir-chamado" 
                         element={
                             <PrivateRoute>
                                 <AbrirChamado />
