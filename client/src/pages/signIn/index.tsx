@@ -9,6 +9,8 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 export default function SignIn() {
 
@@ -101,12 +103,27 @@ export default function SignIn() {
                             </div>
                         </div>
                         <div>
-                            <Button type="submit" className="w-full bg-[--cor-primaria2] hover:bg-[--cor-primaria] text-white hover:duration-150 text-lg md:text-sm">
+                            <Button type="submit" className="w-full bg-[--cor-primaria2] hover:bg-[--cor-primaria] text-white hover:duration-150 text-md md:text-sm">
                                 Entrar
                             </Button>
                         </div>
                     </form>
 
+
+                    <p className='text-center text-sm text-gray-500 font-lato'>ou</p>
+
+                    <GoogleLogin 
+                    size='large' 
+                    text='signin_with'
+                    theme='outline' 
+                    ux_mode='popup' 
+                    onSuccess={credentialResponse => {
+                        console.log(credentialResponse)
+                        }}
+                        onError={() => {
+                            console.log('Login Failed');
+                                }}
+                    />
     
                     <div className='flex justify-between'>
                         <p className='mt-2 text-sm text-center text-gray-600 font-lato hover:underline hover:text-black'>
