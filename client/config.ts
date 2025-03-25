@@ -1,6 +1,7 @@
 // src/config.ts
 const config = {
-    googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || "",
-  };
-  
-  export default config;
+  googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || "",
+  // Observe o prefixo VITE_ em vez de REACT_APP_
+};
+
+export default config;

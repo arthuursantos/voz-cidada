@@ -17,6 +17,14 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  security:
+    oauth2:
+      client:
+        registration:
+          google.client-id: 518788781560-5kjacjm9okd3cnofcs2beq2e6nb7br12.apps.googleusercontent.com
+          google.scope:
+            - profile
+            - email
 security:
   token:
     secret: ${JWT_SECRET:default-secret}

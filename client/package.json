@@ -50,7 +50,7 @@
     "globals": "^15.14.0",
     "postcss": "^8.5.2",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.6.2",
+    "typescript": "^4.9.5",
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.5"
   }

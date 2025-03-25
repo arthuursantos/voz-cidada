@@ -1,9 +1,7 @@
 package com.fiec.voz_cidada.config.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fiec.voz_cidada.exceptions.StandardError;
-import com.fiec.voz_cidada.exceptions.UnauthorizedException;
-import jakarta.servlet.http.HttpServletResponse;
+import com.fiec.voz_cidada.service.OAuth2UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +21,6 @@ import com.fiec.voz_cidada.config.security.SecurityFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.time.Instant;
 import java.util.Arrays;
 
 @Configuration
@@ -31,7 +28,14 @@ import java.util.Arrays;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final SecurityFilter filter;
+    @Autowired
+    private OAuth2UserService service;
+
+    @Autowired
+    private OAuth2AuthenticationHandler handler;
+
+    @Autowired
+    private SecurityFilter filter;
 
     @Value("${cors.originPatterns}")
     private String origins;
@@ -52,6 +56,10 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(service))
+                        .successHandler(handler))
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
