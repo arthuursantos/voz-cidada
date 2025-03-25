@@ -13,6 +13,7 @@ import Chamados from "./pages/chamados/index.tsx";
 import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import config from "../config.ts"
 
 type RouteProps = {
     children: ReactNode;
@@ -53,8 +54,14 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
 }
 
 const App = () => {
+
+    if (!config.googleClientId) {
+        console.error("Google Client ID não configurado");
+        return <div>Erro de configuração. Por favor, contate o administrador.</div>;
+    }
+
     return(
-        <GoogleOAuthProvider clientId="228855543474-nutoar446b7vsmsf673q0cj0shinmlco.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId={config.googleClientId}>
         <BrowserRouter>
             <AuthProvider>
                 <Routes>
