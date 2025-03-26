@@ -105,9 +105,9 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <PrivateRoute>
+                            <PublicRoute>
                                 <Dashboard />
-                            </PrivateRoute>
+                            </PublicRoute>
                         }
                     />
 
@@ -149,7 +149,7 @@ const App = () => {
                     />
 
                     <Route
-                        path="/resetPassword"
+                        path="/redefinir-senha"
                         element={
                             <PublicRoute>
                                 <ResetPassword />

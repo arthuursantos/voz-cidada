@@ -1,7 +1,7 @@
 import AppLayout from "@/layout/AppLayout.tsx";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import ReportsCarousel from "@/pages/Home/components/carousel.tsx";
+import ReportsCarousel from "./components/ReportsCarousel";
 
 export default function Home() {
     return (

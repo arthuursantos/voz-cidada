@@ -10,6 +10,7 @@ import { useContext, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import BlocoConfirmacao from './Components/BlocoDeConfirmacao.tsx'
+import { Link } from 'react-router'
 
 const Profile = () => {
   const { user, getCepApi, updateUser } = useContext(AuthContext)
@@ -126,7 +127,7 @@ const Profile = () => {
       <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold text-[--cor-primaria2] font-montserrat text-center mt-4'>Dados da Conta</h1>
       <div className='flex flex-col md:flex-row border-t-2 border-grey mt-4 flex-grow overflow-auto'>
         {/* div info pessoal */}
-        <div className='flex flex-col gap-4 w-xl pb-4 border-b-2 md:border-r-2 border-grey'>
+        <div className='flex flex-col items gap-4 w-xl pb-4 border-b-2 md:border-r-2 border-grey'>
           <CardHeader>
             <CardTitle><h1 className='font-montserrat text-[--cor-primaria2] text-2xl'>Informações Pessoais</h1></CardTitle>
             <CardDescription><p className='font-lato text-md sm:text-md md:text-lg'>Suas informações pessoais não podem ser modificadas.</p></CardDescription>
@@ -154,6 +155,10 @@ const Profile = () => {
             </div>
             <Input id="name" type='date' value={user? user.dataNascimento : ''} disabled className="bg-muted/50" />
           </div>
+
+          <Button className='mx-auto bg-[--cor-primaria] hover:bg-[#162547] w-48'>
+            <Link to='/redefinir-senha' className='text-white'>Redefinição de Senha</Link>
+          </Button>
         </div>
 
         {/* div info endereco */}
