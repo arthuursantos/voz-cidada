@@ -9,13 +9,17 @@ import clsx from 'clsx';
 import NotificationError from '@/components/NotificacaoError/Notification';
 import NotificationSuccess from '@/components/NotificacaoSucesso/NotificationSuccess';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function ResetPassword() {
     const { changePassword } = useContext(AuthContext);
+    const navigate = useNavigate(); 
 
     const [isLoading, setIsLoading] = useState(false);
 
     const ResetPasswordSchema = z.object({
+        senhaAtual: z.string()
+            .nonempty("A senha atual é obrigatória."),
         senha: z.string()
             .nonempty("A senha é obrigatória.")
             .min(6, "A senha deve ter no mínimo 6 caracteres."),
@@ -27,21 +31,34 @@ export default function ResetPassword() {
     });
 
     type ResetPasswordData = z.infer<typeof ResetPasswordSchema>;
-    const { register, handleSubmit, formState: { errors } } = useForm<ResetPasswordData>({
+    const { register, handleSubmit, formState: { errors, isValid } } = useForm<ResetPasswordData>({
         resolver: zodResolver(ResetPasswordSchema), // Integra o esquema zod ao formulário
     });
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    
+
     const handleResetPassword: SubmitHandler<ResetPasswordData> = async (data) => {
         setIsLoading(true);
+        setError(null);
+        setSuccess(null);
+
+        if (!isValid) {
+            setError("Por favor, corrija os erros antes de continuar.");
+            return;
+        }
+
+        setIsLoading(true);
         try {
-            const response = await changePassword(data.senha);
-            if (response !== undefined) {
-                setSuccess("Senha redefinida com sucesso.");
-            }
+            await changePassword(data); // Chama a função de troca de senha
+            setSuccess("Senha alterada com sucesso! você será redirecionado para a página da conta.");
+
+            setTimeout(() => {
+                navigate("/conta");
+            }, 3500);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Ocorreu um erro ao tentar redefinir a senha.");
+            setError("Ocorreu um erro ao alterar a senha. Tente novamente.");
         } finally {
             setIsLoading(false);
         }
@@ -55,8 +72,9 @@ export default function ResetPassword() {
                     className="w-full h-full object-cover object-[center_90%] md:object-center rounded-b-[50%] md:rounded-none"
                 />
             </div>
-            {success && <NotificationSuccess message={success} />}
+            
             {error && <NotificationError message={error} />}
+            {success && <NotificationSuccess message={success} />}
             <div className="flex items-center justify-center w-full p-8 md:w-1/2">
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-center">
@@ -66,6 +84,23 @@ export default function ResetPassword() {
                         </p>
                     </div>
                     <form onSubmit={handleSubmit(handleResetPassword)} className="space-y-6 font-lato">
+
+                        <div>
+                            <div>
+                                <Label htmlFor='senhaAtual' className="font-lato text-md">Senha Atual</Label>
+                                <Input
+                                    {...register('senhaAtual', { required: 'Campo obrigatório' })}
+                                    id="senhaAtual"
+                                    type="password"
+                                    aria-label="Digite sua senha atual"
+                                    placeholder="Digite sua senha atual"
+                                    className="mt-1 border-black font-lato"
+                                />
+                            </div>
+                            {errors.senhaAtual && (
+                                <p className="text-red-500 text-sm mt-1">{errors.senhaAtual.message}</p>
+                            )}
+                        </div>
                         
                         <div className="space-y-4">
                             <div>
@@ -102,7 +137,13 @@ export default function ResetPassword() {
                         </div>
                         
                         
-                        <div className="flex justify-end space-x-4">
+                        <div className="flex justify-between space-x-4">
+                            <Button
+                                type="button"
+                                className="text-sm md:text-md text-white px-8 bg-gray-400 hover:bg-gray-500"
+                            >
+                                <Link to="/conta">Voltar</Link>
+                            </Button>
                             <Button type="submit" disabled={isLoading} className={clsx(
                                     "text-sm md:text-md text-white px-8",
                                     isLoading ? "bg-gray-400" : "bg-[--cor-primaria2] hover:bg-[--cor-primaria]"

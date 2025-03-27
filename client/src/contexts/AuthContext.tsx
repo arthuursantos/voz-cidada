@@ -66,7 +66,7 @@ type AuthContextType = {
     signOut: () => void,
     getCepApi: (cep: string) => Promise<any>,
     updateUser: (data: UpdateUserData) => Promise<void>,
-    changePassword: (data: string) => Promise<void>
+    changePassword: (data: any) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -249,10 +249,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
-    async function changePassword(data: string) {
+    async function changePassword(data: any) {
+
+        const updatePasswordData = {
+            currentPassword: data.senhaAtual,
+            newPassword: data.senha
+        }
+
         try {
-            await api.post("/auth/changePassword", data);
-            navigate("/conta");
+            await api.patch("/auth/changePassword", updatePasswordData);
         } catch (error) {
             throw new Error("Erro ao tentar redefinir a senha.");
         }

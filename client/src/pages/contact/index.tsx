@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-import { FaInstagram, FaFacebookF, FaWhatsapp } from 'react-icons/fa'; 
+import { FaInstagram } from "react-icons/fa";
+import { FaFacebookF } from "react-icons/fa";
+import { FaWhatsapp } from "react-icons/fa";
 import Header from "@/components/header";
 
 const Contact = () => {

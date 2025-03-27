@@ -1,7 +1,7 @@
 import { useState, useRef, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "@/components/header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Header from "@/components/header";
 import { faCamera, faImage, faLocationPin } from "@fortawesome/free-solid-svg-icons";
 
 export default function AbrirChamado() {

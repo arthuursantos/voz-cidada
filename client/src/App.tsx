@@ -6,7 +6,7 @@ import About from "@/pages/about/index.tsx";
 import Contact from "@/pages/contact/index.tsx";        
 import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
 import AdminDashboard from "./pages/admin/index.tsx";
-import Home from "./pages/home/index.tsx";
+import Home from "./pages/Home/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
 import Profile from "./pages/Profile/index.tsx";
@@ -105,9 +105,9 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Dashboard />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
@@ -151,18 +151,18 @@ const App = () => {
                     <Route
                         path="/redefinir-senha"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <ResetPassword />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
                     <Route 
                         path="/conta"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Profile />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
