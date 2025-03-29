@@ -3,7 +3,7 @@ import api from "@/lib/axios.ts";
 import { setCookie, parseCookies } from "nookies";
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode";
-import {AxiosResponse} from "axios";
+import axios, {AxiosResponse} from "axios";
 
 type User = {
     id: number;
@@ -59,6 +59,7 @@ type AuthContextType = {
     loading: boolean;
     signIn: (data: SignInData) => Promise<void>,
     signUp: (data: SignUpData) => Promise<void>
+    signInWithGoogle: (googleData: any) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -67,7 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
-    const isAuthenticated = !!user;
+    const isAuthenticated = !!userRoles;
 
     const navigate = useNavigate();
 
@@ -83,13 +84,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         setUser(response.data)
                     })
                     .catch(() => {
+                        console.log("entrou no catch do context")
                         setUser(null)
                         setUserRoles(null)
                     })
                     .finally(() => {
                         setLoading(false)
                     })
-            } catch (error) {
+            } catch {
                 setUser(null)
                 setUserRoles(null)
                 setLoading(false)
@@ -127,6 +129,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
         } else {
+            navigate("/home");
+        }
+    }
+
+    async function signInWithGoogle(googleData: any) {
+        const googleresponse = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: {
+                Authorization: `Bearer ${googleData.access_token}`
+            }
+        })
+        console.log(googleresponse)
+        const response = await api.post("/auth/oauth/google", {
+            email: googleresponse.data.email
+        })
+        console.log(response)
+        const {accessToken, refreshToken} = response.data;
+        setTokens(accessToken, refreshToken)
+        const decoded = jwtDecode<JWTClaims>(accessToken);
+        setUserRoles(decoded.roles);
+        console.log(decoded.roles)
+        if (decoded.roles.includes("ROLE_ADMIN")) {
+            navigate("/admin/dashboard");
+        } else {
+            console.log("/home")
             navigate("/home");
         }
     }
@@ -170,7 +196,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp }}>
+        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signInWithGoogle }}>
             {children}
         </AuthContext.Provider>
     )
