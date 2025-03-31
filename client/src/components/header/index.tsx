@@ -5,7 +5,7 @@ import { useContext, useState } from 'react'
 import { AuthContext } from '@/contexts/AuthContext'
 
 function Header() {
-    const {user, isAuthenticated, signOut} = useContext(AuthContext)
+    const { isGoogleUser ,user, isAuthenticated, signOut} = useContext(AuthContext)
 
     const location = useLocation() 
 
@@ -18,7 +18,9 @@ return (
     <header className="bg-[#2B87B3] text-white p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="hidden md:flex items-center gap-2">
-                <User className="h-8 w-8" />
+                {isGoogleUser? <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300">
+                                    <img src={user?.picture} alt="Profile" className="w-full h-full object-cover" />
+                                </div>  : <User className="h-8 w-8" />}
                 <div className="flex flex-col">
                     <Link to="/conta"><span className="text-sm hover:underline">{isAuthenticated && user? user.nome : 'Nome_Cidadao'}</span></Link>
                     <button className="text-xs hover:underline"

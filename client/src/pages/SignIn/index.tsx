@@ -126,15 +126,15 @@ export default function SignIn() {
                             handleGoogleSignIn()
                         }}
                         variant="outline"
-                        className="w-full mt-4 flex items-center justify-center space-x-2 border-[#689689] text-[#504136] hover:bg-gray-100"
+                        className="w-full mt-4 flex items-center justify-center space-x-2 border-gray-600 text-[#504136] hover:bg-gray-100"
                     >
-                        <Chrome className="h-5 w-5 mr-2"/>
+                        <Chrome className="h-5 w-5 mr-2 "/>
                         Continuar com Google
                     </Button>
 
                     <p className="mt-6 text-sm text-center text-gray-600">
                         Não tem uma conta?{" "}
-                        <a href="/signup" className="font-medium text-[#689689] hover:text-[#504136] transition-colors duration-300">
+                        <a href="/signup" className="font-medium text-[--cor-primaria2] hover:text-[--cor-primaria] transition-colors duration-300">
                             Registre-se
                         </a>
                     </p>

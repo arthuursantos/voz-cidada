@@ -6,7 +6,6 @@ import About from "@/pages/about/index.tsx";
 import Contact from "@/pages/contact/index.tsx";        
 import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
 import AdminDashboard from "./pages/admin/index.tsx";
-import Home from "./pages/Home/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
 import Profile from "./pages/Profile/index.tsx";
@@ -15,6 +14,7 @@ import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import config from "../config.ts"
+import Home from "./pages/home/index.tsx";
 
 type RouteProps = {
     children: ReactNode;

@@ -13,7 +13,7 @@ import BlocoConfirmacao from './Components/BlocoDeConfirmacao.tsx'
 import { Link } from 'react-router'
 
 const Profile = () => {
-  const { user, getCepApi, updateUser } = useContext(AuthContext)
+  const { isGoogleUser, user, getCepApi, updateUser } = useContext(AuthContext)
 
   const [cep, setCep] = useState(user?.cep || "12345-678");
   const [rua, setRua] = useState(user?.rua || "");
@@ -140,25 +140,25 @@ const Profile = () => {
             <Input id="name" value={user? user.nome : 'Nome_Cidadão'} disabled className="bg-muted/50" />
           </div>
           
-          <div className="grid font-lato gap-2 pl-8 pr-8">
+          { !isGoogleUser && <div className="grid font-lato gap-2 pl-8 pr-8">
             <div className="flex items-center justify-between">
               <Label htmlFor="cpf">CPF</Label>
               <LockIcon className="h-4 w-4 text-muted-foreground" />
             </div>
             <Input id="cpf" value={user? user.cpf : '123.456.789-00'} disabled className="bg-muted/50" />
-          </div>
+          </div>}
 
-          <div className="grid font-lato gap-2 pl-8 pr-8">
+          { !isGoogleUser && <div className="grid font-lato gap-2 pl-8 pr-8">
             <div className="flex items-center justify-between">
               <Label htmlFor="name">Data de Nascimento</Label>
               <LockIcon className="h-4 w-4 text-muted-foreground" />
             </div>
             <Input id="name" type='date' value={user? user.dataNascimento : ''} disabled className="bg-muted/50" />
-          </div>
+          </div>}
 
-          <Button className='mx-auto bg-[--cor-primaria] hover:bg-[#162547] w-48'>
+          { !isGoogleUser && <Button className='mx-auto bg-[--cor-primaria] hover:bg-[#162547] w-48'>
             <Link to='/redefinir-senha' className='text-white'>Redefinição de Senha</Link>
-          </Button>
+          </Button>}
         </div>
 
         {/* div info endereco */}
@@ -196,33 +196,33 @@ const Profile = () => {
               <div className="grid gap-2">
                 <Label htmlFor="street">Rua</Label>
                 <Input  id="street" value={rua} onChange={(e) => {
-                                                                        setRua(e.target.value);
-                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
-                                                                      }} disabled placeholder="Digite sua rua" />
+                                                      setRua(e.target.value);
+                                                      checkForChanges(); // Verifica mudanças após alterar o campo
+                                                    }} disabled placeholder="Digite sua rua" />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="bairro">Bairro</Label>
                 <Input  id="bairro" value={bairro} onChange={(e) => {
-                                                                        setBairro(e.target.value);
-                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
-                                                                      }} disabled placeholder="Digite seu bairro" />
+                                                        setBairro(e.target.value);
+                                                        checkForChanges(); // Verifica mudanças após alterar o campo
+                                                      }} disabled placeholder="Digite seu bairro" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="city">Cidade</Label>
                   <Input  id="city" value={cidade} onChange={(e) => {
-                                                                        setCidade(e.target.value);
-                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
-                                                                      }} disabled placeholder="Digite sua cidade" />
+                                                        setCidade(e.target.value);
+                                                        checkForChanges(); // Verifica mudanças após alterar o campo
+                                                      }} disabled placeholder="Digite sua cidade" />
                 </div>
                 <div className="grid gap-2 w-28">
                   <Label htmlFor="state">UF</Label>
                   <Input  id='estado' value={uf} onChange={(e) => {
-                                                                        setUf(e.target.value);
-                                                                        checkForChanges(); // Verifica mudanças após alterar o campo
-                                                                      }} disabled placeholder='Digite o UF'/>
+                                                      setUf(e.target.value);
+                                                      checkForChanges(); // Verifica mudanças após alterar o campo
+                                                    }} disabled placeholder='Digite o UF'/>
                 </div>
               </div>
               <CardFooter className="flex justify-end space-x-2">

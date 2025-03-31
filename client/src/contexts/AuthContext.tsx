@@ -16,6 +16,8 @@ type User = {
     bairro: string;
     cidade: string;
     uf: string;
+    email: string;
+    picture: string;
 }
 
 export type UpdateUserData = {
@@ -67,7 +69,8 @@ type AuthContextType = {
     getCepApi: (cep: string) => Promise<any>,
     updateUser: (data: UpdateUserData) => Promise<void>,
     changePassword: (data: any) => Promise<void>,
-    signInWithGoogle: (googleData: any) => Promise<void>
+    signInWithGoogle: (googleData: any) => Promise<void>,
+    isGoogleUser: boolean
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -77,6 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const isAuthenticated = !!userRoles;
+    const [isGoogleUser, setIsGoogleUser] = useState(true);
 
     const navigate = useNavigate();
 
@@ -134,6 +138,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
+            setIsGoogleUser(false)
 
             if (decoded.roles.includes("ROLE_ADMIN")) {
                 navigate("/admin/dashboard");
@@ -175,7 +180,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Limpa o estado do usuário e roles
         setUser(null);
         setUserRoles(null);
-
+        setIsGoogleUser(false)
         // Redireciona para a página de login
         navigate("/signin");
     }
@@ -196,6 +201,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const decoded = jwtDecode<JWTClaims>(accessToken);
         setUserRoles(decoded.roles);
         console.log(decoded.roles)
+        setUser({
+            id: 0,
+            nome: googleresponse.data.name,
+            cpf: "00000000000",
+            dataNascimento: "0000-00-00",
+            dataCadastro: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            cep: "00000000",
+            rua: "Rua Google",
+            bairro: "Bairro Google",
+            cidade: "Cidade Google",
+            uf: "UF",
+            email: googleresponse.data.email,
+            picture: googleresponse.data.picture
+        })
+        setIsGoogleUser(true);
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
         } else {
@@ -290,7 +310,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signInWithGoogle, getCepApi, updateUser, changePassword, signOut }}>
+        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signInWithGoogle, getCepApi, updateUser, changePassword, signOut, isGoogleUser }}>
             {children}
         </AuthContext.Provider>
     )
