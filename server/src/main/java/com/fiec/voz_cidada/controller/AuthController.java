@@ -1,10 +1,7 @@
 package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.config.security.TokenService;
-import com.fiec.voz_cidada.domain.auth_user.AuthUser;
-import com.fiec.voz_cidada.domain.auth_user.AuthenticationDTO;
-import com.fiec.voz_cidada.domain.auth_user.ChangePasswordDTO;
-import com.fiec.voz_cidada.domain.auth_user.RegisterDTO;
+import com.fiec.voz_cidada.domain.auth_user.*;
 import com.fiec.voz_cidada.exceptions.InvalidAuthenticationException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +32,24 @@ public class AuthController {
             return ResponseEntity.ok(tokenService.createAuthTokens((AuthUser) auth.getPrincipal()));
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Seu login ou senha estão incorretos!");
+        }
+    }
+
+    @PostMapping("/oauth/google")
+    public ResponseEntity<?> googleLogin(@RequestBody GoogleEmailDTO data) {
+        try {
+            AuthUser user = (AuthUser) repository.findByLogin(data.email());
+            if (user == null) {
+                user = new AuthUser(
+                        data.email(),
+                        new BCryptPasswordEncoder().encode("google-oauth-" + data.email()),
+                        UserRole.USER);
+                repository.save(user);
+            }
+            LoginResponseDTO tokens = tokenService.createAuthTokens(user);
+            return ResponseEntity.ok(tokens);
+        } catch (Exception e) {
+            throw new InvalidAuthenticationException("Não foi possível se autenticar com sua conta Google.");
         }
     }
 

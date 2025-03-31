@@ -1,4 +1,4 @@
-import AppLayout from "@/layout/AppLayout.tsx";
+import AppLayout from "@/utils/AppLayout.tsx";
 import UserChamados from "./components/UserChamados";
 
 export default function Chamados() {

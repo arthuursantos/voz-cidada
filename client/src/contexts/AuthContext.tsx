@@ -2,8 +2,8 @@ import {createContext, ReactNode, useEffect, useState} from "react";
 import api from "@/lib/axios.ts";
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode";
-import {AxiosResponse} from "axios";
 import { parseCookies, setCookie, destroyCookie } from "nookies";
+import axios, {AxiosResponse} from "axios";
 
 type User = {
     id: number;
@@ -66,7 +66,8 @@ type AuthContextType = {
     signOut: () => void,
     getCepApi: (cep: string) => Promise<any>,
     updateUser: (data: UpdateUserData) => Promise<void>,
-    changePassword: (data: any) => Promise<void>
+    changePassword: (data: any) => Promise<void>,
+    signInWithGoogle: (googleData: any) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -75,7 +76,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
-    const isAuthenticated = !!user;
+    const isAuthenticated = !!userRoles;
 
     const navigate = useNavigate();
 
@@ -91,13 +92,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         setUser(response.data)
                     })
                     .catch(() => {
+                        console.log("entrou no catch do context")
                         setUser(null)
                         setUserRoles(null)
                     })
                     .finally(() => {
                         setLoading(false)
                     })
-            } catch (error) {
+            } catch {
                 setUser(null)
                 setUserRoles(null)
                 setLoading(false)
@@ -176,6 +178,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Redireciona para a página de login
         navigate("/signin");
+    }
+
+    async function signInWithGoogle(googleData: any) {
+        const googleresponse = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: {
+                Authorization: `Bearer ${googleData.access_token}`
+            }
+        })
+        console.log(googleresponse)
+        const response = await api.post("/auth/oauth/google", {
+            email: googleresponse.data.email
+        })
+        console.log(response)
+        const {accessToken, refreshToken} = response.data;
+        setTokens(accessToken, refreshToken)
+        const decoded = jwtDecode<JWTClaims>(accessToken);
+        setUserRoles(decoded.roles);
+        console.log(decoded.roles)
+        if (decoded.roles.includes("ROLE_ADMIN")) {
+            navigate("/admin/dashboard");
+        } else {
+            console.log("/home")
+            navigate("/home");
+        }
     }
 
     async function signUp(data: SignUpData) {
@@ -264,7 +290,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, userRoles, isAuthenticated, loading, signIn, signUp, signOut, getCepApi, updateUser, changePassword }}>
+        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signInWithGoogle, getCepApi, updateUser, changePassword, signOut }}>
             {children}
         </AuthContext.Provider>
     )

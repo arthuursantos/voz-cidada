@@ -1,6 +1,5 @@
 package com.fiec.voz_cidada.config.security;
 
-import com.fiec.voz_cidada.service.OAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +26,6 @@ import java.util.Arrays;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
-    @Autowired
-    private OAuth2UserService service;
-
-    @Autowired
-    private OAuth2AuthenticationHandler handler;
 
     @Autowired
     private SecurityFilter filter;

@@ -21,23 +21,23 @@ type RouteProps = {
     requiredRole?: string;
 }
 
-const PrivateRoute = ({ children, requiredRole }: RouteProps) => {
-    const { isAuthenticated, loading, userRoles } = useContext(AuthContext);
+const PrivateRoute = ({children, requiredRole}: RouteProps) => {
+    const {isAuthenticated, loading, userRoles} = useContext(AuthContext);
 
     if (loading) {
         return "";
     }
 
     if (!isAuthenticated) {
-        return <Navigate to="/signin" />
+        return <Navigate to="/signin"/>
     }
 
     if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
-        return <Navigate to="/admin/home" />
+        return <Navigate to="/admin/home"/>
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {
-        return <Navigate to="/home" />
+        return <Navigate to="/home"/>
     }
 
     return children;
@@ -75,32 +75,32 @@ const App = () => {
                         }
                     />
 
-                    <Route
-                        path="/signup"
-                        element={
-                            <PublicRoute>
-                                <SignUp />
-                            </PublicRoute>
-                        }
-                    />
+                        <Route
+                            path="/signup"
+                            element={
+                                <PublicRoute>
+                                    <SignUp/>
+                                </PublicRoute>
+                            }
+                        />
 
-                    <Route
-                        path="/admin/home"
-                        element={
-                            <PrivateRoute requiredRole="ROLE_ADMIN">
-                                <AdminDashboard />
-                            </PrivateRoute>
-                        }
-                    />
+                        <Route
+                            path="/admin/home"
+                            element={
+                                <PrivateRoute requiredRole="ROLE_ADMIN">
+                                    <AdminDashboard/>
+                                </PrivateRoute>
+                            }
+                        />
 
-                    <Route
-                        path="/home"
-                        element={
-                            <PrivateRoute>
-                                <Home />
-                            </PrivateRoute>
-                        }
-                    />
+                        <Route
+                            path="/home"
+                            element={
+                                <PrivateRoute>
+                                    <Home/>
+                                </PrivateRoute>
+                            }
+                        />
 
                     <Route
                         path="/dashboard"
