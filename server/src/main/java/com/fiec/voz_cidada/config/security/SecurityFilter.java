@@ -31,7 +31,8 @@ public class SecurityFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(
             "/auth/login",
             "/auth/register",
-            "/auth/refresh"
+            "/auth/refresh",
+            "/auth/oauth/google"
     );
 
     @Override

@@ -2,7 +2,8 @@ CREATE TABLE auth_user (
     id BIGSERIAL PRIMARY KEY NOT NULL,
     login TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
-    role TEXT NOT NULL
+    role TEXT NOT NULL,
+    auth_status TEXT NOT NULL
 );
 
 CREATE TABLE usuario (

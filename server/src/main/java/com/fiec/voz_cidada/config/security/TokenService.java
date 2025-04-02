@@ -2,15 +2,12 @@ package com.fiec.voz_cidada.config.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.auth_user.LoginResponseDTO;
 import com.fiec.voz_cidada.exceptions.InvalidAuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
@@ -45,6 +42,7 @@ public class TokenService {
                     .withClaim(rolesClaim, user.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
                             .toList())
+                    .withClaim("auth_status", user.getAuthStatus().getAuthType())
                     .withExpiresAt(LocalDateTime.now().plusSeconds(expireLength).toInstant(ZoneOffset.of("-03:00")))
                     .sign(algorithm);
         } catch (InvalidAuthenticationException e) {

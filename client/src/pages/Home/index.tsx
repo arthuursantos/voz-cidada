@@ -1,4 +1,4 @@
-import AppLayout from "@/layout/AppLayout.tsx";
+import AppLayout from "@/utils/AppLayout.tsx";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import ReportsCarousel from "@/pages/Home/components/carousel.tsx";

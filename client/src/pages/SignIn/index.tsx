@@ -4,10 +4,11 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
 import { useContext, useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Chrome } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useGoogleLogin } from '@react-oauth/google';
 
 export default function SignIn() {
 
@@ -24,7 +25,7 @@ export default function SignIn() {
         resolver: zodResolver(SignInSchema)
     });
 
-    const { signIn } = useContext(AuthContext);
+    const { signIn, oAuthSignIn } = useContext(AuthContext);
     const [error, setError] = useState<string | null>(null);
 
     const handleSignIn: SubmitHandler<SignInData> = async (data) => {
@@ -35,6 +36,13 @@ export default function SignIn() {
             setError(err instanceof Error ? err.message : "Ocorreu um erro ao fazer login");
         }
     };
+
+    const handleGoogleSignIn = useGoogleLogin({
+        onSuccess: async (response) => {
+            console.log(response)
+            await oAuthSignIn(response);
+        }
+    })
 
     return (
         <div className="flex flex-col min-h-screen bg-white md:flex-row">
@@ -108,6 +116,25 @@ export default function SignIn() {
                             </Button>
                         </div>
                     </form>
+
+                    <div className="mt-4 flex items-center justify-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                        <span className="px-4 text-gray-500 bg-white">ou</span>
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+
+                    <Button
+                        onClick={(e) => {
+                            e.preventDefault()
+                            handleGoogleSignIn()
+                        }}
+                        variant="outline"
+                        className="w-full mt-4 flex items-center justify-center space-x-2 border-[#689689] text-[#504136] hover:bg-gray-100"
+                    >
+                        <Chrome className="h-5 w-5 mr-2"/>
+                        Continuar com Google
+                    </Button>
+
                     <p className="mt-6 text-sm text-center text-gray-600">
                         Não tem uma conta?{" "}
                         <a href="/signup" className="font-medium text-[#689689] hover:text-[#504136] transition-colors duration-300">
