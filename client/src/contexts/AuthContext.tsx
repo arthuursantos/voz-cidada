@@ -80,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const isAuthenticated = !!userRoles;
-    const [isGoogleUser, setIsGoogleUser] = useState(true);
+    const [isGoogleUser, setIsGoogleUser] = useState(false);
 
     const navigate = useNavigate();
 

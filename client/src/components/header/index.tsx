@@ -5,17 +5,36 @@ import { useContext, useState } from 'react'
 import { AuthContext } from '@/contexts/AuthContext'
 
 function Header() {
-    const { isGoogleUser ,user, isAuthenticated, signOut} = useContext(AuthContext)
+    const { isGoogleUser, user, isAuthenticated, signOut} = useContext(AuthContext)
 
     const location = useLocation() 
 
-    const rotasOcultas = ["/dashboard"]
+    const rotasOcultas = ["/dashboard", "/admin/dashboard"]
 
     const [showMenu, setShowMenu] = useState(false);
 
     const [showConta, setShowConta] = useState(false);
+
+    const showNavUser = () => {
+        if (!(location.pathname === '/admin/dashboard')) {
+            return (
+                <nav className="hidden md:flex items-center gap-8">
+                <Link to="/" className="hover:underline font-montserrat">
+                    HOME
+                </Link>
+                <Link to="/about" className="hover:underline font-montserrat">
+                    SOBRE NÓS
+                </Link>
+                <Link to="/contact" className="hover:underline font-montserrat">
+                    FALE CONOSCO
+                </Link>
+            </nav>
+            )
+
+        }
+    }
 return (
-    <header className="bg-[#2B87B3] text-white p-4">
+    <header className="bg-[--cor-primaria2] text-white p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="hidden md:flex items-center gap-2">
                 {isGoogleUser? <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300">
@@ -35,17 +54,7 @@ return (
                 </div>
             </div>
 
-            <nav className="hidden md:flex items-center gap-8">
-                <Link to="/" className="hover:underline font-montserrat">
-                    HOME
-                </Link>
-                <Link to="/about" className="hover:underline font-montserrat">
-                    SOBRE NÓS
-                </Link>
-                <Link to="/contact" className="hover:underline font-montserrat">
-                    FALE CONOSCO
-                </Link>
-            </nav>
+            {showNavUser()}
 
 
             <div className="flex items-center gap-4">

@@ -14,7 +14,7 @@ import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import config from "../config.ts"
-import Home from "./pages/home/index.tsx";
+import Home from "./pages/Home/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -85,7 +85,7 @@ const App = () => {
                         />
 
                         <Route
-                            path="/admin/home"
+                            path="/admin/dashboard"
                             element={
                                 <PrivateRoute requiredRole="ROLE_ADMIN">
                                     <AdminDashboard/>

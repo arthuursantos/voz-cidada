@@ -201,6 +201,7 @@ export default function SignUp() {
                                                 maxLength={14}
                                                 className="border-[#504136]/20 focus:border-[#689689] focus:ring-[#689689]"
                                             />
+                                            <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target='_blank' className='text-[--cor-primaria2] text-sm hover:underline w-fit'>Esqueceu o CEP?</a>
                                             {errors.cpf && <p className="text-red-500 text-sm">{errors.cpf.message}</p>}
                                         </div>
                                     </div>
