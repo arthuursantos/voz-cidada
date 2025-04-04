@@ -175,6 +175,10 @@ export function AuthProvider({children}: AuthProviderProps) {
             setUserRoles(decoded.roles);
             setAuthStatus(decoded.auth_status)
 
+            setCookie(undefined, "vozcidada.authType", "OAuth", {
+                maxAge: 60 * 60 * 1 // 1h
+            })
+
             if (decoded.auth_status !== "SIGNIN") {
                 try {
                     const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
@@ -190,7 +194,6 @@ export function AuthProvider({children}: AuthProviderProps) {
                     console.error("Não foi possível recuperar as informações de usuário.");
                 }
             } else {
-                console.log("context: " + authStatus)
                 setTimeout(() => {
                     navigate("/signup/oauth");
                 }, 0);
@@ -229,6 +232,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         setUserRoles(decoded.roles);
         const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
         setUser(userResponse.data);
+
 
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
