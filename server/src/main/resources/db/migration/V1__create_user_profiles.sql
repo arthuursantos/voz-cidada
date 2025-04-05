@@ -26,8 +26,13 @@ CREATE TABLE usuario (
 
 CREATE TABLE funcionario_prefeitura (
     id SERIAL PRIMARY KEY,
+    auth_user_id INT NOT NULL,
     cpf VARCHAR(11) NOT NULL,
     cargo VARCHAR(255) NOT NULL,
     setor VARCHAR(255) NOT NULL,
-    data_cadastro TIMESTAMP NOT NULL
+    data_cadastro TIMESTAMP NOT NULL,
+    CONSTRAINT fk_auth_user
+        FOREIGN KEY (auth_user_id)
+            REFERENCES auth_user(id)
+            ON DELETE CASCADE
 );
