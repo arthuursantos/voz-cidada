@@ -80,6 +80,7 @@ type AuthContextType = {
     changePassword: (data: any) => Promise<void>,
     oAuthSignIn: (googleData: any) => Promise<void>,
     oAuthSignUp: (profileData: ProfileData) => Promise<void>,
+    isGoogleUser: boolean
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -90,6 +91,7 @@ export function AuthProvider({children}: AuthProviderProps) {
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const [authStatus, setAuthStatus] = useState<string | null>(null)
     const isAuthenticated = !!userRoles;
+    const [isGoogleUser, setIsGoogleUser] = useState(false);
 
     const navigate = useNavigate();
 
@@ -202,6 +204,8 @@ export function AuthProvider({children}: AuthProviderProps) {
         // Limpa o estado do usuário e roles
         setUser(null);
         setUserRoles(null);
+        setAuthStatus(null);
+        setIsGoogleUser(false);
         
         // Redireciona para a página de login
         navigate("/signin");
@@ -226,6 +230,7 @@ export function AuthProvider({children}: AuthProviderProps) {
             const decoded = jwtDecode<JWTClaims>(accessToken);
             setUserRoles(decoded.roles);
             setAuthStatus(decoded.auth_status)
+            setIsGoogleUser(true);
 
             if (decoded.auth_status !== "SIGNIN") {
                 try {
@@ -367,7 +372,7 @@ export function AuthProvider({children}: AuthProviderProps) {
 
     return (
         <AuthContext.Provider
-            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp}}>
+            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser}}>
             {children}
         </AuthContext.Provider>
     )
