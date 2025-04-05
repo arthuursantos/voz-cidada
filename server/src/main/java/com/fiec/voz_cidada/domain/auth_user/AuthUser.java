@@ -35,14 +35,22 @@ public class AuthUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    public AuthUser(String login, String password, UserRole role){
+    @Enumerated(EnumType.STRING)
+    private AuthStatus authStatus;
+
+    public AuthUser(String login, String password, UserRole role, AuthStatus authStatus) {
         this.login = login;
         this.password = password;
         this.role = role;
+        this.authStatus = authStatus;
     }
 
     public void changePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void updateAuthStatus(String authStatus) {
+        this.authStatus = AuthStatus.valueOf(authStatus.toUpperCase());
     }
 
     @Override

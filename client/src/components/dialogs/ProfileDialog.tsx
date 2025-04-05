@@ -1,5 +1,5 @@
-import { useState, useContext, useEffect } from "react";
-import { AuthContext } from "@/contexts/AuthContext.tsx";
+import {useState, useContext, useEffect} from "react";
+import {AuthContext} from "@/contexts/AuthContext.tsx";
 import api from "@/lib/axios.ts";
 import {
     Dialog,
@@ -18,14 +18,15 @@ import {
     FormLabel,
     FormMessage
 } from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Users, ArrowLeft } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
+import {Input} from "@/components/ui/input.tsx";
+import {Button} from "@/components/ui/button.tsx";
+import {z} from "zod";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {AlertCircle, Users, ArrowLeft} from "lucide-react";
+import {Alert, AlertDescription} from "@/components/ui/alert.tsx";
 import {cn} from "@/lib/utils.ts";
+import {parseCookies} from "nookies";
 
 type UpdateUserData = {
     nome: string;
@@ -74,12 +75,14 @@ const passwordSchema = z.object({
     path: ["confirmPassword"]
 });
 
-export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
-    const { user } = useContext(AuthContext);
+export function ProfileDialog({collapsed}: { collapsed: boolean }) {
+    const {user} = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [formState, setFormState] = useState<"profile" | "password">("profile");
     const [dialogOpen, setDialogOpen] = useState(false);
+
+    const {"vozcidada.authType": authType} = parseCookies();
 
     const profileForm = useForm({
         resolver: zodResolver(profileSchema),
@@ -186,7 +189,7 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                         collapsed ? "justify-center px-2" : "justify-start"
                     )}
                 >
-                    <Users className="h-5 w-5" />
+                    <Users className="h-5 w-5"/>
                     {!collapsed && <span>Perfil</span>}
                 </Button>
 
@@ -205,7 +208,7 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
 
                 {error && (
                     <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
+                        <AlertCircle className="h-4 w-4"/>
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 )}
@@ -217,13 +220,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="nome"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Nome</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -231,13 +234,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="cpf"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>CPF</FormLabel>
                                             <FormControl>
-                                                <Input {...field} disabled />
+                                                <Input {...field} disabled/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -245,13 +248,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="dataNascimento"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Data de Nascimento</FormLabel>
                                             <FormControl>
                                                 <Input type="date" {...field} />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -259,7 +262,7 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="cep"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>CEP</FormLabel>
                                             <FormControl>
@@ -268,7 +271,7 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                                     placeholder="12345-678"
                                                 />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -276,13 +279,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="rua"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem className="col-span-2">
                                             <FormLabel>Rua</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -290,13 +293,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="bairro"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Bairro</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -304,13 +307,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="cidade"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Cidade</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -318,27 +321,28 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                 <FormField
                                     control={profileForm.control}
                                     name="uf"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>UF</FormLabel>
                                             <FormControl>
-                                                <Input {...field} maxLength={2} />
+                                                <Input {...field} maxLength={2}/>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
                             </div>
 
                             <DialogFooter className="flex justify-between gap-2">
-                                <Button
+                                {authType !== "OAuth" && <Button
                                     type="button"
                                     onClick={() => setFormState("password")}
                                     variant="outline"
                                 >
                                     Alterar Senha
-                                </Button>
-                                <Button type="submit" disabled={loading} className="bg-[#689689] hover:bg-[#689689]/90 text-white">
+                                </Button>}
+                                <Button type="submit" disabled={loading}
+                                        className="bg-[#689689] hover:bg-[#689689]/90 text-white">
                                     {loading ? "Salvando..." : "Salvar Alterações"}
                                 </Button>
                             </DialogFooter>
@@ -350,13 +354,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                             <FormField
                                 control={passwordForm.control}
                                 name="currentPassword"
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Senha atual</FormLabel>
                                         <FormControl>
                                             <Input type="password" {...field} />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -364,13 +368,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                             <FormField
                                 control={passwordForm.control}
                                 name="newPassword"
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Nova senha</FormLabel>
                                         <FormControl>
                                             <Input type="password" {...field} />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -378,13 +382,13 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                             <FormField
                                 control={passwordForm.control}
                                 name="confirmPassword"
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Confirme sua nova senha</FormLabel>
                                         <FormControl>
                                             <Input type="password" {...field} />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -396,7 +400,7 @@ export function ProfileDialog({ collapsed }: { collapsed: boolean }) {
                                     onClick={handleBack}
                                     className="text-[#504136] hover:text-[#504136]/90 hover:bg-[#504136]/10"
                                 >
-                                    <ArrowLeft className="h-5 w-5 mr-2" />
+                                    <ArrowLeft className="h-5 w-5 mr-2"/>
                                     Voltar
                                 </Button>
                                 <Button

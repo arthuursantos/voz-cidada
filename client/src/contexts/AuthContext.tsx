@@ -28,6 +28,7 @@ type JWTClaims = {
     sub: string;
     iss: string;
     token_type: string;
+    auth_status: string;
     roles: string[];
     exp: number;
 }
@@ -51,6 +52,13 @@ export type SignUpData = {
     cpf: string
 }
 
+export type ProfileData = {
+    name: string,
+    birthDate: string,
+    cep: string,
+    cpf: string
+}
+
 type SignInResponse = AxiosResponse<SignInResponseData>
 
 type SignInResponseData = {
@@ -59,37 +67,48 @@ type SignInResponseData = {
 }
 
 type AuthContextType = {
-    user: User | null;
-    userRoles: string[] | null;
+    user: User | null,
+    userRoles: string[] | null,
+    authStatus: string | null,
     isAuthenticated: boolean,
-    loading: boolean;
+    loading: boolean,
     signIn: (data: SignInData) => Promise<void>,
     signUp: (data: SignUpData) => Promise<void>,
     signOut: () => void,
     getCepApi: (cep: string) => Promise<any>,
     updateUser: (data: UpdateUserData) => Promise<void>,
     changePassword: (data: any) => Promise<void>,
-    signInWithGoogle: (googleData: any) => Promise<void>,
-    isGoogleUser: boolean
+    oAuthSignIn: (googleData: any) => Promise<void>,
+    oAuthSignUp: (profileData: ProfileData) => Promise<void>,
 }
 
 export const AuthContext = createContext({} as AuthContextType)
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({children}: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
+    const [authStatus, setAuthStatus] = useState<string | null>(null)
     const isAuthenticated = !!userRoles;
-    const [isGoogleUser, setIsGoogleUser] = useState(true);
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        const { "vozcidada.accessToken": accessToken } = parseCookies();
+        const {"vozcidada.accessToken": accessToken} = parseCookies();
         if (accessToken) {
             try {
+
                 const decoded = jwtDecode<JWTClaims>(accessToken);
                 setUserRoles(decoded.roles);
+                setAuthStatus(decoded.auth_status)
+
+                if (decoded.auth_status === "SIGNIN") {
+                    navigate("/signup/oauth");
+                } else if (decoded.roles.includes("ROLE_ADMIN")) {
+                    navigate("/admin/dashboard");
+                } else {
+                    navigate("/home");
+                }
 
                 api.get(`/api/usuario/auth/${decoded.sub}`)
                     .then(response => {
@@ -103,10 +122,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     .finally(() => {
                         setLoading(false)
                     })
+
             } catch {
+
                 setUser(null)
                 setUserRoles(null)
                 setLoading(false)
+
             }
         } else {
             setLoading(false)
@@ -138,7 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
-            setIsGoogleUser(false)
+            
 
             if (decoded.roles.includes("ROLE_ADMIN")) {
                 navigate("/admin/dashboard");
@@ -180,47 +202,53 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Limpa o estado do usuário e roles
         setUser(null);
         setUserRoles(null);
-        setIsGoogleUser(false)
+        
         // Redireciona para a página de login
         navigate("/signin");
     }
 
-    async function signInWithGoogle(googleData: any) {
-        const googleresponse = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
-            headers: {
-                Authorization: `Bearer ${googleData.access_token}`
+
+    async function oAuthSignIn(googleData: any) {
+        try {
+            const googleresponse = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+                headers: {
+                    Authorization: `Bearer ${googleData.access_token}`
+                }
+            });
+
+            const response = await api.post("/auth/oauth/google", {
+                email: googleresponse.data.email
+            });
+
+            const {accessToken, refreshToken} = response.data;
+            setTokens(accessToken, refreshToken);
+
+            const decoded = jwtDecode<JWTClaims>(accessToken);
+            setUserRoles(decoded.roles);
+            setAuthStatus(decoded.auth_status)
+
+            if (decoded.auth_status !== "SIGNIN") {
+                try {
+                    const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+                    setUser(userResponse.data);
+
+                    if (decoded.roles.includes("ROLE_ADMIN")) {
+                        navigate("/admin/dashboard");
+                    } else {
+                        navigate("/home");
+                    }
+
+                } catch {
+                    console.error("Não foi possível recuperar as informações de usuário.");
+                }
+            } else {
+                console.log("context: " + authStatus)
+                setTimeout(() => {
+                    navigate("/signup/oauth");
+                }, 0);
             }
-        })
-        console.log(googleresponse)
-        const response = await api.post("/auth/oauth/google", {
-            email: googleresponse.data.email
-        })
-        console.log(response)
-        const {accessToken, refreshToken} = response.data;
-        setTokens(accessToken, refreshToken)
-        const decoded = jwtDecode<JWTClaims>(accessToken);
-        setUserRoles(decoded.roles);
-        console.log(decoded.roles)
-        setUser({
-            id: 0,
-            nome: googleresponse.data.name,
-            cpf: "00000000000",
-            dataNascimento: "0000-00-00",
-            dataCadastro: new Date().toISOString().slice(0, 19).replace('T', ' '),
-            cep: "00000000",
-            rua: "Rua Google",
-            bairro: "Bairro Google",
-            cidade: "Cidade Google",
-            uf: "UF",
-            email: googleresponse.data.email,
-            picture: googleresponse.data.picture
-        })
-        setIsGoogleUser(true);
-        if (decoded.roles.includes("ROLE_ADMIN")) {
-            navigate("/admin/dashboard");
-        } else {
-            console.log("/home")
-            navigate("/home");
+        } catch {
+            console.error("Não foi possível se autenticar com sua conta Google.");
         }
     }
 
@@ -309,8 +337,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
+    async function oAuthSignUp(data: ProfileData) {
+
+        const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        await api.post("/api/usuario", {
+            nome: data.name,
+            dataNascimento: data.birthDate,
+            cpf: data.cpf,
+            cep: data.cep,
+            dataCadastro: dataCadastro
+        })
+
+        const {"vozcidada.accessToken": tokenBeforeUpdate} = parseCookies();
+        const decoded = jwtDecode<JWTClaims>(tokenBeforeUpdate);
+
+        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+        setUser(userResponse.data);
+
+        const updateTokens = await api.patch("/auth/updateAuthStatus");
+        const { accessToken, refreshToken } = updateTokens.data;
+        setTokens(accessToken, refreshToken)
+        setCookie(undefined, "vozcidada.authType", "OAuth", {
+            maxAge: 60 * 60 * 1 // 1h
+        })
+
+        navigate("/home")
+
+    }
+
     return (
-        <AuthContext.Provider value={{ user, userRoles,  isAuthenticated, loading, signIn, signUp, signInWithGoogle, getCepApi, updateUser, changePassword, signOut, isGoogleUser }}>
+        <AuthContext.Provider
+            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp}}>
             {children}
         </AuthContext.Provider>
     )
