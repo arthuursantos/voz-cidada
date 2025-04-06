@@ -43,7 +43,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/funcionario").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/historico").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()

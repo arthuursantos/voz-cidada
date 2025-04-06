@@ -57,7 +57,6 @@ const PublicRoute = ({children}: { children: ReactNode }) => {
 
 const OAuthRoute = ({children}: { children: ReactNode }) => {
     const {authStatus, loading} = useContext(AuthContext)
-    console.log("oauth route: " + authStatus)
     if (loading) {
         return "";
     }
