@@ -167,7 +167,7 @@ export default function OAuthSignUp() {
                             </div>
 
                             <div className="flex items-center justify-end space-x-4">
-                                <Button type="submit" className="bg-[#689689] hover:bg-[#689689]/90 text-white px-8">
+                                <Button type="submit" className="bg-[--cor-primaria2] hover:bg-[--cor-primaria] text-white px-8">
                                     Continuar
                                 </Button>
                             </div>

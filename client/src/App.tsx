@@ -38,7 +38,7 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {
-        return <Navigate to="/home"/>
+        return <Navigate to="/dashboard"/>
     }
 
     return children;
@@ -61,7 +61,7 @@ const OAuthRoute = ({children}: { children: ReactNode }) => {
         return "";
     }
     if (authStatus == "SIGNUP") {
-        return <Navigate to="/home"/>
+        return <Navigate to="/dashboard"/>
     } else if (authStatus == null) {
         return <Navigate to="/signin"/>
     }
@@ -95,9 +95,9 @@ const App = () => {
                         <Route
                             path="/admin/home"
                             element={
-                                <PrivateRoute requiredRole="ROLE_ADMIN">
+                                <PublicRoute /*requiredRole="ROLE_ADMIN" */>
                                     <AdminDashboard/>
-                                </PrivateRoute>
+                                </PublicRoute>
                             }
                         />
 
@@ -129,7 +129,7 @@ const App = () => {
                     />
 
                     <Route
-                        path="/contact" // por enquanto público apenas para teste
+                        path="/contact"
                         element={
                             <PrivateRoute>
                                 <Contact />
@@ -182,8 +182,8 @@ const App = () => {
                             }
                         />
 
-                        <Route path="/" element={<Navigate to="/home"/>}/>
-                        <Route path="*" element={<Navigate to="/home"/>}/>
+                        <Route path="/" element={<Navigate to="/dashboard"/>}/>
+                        <Route path="*" element={<Navigate to="/dashboard"/>}/>
                     </Routes>
                 </AuthProvider>
             </BrowserRouter>

@@ -17,7 +17,6 @@ type User = {
     cidade: string;
     uf: string;
     email: string;
-    picture: string;
 }
 
 export type UpdateUserData = {
@@ -80,7 +79,8 @@ type AuthContextType = {
     changePassword: (data: any) => Promise<void>,
     oAuthSignIn: (googleData: any) => Promise<void>,
     oAuthSignUp: (profileData: ProfileData) => Promise<void>,
-    isGoogleUser: boolean
+    isGoogleUser: boolean,
+    userProfilePicture: string | null
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -92,6 +92,7 @@ export function AuthProvider({children}: AuthProviderProps) {
     const [authStatus, setAuthStatus] = useState<string | null>(null)
     const isAuthenticated = !!userRoles;
     const [isGoogleUser, setIsGoogleUser] = useState(false);
+    const [userProfilePicture, setUserProfilePicture] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
@@ -107,9 +108,9 @@ export function AuthProvider({children}: AuthProviderProps) {
                 if (decoded.auth_status === "SIGNIN") {
                     navigate("/signup/oauth");
                 } else if (decoded.roles.includes("ROLE_ADMIN")) {
-                    navigate("/admin/dashboard");
+                    navigate("/admin/home");
                 } else {
-                    navigate("/home");
+                    navigate("/dashboard");
                 }
 
                 api.get(`/api/usuario/auth/${decoded.sub}`)
@@ -211,7 +212,6 @@ export function AuthProvider({children}: AuthProviderProps) {
         navigate("/signin");
     }
 
-
     async function oAuthSignIn(googleData: any) {
         try {
             const googleresponse = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -224,13 +224,14 @@ export function AuthProvider({children}: AuthProviderProps) {
                 email: googleresponse.data.email
             });
 
+            setUserProfilePicture(googleresponse.data.picture);
+
             const {accessToken, refreshToken} = response.data;
             setTokens(accessToken, refreshToken);
 
             const decoded = jwtDecode<JWTClaims>(accessToken);
             setUserRoles(decoded.roles);
             setAuthStatus(decoded.auth_status)
-            setIsGoogleUser(true);
 
             setCookie(undefined, "vozcidada.authType", "OAuth", {
                 maxAge: 60 * 60 * 1 // 1h
@@ -240,11 +241,12 @@ export function AuthProvider({children}: AuthProviderProps) {
                 try {
                     const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
                     setUser(userResponse.data);
+                    setIsGoogleUser(true);
 
                     if (decoded.roles.includes("ROLE_ADMIN")) {
                         navigate("/admin/dashboard");
                     } else {
-                        navigate("/home");
+                        navigate("/dashboard");
                     }
 
                 } catch {
@@ -264,12 +266,17 @@ export function AuthProvider({children}: AuthProviderProps) {
 
         const infoCep = await getCepApi(data.cep)
 
+        console.log(infoCep)
+
         await api.post("/auth/register", {
             login: data.email,
             password: data.password,
-            role: "USER"
+            role: "USER",
+            AuthStatus: "SIGNUP",
         })
 
+        console.log("registrando user");
+        
         const response = await api.post("/auth/login", {
             login: data.email,
             password: data.password
@@ -300,7 +307,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
         } else {
-            navigate("/home");
+            navigate("/dashboard");
         }
     }
 
@@ -347,6 +354,7 @@ export function AuthProvider({children}: AuthProviderProps) {
     }
 
     async function oAuthSignUp(data: ProfileData) {
+        const infoCep = await getCepApi(data.cep)
 
         const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
         await api.post("/api/usuario", {
@@ -354,6 +362,10 @@ export function AuthProvider({children}: AuthProviderProps) {
             dataNascimento: data.birthDate,
             cpf: data.cpf,
             cep: data.cep,
+            rua: infoCep.logradouro,
+            bairro: infoCep.bairro,
+            cidade: infoCep.localidade,
+            uf: infoCep.uf,
             dataCadastro: dataCadastro
         })
 
@@ -362,7 +374,8 @@ export function AuthProvider({children}: AuthProviderProps) {
 
         const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
         setUser(userResponse.data);
-
+        setIsGoogleUser(true);
+        
         const updateTokens = await api.patch("/auth/updateAuthStatus");
         const { accessToken, refreshToken } = updateTokens.data;
         setTokens(accessToken, refreshToken)
@@ -370,13 +383,13 @@ export function AuthProvider({children}: AuthProviderProps) {
             maxAge: 60 * 60 * 1 // 1h
         })
 
-        navigate("/home")
+        navigate("/dashboard")
 
     }
 
     return (
         <AuthContext.Provider
-            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser}}>
+            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser, userProfilePicture}}>
             {children}
         </AuthContext.Provider>
     )
