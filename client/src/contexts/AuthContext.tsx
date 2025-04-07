@@ -115,9 +115,10 @@ export function AuthProvider({children}: AuthProviderProps) {
                 setAuthStatus(decoded.auth_status)
 
                 if (decoded.auth_status === "SIGNIN") {
+                    setIsGoogleUser(true)
                     navigate("/signup/oauth");
-                } else if (decoded.roles.includes("ROLE_ADMIN")) {
-                    navigate("/admin/home");
+                } else if (decoded.roles.includes("ROLE_OWNER")) {
+                    navigate("/admin/dashboard");
                 } else {
                     navigate("/dashboard");
                 }
@@ -174,7 +175,7 @@ export function AuthProvider({children}: AuthProviderProps) {
             setUser(userResponse.data);
             
 
-            if (decoded.roles.includes("ROLE_ADMIN")) {
+            if (decoded.roles.includes("ROLE_OWNER")) {
                 navigate("/admin/dashboard");
             } else {
                 navigate("/dashboard");
@@ -229,6 +230,8 @@ export function AuthProvider({children}: AuthProviderProps) {
                 }
             });
 
+            setIsGoogleUser(true)
+
             const response = await api.post("/auth/oauth/google", {
                 email: googleresponse.data.email
             });
@@ -252,7 +255,7 @@ export function AuthProvider({children}: AuthProviderProps) {
                     setUser(userResponse.data);
                     setIsGoogleUser(true);
 
-                    if (decoded.roles.includes("ROLE_ADMIN")) {
+                    if (decoded.roles.includes("ROLE_OWNER")) {
                         navigate("/admin/dashboard");
                     } else {
                         navigate("/dashboard");
