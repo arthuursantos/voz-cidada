@@ -35,18 +35,27 @@ public class AuthUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    public AuthUser(String login, String password, UserRole role){
+    @Enumerated(EnumType.STRING)
+    private AuthStatus authStatus;
+
+    public AuthUser(String login, String password, UserRole role, AuthStatus authStatus) {
         this.login = login;
         this.password = password;
         this.role = role;
+        this.authStatus = authStatus;
     }
 
     public void changePassword(String newPassword) {
         this.password = newPassword;
     }
 
+    public void updateAuthStatus(String authStatus) {
+        this.authStatus = AuthStatus.valueOf(authStatus.toUpperCase());
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if(this.role == UserRole.OWNER) return List.of(new SimpleGrantedAuthority("ROLE_OWNER"), new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
         if(this.role == UserRole.ADMIN) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
         else return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }

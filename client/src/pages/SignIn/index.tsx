@@ -25,7 +25,7 @@ export default function SignIn() {
         resolver: zodResolver(SignInSchema)
     });
 
-    const { signIn, signInWithGoogle } = useContext(AuthContext);
+    const { signIn, oAuthSignIn } = useContext(AuthContext);
     const [error, setError] = useState<string | null>(null);
 
     const handleSignIn: SubmitHandler<SignInData> = async (data) => {
@@ -40,7 +40,7 @@ export default function SignIn() {
     const handleGoogleSignIn = useGoogleLogin({
         onSuccess: async (response) => {
             console.log(response)
-            await signInWithGoogle(response);
+            await oAuthSignIn(response);
         }
     })
 

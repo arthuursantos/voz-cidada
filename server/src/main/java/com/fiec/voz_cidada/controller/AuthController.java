@@ -4,6 +4,8 @@ import com.fiec.voz_cidada.config.security.TokenService;
 import com.fiec.voz_cidada.domain.auth_user.*;
 import com.fiec.voz_cidada.exceptions.InvalidAuthenticationException;
 import com.fiec.voz_cidada.repository.AuthRepository;
+import com.fiec.voz_cidada.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     private final AuthenticationManager authManager;
     private final AuthRepository repository;
@@ -43,7 +48,8 @@ public class AuthController {
                 user = new AuthUser(
                         data.email(),
                         new BCryptPasswordEncoder().encode("google-oauth-" + data.email()),
-                        UserRole.USER);
+                        UserRole.USER,
+                        AuthStatus.SIGNIN);
                 repository.save(user);
             }
             LoginResponseDTO tokens = tokenService.createAuthTokens(user);
@@ -57,7 +63,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterDTO data){
         if (repository.findByLogin(data.login()) != null) return ResponseEntity.badRequest().build();
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        AuthUser newUser = new AuthUser(data.login(), encryptedPassword, data.role());
+        AuthUser newUser = new AuthUser(data.login(), encryptedPassword, UserRole.USER, AuthStatus.SIGNUP);
         repository.save(newUser);
         return ResponseEntity.ok().build();
     }
@@ -81,6 +87,28 @@ public class AuthController {
         user.changePassword(encryptedPassword);
         repository.save(user);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/updateAuthStatus")
+    public ResponseEntity<?> updateAuthStatus(@RequestHeader("Authorization") String token) {
+        String id = tokenService.validateAccessToken(token.replace("Bearer ", ""));
+        if (id == null) {
+            throw new InvalidAuthenticationException("Token inválido ou expirado.");
+        }
+
+        var user = repository.findById(Long.valueOf(id))
+                .orElseThrow(() -> new InvalidAuthenticationException("Usuário não encontrado."));
+
+        var profile = usuarioRepository.findByAuthUser_Id(Long.valueOf(id));
+        if (profile == null) {
+            throw new InvalidAuthenticationException("Não foi possível atualizar a autenticação do usuário.");
+        }
+
+        user.updateAuthStatus("SIGNUP");
+        repository.save(user);
+        LoginResponseDTO tokens = tokenService.createAuthTokens(user);
+
+        return ResponseEntity.ok(tokens);
     }
 
     @PostMapping("/refresh")

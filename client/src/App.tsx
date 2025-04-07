@@ -1,4 +1,3 @@
-
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
@@ -13,8 +12,9 @@ import Chamados from "./pages/chamados/index.tsx";
 import SignIn from "./pages/signIn/index.tsx";
 import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import config from "../config.ts"
-import Home from "./pages/Home/index.tsx";
+import Home from "./pages/home/index.tsx";
+import OAuthSignUp from "@/pages/OAuthSignUp";
+import {Toaster} from "react-hot-toast";
 
 type RouteProps = {
     children: ReactNode;
@@ -32,19 +32,19 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
         return <Navigate to="/signin"/>
     }
 
-    if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
+    if (!requiredRole && userRoles?.includes("ROLE_OWNER")) {
         return <Navigate to="/admin/home"/>
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {
-        return <Navigate to="/home"/>
+        return <Navigate to="/dashboard"/>
     }
 
     return children;
 }
 
-const PublicRoute = ({ children }: { children: ReactNode }) => {
-    const { isAuthenticated, loading } = useContext(AuthContext);
+const PublicRoute = ({children}: { children: ReactNode }) => {
+    const {isAuthenticated, loading} = useContext(AuthContext);
     if (loading) {
         return "";
     }
@@ -54,26 +54,33 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     return children;
 }
 
-const App = () => {
-
-    if (!config.googleClientId) {
-        console.error("Google Client ID não configurado");
-        return <div>Erro de configuração. Por favor, contate o administrador.</div>;
+const OAuthRoute = ({children}: { children: ReactNode }) => {
+    const {authStatus, loading} = useContext(AuthContext)
+    if (loading) {
+        return "";
     }
+    if (authStatus == "SIGNUP") {
+        return <Navigate to="/dashboard"/>
+    } else if (authStatus == null) {
+        return <Navigate to="/signin"/>
+    }
+    return children;
+}
 
-    return(
-        <GoogleOAuthProvider clientId={config.googleClientId}>
-        <BrowserRouter>
-            <AuthProvider>
-                <Routes>
-                    <Route
-                        path="/signin"
-                        element={
-                            <PublicRoute>
-                                <SignIn />
-                            </PublicRoute>
-                        }
-                    />
+const App = () => {
+    return (
+        <GoogleOAuthProvider clientId="518788781560-5kjacjm9okd3cnofcs2beq2e6nb7br12.apps.googleusercontent.com">
+            <BrowserRouter>
+                <AuthProvider>
+                    <Routes>
+                        <Route
+                            path="/signin"
+                            element={
+                                <PublicRoute>
+                                    <SignIn/>
+                                </PublicRoute>
+                            }
+                        />
 
                         <Route
                             path="/signup"
@@ -87,8 +94,8 @@ const App = () => {
                         <Route
                             path="/admin/dashboard"
                             element={
-                                <PrivateRoute requiredRole="ROLE_ADMIN">
-                                    <AdminDashboard/>
+                                <PrivateRoute requiredRole="ROLE_OWNER">
+                                    <AdminDashboard />
                                 </PrivateRoute>
                             }
                         />
@@ -121,7 +128,7 @@ const App = () => {
                     />
 
                     <Route
-                        path="/contact" // por enquanto público apenas para teste
+                        path="/contact"
                         element={
                             <PrivateRoute>
                                 <Contact />
@@ -129,17 +136,16 @@ const App = () => {
                         }
                     />
 
-                    <Route
-                        path="/chamados"
-                        element={
-                            <PrivateRoute>
-                                <Chamados />
-                            </PrivateRoute>
-                        }
-                    />
+                        <Route
+                            path="/chamados"
+                            element={
+                                <PrivateRoute>
+                                    <Chamados/>
+                                </PrivateRoute>
+                            }
+                        />
 
-
-                    <Route
+<Route
                         path="/abrir-chamado" 
                         element={
                             <PrivateRoute>
@@ -166,11 +172,21 @@ const App = () => {
                         }
                     />
 
-                    <Route path="/" element={<Navigate to="/dashboard" />} />
-                    <Route path="*" element={<Navigate to="/dashboard" />} />
-                </Routes>
-            </AuthProvider>
-        </BrowserRouter>
+                        <Route
+                            path="/signup/oauth"
+                            element={
+                                <OAuthRoute>
+                                    <OAuthSignUp/>
+                                </OAuthRoute>
+                            }
+                        />
+
+                        <Route path="/" element={<Navigate to="/dashboard"/>}/>
+                        <Route path="*" element={<Navigate to="/dashboard"/>}/>
+                    </Routes>
+                </AuthProvider>
+            </BrowserRouter>
+            <Toaster/>
         </GoogleOAuthProvider>
     );
 };
