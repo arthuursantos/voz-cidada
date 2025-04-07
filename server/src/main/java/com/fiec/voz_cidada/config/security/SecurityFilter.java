@@ -32,7 +32,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             "/auth/login",
             "/auth/register",
             "/auth/refresh",
-            "/auth/oauth/google"
+            "/auth/oauth/google",
+            "/swagger-ui"
     );
 
     @Override

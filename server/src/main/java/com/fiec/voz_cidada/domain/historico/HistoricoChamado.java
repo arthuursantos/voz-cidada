@@ -2,13 +2,12 @@ package com.fiec.voz_cidada.domain.historico;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
-import com.fiec.voz_cidada.domain.funcionario.FuncionarioPrefeitura;
+import com.fiec.voz_cidada.domain.funcionario.Funcionario;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Data
 @Entity
@@ -25,7 +24,7 @@ public class HistoricoChamado implements Serializable {
     @ManyToOne
     @JoinColumn(name = "funcionario_id")
     @JsonIgnore
-    private FuncionarioPrefeitura funcionario;
+    private Funcionario funcionario;
 
     private LocalDateTime dataModificacao;
     private String statusAnterior;
