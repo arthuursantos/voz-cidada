@@ -1,4 +1,3 @@
-
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
@@ -33,7 +32,7 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
         return <Navigate to="/signin"/>
     }
 
-    if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
+    if (!requiredRole && userRoles?.includes("ROLE_OWNER")) {
         return <Navigate to="/admin/home"/>
     }
 
@@ -95,8 +94,8 @@ const App = () => {
                         <Route
                             path="/admin/home"
                             element={
-                                <PublicRoute /*requiredRole="ROLE_ADMIN" */>
-                                    <AdminDashboard/>
+                                <PublicRoute /*requiredRole="ROLE_OWNER"*/>
+                                    <AdminDashboard />
                                 </PublicRoute>
                             }
                         />

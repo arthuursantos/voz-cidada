@@ -23,6 +23,14 @@ export type UpdateUserData = {
     cep: string;
 }
 
+export type FuncionarioData = {
+    cpf: string;
+    cargo: string;
+    setor: string;
+    email: string;
+    senha: string;
+}
+
 type JWTClaims = {
     sub: string;
     iss: string;
@@ -80,7 +88,8 @@ type AuthContextType = {
     oAuthSignIn: (googleData: any) => Promise<void>,
     oAuthSignUp: (profileData: ProfileData) => Promise<void>,
     isGoogleUser: boolean,
-    userProfilePicture: string | null
+    userProfilePicture: string | null,
+    criarFuncionario: (data: FuncionarioData) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -384,12 +393,35 @@ export function AuthProvider({children}: AuthProviderProps) {
         })
 
         navigate("/dashboard")
+    }
 
+    const criarFuncionario = async (data: FuncionarioData) => {
+
+        try {
+            await api.post("/auth/register", {
+                login: data.email,
+                password: data.senha,
+                role: "ADMIN",
+                AuthStatus: "SIGNUP"
+            });
+
+            const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            await api.post('/api/funcionario', {
+                cpf: data.cpf,
+                cargo: data.cargo,
+                setor: data.setor,
+                dataCadastro: dataCadastro
+            });
+
+        } catch (error) {
+            console.error("Erro ao criar funcionário:", error);
+            throw new Error("Erro ao criar funcionário. Tente novamente.");
+        }
     }
 
     return (
         <AuthContext.Provider
-            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser, userProfilePicture}}>
+            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser, userProfilePicture, criarFuncionario}}>
             {children}
         </AuthContext.Provider>
     )

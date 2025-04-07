@@ -9,7 +9,7 @@ function Header() {
 
     const location = useLocation() 
 
-    const rotasOcultas = ["/dashboard"]
+    const rotasOcultas = ["/dashboard", "/admin/home"]
 
     const [showMenu, setShowMenu] = useState(false);
 
@@ -34,8 +34,8 @@ return (
                     </button>
                 </div>
             </div>
-
-            <nav className="hidden md:flex items-center gap-8">
+            
+            {location.pathname !== "/admin/home" && <nav className={`md:flex items-center gap-8`}>
                 <Link to="/" className="hover:underline font-montserrat">
                     HOME
                 </Link>
@@ -45,7 +45,7 @@ return (
                 <Link to="/contact" className="hover:underline font-montserrat">
                     FALE CONOSCO
                 </Link>
-            </nav>
+            </nav>}
 
 
             <div className="flex items-center gap-4">
