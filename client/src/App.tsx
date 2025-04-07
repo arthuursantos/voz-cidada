@@ -94,9 +94,9 @@ const App = () => {
                         <Route
                             path="/admin/home"
                             element={
-                                <PublicRoute /*requiredRole="ROLE_OWNER"*/>
+                                <PrivateRoute requiredRole="ROLE_OWNER">
                                     <AdminDashboard />
-                                </PublicRoute>
+                                </PrivateRoute>
                             }
                         />
 
