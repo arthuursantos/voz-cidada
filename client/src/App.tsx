@@ -14,7 +14,7 @@ import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
-import Home from "./pages/Home/index.tsx";
+import Home from "./pages/home/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -34,6 +34,10 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
 
     if (!requiredRole && userRoles?.includes("ROLE_OWNER")) {
         return <Navigate to="/admin/dashboard"/>
+    }
+
+    if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
+        return <Navigate to="/admin/home"/>
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {

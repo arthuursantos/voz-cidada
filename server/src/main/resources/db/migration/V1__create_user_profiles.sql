@@ -27,6 +27,7 @@ CREATE TABLE usuario (
 
 CREATE TABLE funcionario_prefeitura (
     id SERIAL PRIMARY KEY,
+    auth_user_id INT NOT NULL,
     cpf VARCHAR(11) NOT NULL,
     cargo VARCHAR(255) NOT NULL,
     setor VARCHAR(255) NOT NULL,
