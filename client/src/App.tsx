@@ -14,7 +14,7 @@ import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
-import Home from "./pages/home/index.tsx";
+import Home from "./pages/Home/index.tsx";
 
 type RouteProps = {
     children: ReactNode;

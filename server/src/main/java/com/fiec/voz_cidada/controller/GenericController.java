@@ -14,7 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.Serializable;
 import java.net.URI;
 
-public abstract class GenericController<T, D extends RepresentationModel<D>, ID extends Serializable> {
+public abstract class  GenericController<T, D extends RepresentationModel<D>, ID extends Serializable> {
 
     protected final GenericService<T, D, ID> service;
 

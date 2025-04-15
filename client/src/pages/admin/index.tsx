@@ -15,6 +15,7 @@ interface Funcionario {
     cpf: string;
     cargo: string;
     setor: string;
+    email?: string;
 }
 
 export default function AdminDashboard() {
@@ -22,7 +23,8 @@ export default function AdminDashboard() {
 
     const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
     const [activeTab, setActiveTab] = useState("sectors");
-    const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]); // Explicitly type the state
+    const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+    //const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
 
     const getAlunos = async () => {
         try {
@@ -65,14 +67,31 @@ export default function AdminDashboard() {
 
     type FuncionarioData = z.infer<typeof createFuncionarioSchema>;
 
-    const { register, handleSubmit, formState: {errors} } = useForm<FuncionarioData>({
+    const { register, handleSubmit, reset,formState: {errors} } = useForm<FuncionarioData>({
             resolver: zodResolver(createFuncionarioSchema)
         })
 
     async function handleSubmitFuncionario(data: FuncionarioData) {
-        await criarFuncionario(data)
-        setShowNewEmployeeDialog(false)
-        getAlunos()
+        await criarFuncionario(data);
+        setShowNewEmployeeDialog(false);
+        reset();
+        getAlunos();
+    }
+
+    function handleDeleteFuncionario(id: number): void {
+        console.log(`Funcionario de id: ${id} deletado`);
+    }
+
+    function handleEditFuncionario(funcionario: Funcionario): void {
+        //setEditingFuncionario(funcionario);
+        setShowNewEmployeeDialog(true);
+        reset({
+            cpf: funcionario.cpf,
+            cargo: funcionario.cargo,
+            setor: funcionario.setor as "OBRAS" | "URBANISMO",
+            email: funcionario.email || '',
+            senha: ''
+        });
     }
 
     return (
@@ -181,13 +200,23 @@ export default function AdminDashboard() {
                                         </thead>
                                         <tbody>
                                             {funcionarios.map((funcionario) => (
-                                                <FuncionariosRow
-                                                    key={funcionario.id}
-                                                    id={funcionario.id}
-                                                    cpf={funcionario.cpf}
-                                                    cargo={funcionario.cargo}
-                                                    setor={funcionario.setor}
-                                                />
+                                            <tr key={funcionario.id} className="border-b hover:bg-gray-50">
+                                                <td className="p-4 font-medium">{funcionario.id}</td>
+                                                <td className="p-4">{funcionario.cpf}</td>
+                                                <td className="p-4">{funcionario.cargo}</td>
+                                                <td className="p-4">{funcionario.setor}</td>
+                                                <td className="p-4 text-right">
+                                                <button 
+                                                    onClick={() => handleEditFuncionario(funcionario)} 
+                                                    className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </button>
+                                                    <button onClick={() => handleDeleteFuncionario(funcionario.id)} className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center text-red-500">
+                                                        <Trash className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            </tr>
                                             ))}
                                         </tbody>
                                     </table>
@@ -331,24 +360,5 @@ function Edit(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
             <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
             <path d="m15 5 4 4" />
         </svg>
-    )
-}
-
-const FuncionariosRow = (props: Funcionario) => {
-    return (
-        <tr className="border-b hover:bg-gray-50">
-            <td className="p-4 font-medium">{props.id}</td>
-            <td className="p-4">{props.cpf}</td>
-            <td className="p-4">{props.cargo}</td>
-            <td className="p-4">{props.setor}</td>
-            <td className="p-4 text-right">
-                <button className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center">
-                    <Edit className="h-4 w-4" />
-                </button>
-                <button className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center text-red-500">
-                    <Trash className="h-4 w-4" />
-                </button>
-            </td>
-        </tr>
     )
 }

@@ -89,7 +89,8 @@ type AuthContextType = {
     oAuthSignUp: (profileData: ProfileData) => Promise<void>,
     isGoogleUser: boolean,
     userProfilePicture: string | null,
-    criarFuncionario: (data: FuncionarioData) => Promise<void>
+    criarFuncionario: (data: FuncionarioData) => Promise<void>,
+    deletarFuncionario: (id: number) => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -404,7 +405,7 @@ export function AuthProvider({children}: AuthProviderProps) {
             await api.post("/auth/register", {
                 login: data.email,
                 password: data.senha,
-                role: "ADMIN",
+                role: "admin",
                 AuthStatus: "SIGNUP"
             });
 
@@ -422,9 +423,18 @@ export function AuthProvider({children}: AuthProviderProps) {
         }
     }
 
+    const deletarFuncionario = async (id: number) => {
+        try {
+            await api.delete(`/api/funcionario/${id}`);
+        } catch (error) {
+            console.error("Erro ao deletar funcionário:", error);
+            throw new Error("Erro ao deletar funcionário. Tente novamente.");
+        }
+    }
+
     return (
         <AuthContext.Provider
-            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser, userProfilePicture, criarFuncionario}}>
+            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser, userProfilePicture, criarFuncionario, deletarFuncionario}}>
             {children}
         </AuthContext.Provider>
     )
