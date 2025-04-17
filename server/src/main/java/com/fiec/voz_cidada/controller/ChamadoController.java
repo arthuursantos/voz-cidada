@@ -31,10 +31,17 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findByUser(
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findByUserId(
             @PathVariable Long userId,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(service.findMy(userId, pageable));
+        return ResponseEntity.ok(service.findByUserId(userId, pageable));
+    }
+
+    @GetMapping("/secretaria/{secretaria}")
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findBySecretaria(
+            @PathVariable String secretaria,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(service.findBySecretaria(secretaria, pageable));
     }
 
     @Override

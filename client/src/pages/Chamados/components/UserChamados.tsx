@@ -1,4 +1,4 @@
-import api from "@/lib/axios"
+import api from "@/shared/axios.ts"
 import { AuthContext } from "@/contexts/AuthContext"
 import CreateChamadoDialog from './CreateChamadoDialog'
 import GetChamadoDialog from "./GetChamadoDialog"

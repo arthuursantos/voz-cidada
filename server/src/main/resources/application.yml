@@ -26,6 +26,9 @@ spring:
           google.scope:
             - profile
             - email
+springdoc:
+  swagger-ui:
+    url: /openapi.yml
 security:
   token:
     secret: ${JWT_SECRET:default-secret}

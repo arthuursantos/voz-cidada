@@ -27,7 +27,7 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
     }
 
     if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
-        return <Navigate to="/admin/home"/>
+        return <Navigate to="/admin/dashboard"/>
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {
@@ -50,7 +50,6 @@ const PublicRoute = ({children}: { children: ReactNode }) => {
 
 const OAuthRoute = ({children}: { children: ReactNode }) => {
     const {authStatus, loading} = useContext(AuthContext)
-    console.log("oauth route: " + authStatus)
     if (loading) {
         return "";
     }
@@ -87,7 +86,7 @@ const App = () => {
                         />
 
                         <Route
-                            path="/admin/home"
+                            path="/admin/dashboard"
                             element={
                                 <PrivateRoute requiredRole="ROLE_ADMIN">
                                     <AdminDashboard/>

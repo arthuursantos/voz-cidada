@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils.ts"
+import { cn } from "@/shared/utils.ts"
 import { Button } from "@/components/ui/button.tsx"
 import { Separator } from "@/components/ui/separator.tsx"
 import { Link, useLocation } from 'react-router-dom';
