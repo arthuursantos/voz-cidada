@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
-import api from "@/lib/axios"
+import api from "@/shared/axios.ts"
 
 type Status = "concluído" | "em andamento" | "pendente"
 

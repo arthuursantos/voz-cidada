@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -33,11 +32,22 @@ public class SecurityFilter extends OncePerRequestFilter {
             "/auth/register",
             "/auth/refresh",
             "/auth/oauth/google",
-            "/swagger-ui"
+            "/v3/api-docs",
+            "/swagger-ui/index.html",
+            "/openapi.yml"
     );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        String requestPath = request.getRequestURI();
+        if (requestPath.contains("/swagger-ui") ||
+                requestPath.contains("/v3/api-docs") ||
+                requestPath.contains("openapi.yml")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (isPublicEndpoint(request)) {
             filterChain.doFilter(request, response);
             return;

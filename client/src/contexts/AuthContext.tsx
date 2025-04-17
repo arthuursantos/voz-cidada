@@ -1,8 +1,8 @@
 import {createContext, ReactNode, useEffect, useState} from "react";
-import api from "@/lib/axios.ts";
-import { useNavigate } from "react-router-dom"
-import { jwtDecode } from "jwt-decode";
-import { parseCookies, setCookie, destroyCookie } from "nookies";
+import api from "@/shared/axios.ts";
+import {setCookie, parseCookies, destroyCookie} from "nookies";
+import {useNavigate} from "react-router-dom"
+import {jwtDecode} from "jwt-decode";
 import axios, {AxiosResponse} from "axios";
 
 type User = {
@@ -31,7 +31,15 @@ export type FuncionarioData = {
     senha: string;
 }
 
-type JWTClaims = {
+type Admin = {
+    id: number;
+    cpf: string;
+    cargo: string;
+    setor: string;
+    dataCadastro: string;
+}
+
+export type JWTClaims = {
     sub: string;
     iss: string;
     token_type: string;
@@ -75,6 +83,7 @@ type SignInResponseData = {
 
 type AuthContextType = {
     user: User | null,
+    admin: Admin | null,
     userRoles: string[] | null,
     authStatus: string | null,
     isAuthenticated: boolean,
@@ -97,6 +106,7 @@ export const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({children}: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
+    const [admin, setAdmin] = useState<Admin | null>(null)
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const [authStatus, setAuthStatus] = useState<string | null>(null)
@@ -116,33 +126,44 @@ export function AuthProvider({children}: AuthProviderProps) {
                 setAuthStatus(decoded.auth_status)
 
                 if (decoded.auth_status === "SIGNIN") {
-                    setIsGoogleUser(true)
-                    navigate("/signup/oauth");
-                } else if (decoded.roles.includes("ROLE_OWNER")) {
-                    navigate("/admin/dashboard");
-                } else {
-                    navigate("/dashboard");
+                    setTimeout(() => {
+                        navigate("/signup/oauth");
+                    }, 0);
                 }
 
-                api.get(`/api/usuario/auth/${decoded.sub}`)
-                    .then(response => {
-                        setUser(response.data)
-                    })
-                    .catch(() => {
-                        console.log("entrou no catch do context")
-                        setUser(null)
-                        setUserRoles(null)
-                    })
-                    .finally(() => {
-                        setLoading(false)
-                    })
+                if (decoded.roles.includes("ROLE_ADMIN")) {
+                    api.get(`/api/funcionario/auth/${decoded.sub}`)
+                        .then(response => {
+                            setAdmin(response.data)
+                        })
+                        .catch(() => {
+                            setAdmin(null)
+                            setUserRoles(null)
+                        })
+                        .finally(() => {
+                            setLoading(false)
+                        })
+                    navigate("/admin/dashboard");
+                } else {
+                    api.get(`/api/usuario/auth/${decoded.sub}`)
+                        .then(response => {
+                            setUser(response.data)
+                        })
+                        .catch(() => {
+                            setUser(null)
+                            setUserRoles(null)
+                        })
+                        .finally(() => {
+                            setLoading(false)
+                        })
+                    navigate("/home");
+                }
 
             } catch {
-
+                setAdmin(null)
                 setUser(null)
                 setUserRoles(null)
                 setLoading(false)
-
             }
         } else {
             setLoading(false)
@@ -159,34 +180,37 @@ export function AuthProvider({children}: AuthProviderProps) {
         });
     }
 
-    async function signIn({ login, password }: SignInData) {
-        try {
-            const response: SignInResponse = await api.post("/auth/login", {
-                login,
-                password
+    async function signIn({login, password}: SignInData) {
+        const response: SignInResponse = await api.post("/auth/login", {
+            login,
+            password
+        });
+
+        const {accessToken, refreshToken} = response.data;
+        const decoded = jwtDecode<JWTClaims>(accessToken);
+
+        setUserRoles(decoded.roles);
+        setTokens(accessToken, refreshToken)
+
+        if (decoded.roles.includes("ROLE_ADMIN")) {
+            api.get(`/api/funcionario/auth/${decoded.sub}`)
+                .then(response => {
+                    setAdmin(response.data)
+                    navigate("/admin/dashboard");
+
+                })
+        }
+
+        api.get(`/api/usuario/auth/${decoded.sub}`)
+            .then(response => {
+                setUser(response.data)
+                navigate("/home");
+            })
+            .catch(() => {
+                navigate("/signup/oauth")
             });
-
-            const { accessToken, refreshToken } = response.data;
-            setTokens(accessToken, refreshToken);
-
-            const decoded = jwtDecode<JWTClaims>(accessToken);
-            setUserRoles(decoded.roles);
-
-            const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-            setUser(userResponse.data);
-            
-
-            if (decoded.roles.includes("ROLE_OWNER")) {
-                navigate("/admin/dashboard");
-            } else {
-                navigate("/dashboard");
-            }
-        }
-        catch (error) {
-            console.error("Erro ao fazer login:", error);
-            alert("Erro ao fazer login. Verifique suas credenciais e tente novamente.");
-        }
     }
+    
 
     const getCepApi = async (cep: string) =>{
         try {
@@ -221,6 +245,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         
         // Redireciona para a página de login
         navigate("/signin");
+
     }
 
     async function oAuthSignIn(googleData: any) {
@@ -252,15 +277,20 @@ export function AuthProvider({children}: AuthProviderProps) {
 
             if (decoded.auth_status !== "SIGNIN") {
                 try {
-                    const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-                    setUser(userResponse.data);
-                    setIsGoogleUser(true);
 
-                    if (decoded.roles.includes("ROLE_OWNER")) {
-                        navigate("/admin/dashboard");
-                    } else {
-                        navigate("/dashboard");
+                    if (decoded.roles.includes("ROLE_ADMIN")) {
+                        api.get(`/api/funcionario/auth/${decoded.sub}`)
+                            .then(response => {
+                                setAdmin(response.data)
+                            })
+                        navigate("/admin/dashboard")
                     }
+
+                    api.get(`/api/usuario/auth/${decoded.sub}`)
+                        .then(response => {
+                            setUser(response.data)
+                        });
+                    navigate("/home");
 
                 } catch {
                     console.error("Não foi possível recuperar as informações de usuário.");
@@ -390,7 +420,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         setIsGoogleUser(true);
         
         const updateTokens = await api.patch("/auth/updateAuthStatus");
-        const { accessToken, refreshToken } = updateTokens.data;
+        const {accessToken, refreshToken} = updateTokens.data;
         setTokens(accessToken, refreshToken)
         setCookie(undefined, "vozcidada.authType", "OAuth", {
             maxAge: 60 * 60 * 1 // 1h
@@ -434,7 +464,26 @@ export function AuthProvider({children}: AuthProviderProps) {
 
     return (
         <AuthContext.Provider
-            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, getCepApi, updateUser, changePassword, signOut, oAuthSignIn, oAuthSignUp, isGoogleUser, userProfilePicture, criarFuncionario, deletarFuncionario}}>
+            value={{
+                user,
+                admin,
+                userRoles,
+                authStatus,
+                isAuthenticated,
+                loading,
+                signIn,
+                signUp,
+                signOut,
+                getCepApi,
+                updateUser,
+                changePassword,
+                oAuthSignIn,
+                oAuthSignUp,
+                isGoogleUser,
+                userProfilePicture,
+                criarFuncionario,
+                deletarFuncionario
+            }}>
             {children}
         </AuthContext.Provider>
     )

@@ -1,0 +1,418 @@
+openapi: 3.0.3
+info:
+  title: Voz Cidadã API
+  description: API para o sistema Voz Cidadã
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desenvolvimento local
+
+tags:
+  - name: Autenticação
+    description: Operações relacionadas à autenticação de usuários
+  - name: Funcionário
+    description: Operações relacionadas a funcionários
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Autenticar usuário
+      description: Autenticação de usuário com email e senha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationDTO'
+      responses:
+        '200':
+          description: Autenticação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDTO'
+        '400':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/oauth/google:
+    post:
+      tags:
+        - Autenticação
+      summary: Login com Google
+      description: Autenticação de usuário usando conta Google
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleEmailDTO'
+      responses:
+        '200':
+          description: Autenticação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDTO'
+        '400':
+          description: Falha na autenticação com Google
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - Autenticação
+      summary: Registrar novo usuário
+      description: Registro de um novo usuário comum
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDTO'
+      responses:
+        '200':
+          description: Usuário registrado com sucesso
+        '400':
+          description: Erro no registro (ex. email já existe)
+
+  /auth/register/admin:
+    post:
+      tags:
+        - Autenticação
+      summary: Registrar novo administrador
+      description: Registro de um novo usuário com privilégios de administrador
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDTO'
+      responses:
+        '200':
+          description: Administrador registrado com sucesso
+        '400':
+          description: Erro no registro (ex. email já existe)
+        '403':
+          description: Sem permissão para criar administrador
+
+  /auth/changePassword:
+    patch:
+      tags:
+        - Autenticação
+      summary: Alterar senha
+      description: Altera a senha do usuário autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordDTO'
+      responses:
+        '200':
+          description: Senha alterada com sucesso
+        '400':
+          description: Erro na alteração de senha
+        '401':
+          description: Token inválido ou senha atual incorreta
+
+  /auth/updateAuthStatus:
+    patch:
+      tags:
+        - Autenticação
+      summary: Atualizar status de autenticação
+      description: Atualiza o status de autenticação do usuário
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Status atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDTO'
+        '401':
+          description: Token inválido ou expirado
+
+  /auth/refresh:
+    post:
+      tags:
+        - Autenticação
+      summary: Renovar token
+      description: Renovar token de autenticação usando refresh token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tokens renovados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDTO'
+        '401':
+          description: Refresh token inválido ou expirado
+
+  /api/funcionario:
+    get:
+      tags:
+        - Funcionário
+      summary: Listar todos os funcionários
+      description: Retorna uma lista paginada de funcionários
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/pageNumberParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: Lista de funcionários recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FuncionarioDTO'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        '403':
+          description: Sem permissão para acessar o recurso
+    post:
+      tags:
+        - Funcionário
+      summary: Criar perfil de administrador
+      description: Cria um novo perfil de administrador
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuncionarioDTO'
+      responses:
+        '201':
+          description: Perfil de administrador criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FuncionarioDTO'
+        '403':
+          description: Sem permissão para criar administrador
+
+  /api/funcionario/{id}:
+    get:
+      tags:
+        - Funcionário
+      summary: Buscar funcionário por ID
+      description: Retorna os detalhes de um funcionário específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Funcionário encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FuncionarioDTO'
+        '404':
+          description: Funcionário não encontrado
+
+  /api/funcionario/auth/{authUserId}:
+    get:
+      tags:
+        - Funcionário
+      summary: Buscar funcionário por ID de usuário autenticado
+      description: Retorna os detalhes do funcionário associado ao ID de usuário autenticado
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: authUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Funcionário encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FuncionarioDTO'
+        '404':
+          description: Funcionário não encontrado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    pageSizeParam:
+      name: size
+      in: query
+      description: Número de itens por página
+      schema:
+        type: integer
+        default: 10
+    pageNumberParam:
+      name: page
+      in: query
+      description: Número da página (começando em 0)
+      schema:
+        type: integer
+        default: 0
+    sortParam:
+      name: sort
+      in: query
+      description: Ordenação (ex. campo,asc ou campo,desc)
+      schema:
+        type: string
+
+  schemas:
+    AuthenticationDTO:
+      type: object
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          description: Email ou nome de usuário
+        password:
+          type: string
+          description: Senha do usuário
+          format: password
+
+    GoogleEmailDTO:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: Email da conta Google
+          format: email
+
+    RegisterDTO:
+      type: object
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          description: Email ou nome de usuário
+        password:
+          type: string
+          description: Senha do usuário
+          format: password
+
+    ChangePasswordDTO:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          description: Senha atual
+          format: password
+        newPassword:
+          type: string
+          description: Nova senha
+          format: password
+
+    LoginResponseDTO:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token de acesso JWT
+        refreshToken:
+          type: string
+          description: Token de atualização JWT
+
+    FuncionarioDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nome:
+          type: string
+        cargo:
+          type: string
+        departamento:
+          type: string
+        authUserId:
+          type: integer
+          format: int64
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensagem de erro
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          description: Código de status HTTP
+
+    PageInfo:
+      type: object
+      properties:
+        size:
+          type: integer
+          description: Número de elementos por página
+        totalElements:
+          type: integer
+          description: Número total de elementos
+        totalPages:
+          type: integer
+          description: Número total de páginas
+        number:
+          type: integer
+          description: Página atual (começando em 0)
+
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+          description: Relação do link
+        href:
+          type: string
+          description: URL do link

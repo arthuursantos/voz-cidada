@@ -37,7 +37,7 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
     }
 
     if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
-        return <Navigate to="/admin/home"/>
+        return <Navigate to="/admin/dashboard"/>
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {

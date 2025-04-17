@@ -7,6 +7,7 @@ import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -57,6 +58,17 @@ public class AuthController {
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Não foi possível se autenticar com sua conta Google.");
         }
+    }
+
+    @PostMapping("/register/admin")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ResponseEntity<?> registerAdmin(@RequestBody RegisterDTO data){
+        if (repository.findByLogin(data.login()) != null) return ResponseEntity.badRequest().build();
+        System.out.println(data.login()+" "+data.password());
+        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+        AuthUser newUser = new AuthUser(data.login(), encryptedPassword, UserRole.ADMIN, AuthStatus.SIGNUP);
+        repository.save(newUser);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/register")

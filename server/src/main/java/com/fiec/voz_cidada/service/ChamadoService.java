@@ -3,6 +3,7 @@ package com.fiec.voz_cidada.service;
 import com.fiec.voz_cidada.controller.ChamadoController;
 import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
+import com.fiec.voz_cidada.domain.chamado.Secretaria;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,15 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
-    public PagedModel<EntityModel<ChamadoDTO>> findMy(Long id, Pageable pageable) {
+    public PagedModel<EntityModel<ChamadoDTO>> findByUserId(Long id, Pageable pageable) {
+        checkUserAccess(id);
         Page<Chamado> entities = repository.findChamadoByUsuario_Id(pageable, id);
+        Page<ChamadoDTO> dtos = entities.map(this::convertToDto);
+        return assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto)));
+    }
+
+    public PagedModel<EntityModel<ChamadoDTO>> findBySecretaria(String secretaria, Pageable pageable) {
+        Page<Chamado> entities = repository.findChamadoBySecretaria(pageable, Secretaria.valueOf(secretaria.toUpperCase()));
         Page<ChamadoDTO> dtos = entities.map(this::convertToDto);
         return assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto)));
     }

@@ -10,6 +10,7 @@ import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.FuncionarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -18,6 +19,8 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class FuncionarioService extends GenericService<Funcionario, FuncionarioDTO, Long> {
@@ -59,18 +62,29 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         }
     }
 
+    @Transactional
+    public EntityModel<FuncionarioDTO> findByAuthUserId(Long authUserId) {
+        try {
+            var entity = repository.findByAuthUser_Id(authUserId);
+            var dto = convertToDto(entity);
+            return EntityModel.of(dto, generateLinks(dto));
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado.");
+        }
+    }
+
     @Override
     public Long getResourceID(FuncionarioDTO dto) {
         return dto.getId();
     }
 
     public EntityModel<FuncionarioDTO> createAdminProfile(FuncionarioDTO dto) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
-        AuthUser authUser = authRepository.findById(currentAuthUser.getId())
+        AuthUser authUser = authRepository.findById(dto.getAuthId())
                 .orElseThrow(() -> new ResourceNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
+        System.out.println(dto);
         Funcionario entity = convertToEntity(dto);
         entity.setAuthUser(authUser);
+        entity.setDataCadastro(LocalDateTime.now());
         FuncionarioDTO savedDto = convertToDto(repository.save(entity));
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }

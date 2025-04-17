@@ -1,6 +1,7 @@
 package com.fiec.voz_cidada.domain.funcionario;
 
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
+import com.fiec.voz_cidada.domain.chamado.Secretaria;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,9 +21,11 @@ public class Funcionario implements Serializable {
     @JoinColumn(name = "auth_user_id", nullable = false)
     private AuthUser authUser;
 
+    @Enumerated(EnumType.STRING)
+    private Secretaria secretaria;
+
     private String cpf;
     private String cargo;
-    private String setor;
     private LocalDateTime dataCadastro;
 
 }
