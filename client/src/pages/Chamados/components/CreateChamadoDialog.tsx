@@ -1,6 +1,6 @@
 import { useState, useRef, useContext } from "react"
 import { AuthContext } from "@/contexts/AuthContext"
-import api from "@/lib/axios"
+import api from "@/shared/axios.ts"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
