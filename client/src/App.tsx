@@ -14,7 +14,7 @@ import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
-import Home from "./pages/Home/index.tsx";
+import Home from "./pages/home/index.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -22,7 +22,7 @@ type RouteProps = {
 }
 
 const PrivateRoute = ({children, requiredRole}: RouteProps) => {
-    const {isAuthenticated, loading, userRoles} = useContext(AuthContext);
+    const {isAuthenticated, loading, userRoles, authStatus} = useContext(AuthContext);
 
     if (loading) {
         return "";
@@ -40,6 +40,10 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
         return <Navigate to="/admin/dashboard"/>
     }
 
+    if (authStatus == "SIGNIN") {
+        return <Navigate to="/signup/oauth"/>
+    }
+
     if (requiredRole && !userRoles?.includes(requiredRole)) {
         return <Navigate to="/dashboard"/>
     }
@@ -48,9 +52,12 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
 }
 
 const PublicRoute = ({children}: { children: ReactNode }) => {
-    const {isAuthenticated, loading} = useContext(AuthContext);
+    const {isAuthenticated, loading, authStatus} = useContext(AuthContext);
     if (loading) {
         return "";
+    }
+    if (authStatus == "SIGNIN") {
+        return <Navigate to="/signup/oauth"/>
     }
     if (isAuthenticated) {
         return <Navigate to="/dashboard" />

@@ -129,12 +129,14 @@ export function AuthProvider({children}: AuthProviderProps) {
                     setTimeout(() => {
                         navigate("/signup/oauth");
                     }, 0);
+
                 }
 
                 if (decoded.roles.includes("ROLE_ADMIN")) {
                     api.get(`/api/funcionario/auth/${decoded.sub}`)
                         .then(response => {
                             setAdmin(response.data)
+                            navigate("/admin/dashboard");
                         })
                         .catch(() => {
                             setAdmin(null)
@@ -143,22 +145,21 @@ export function AuthProvider({children}: AuthProviderProps) {
                         .finally(() => {
                             setLoading(false)
                         })
-                    navigate("/admin/dashboard");
                 } else {
                     api.get(`/api/usuario/auth/${decoded.sub}`)
                         .then(response => {
                             setUser(response.data)
+                            navigate("/dashboard");
                         })
                         .catch(() => {
                             setUser(null)
                             setUserRoles(null)
+                            navigate("/signup/oauth")
                         })
                         .finally(() => {
                             setLoading(false)
                         })
-                    navigate("/home");
                 }
-
             } catch {
                 setAdmin(null)
                 setUser(null)
@@ -190,6 +191,8 @@ export function AuthProvider({children}: AuthProviderProps) {
         const decoded = jwtDecode<JWTClaims>(accessToken);
 
         setUserRoles(decoded.roles);
+        setAuthStatus(decoded.auth_status)
+
         setTokens(accessToken, refreshToken)
 
         if (decoded.roles.includes("ROLE_ADMIN")) {
@@ -197,7 +200,6 @@ export function AuthProvider({children}: AuthProviderProps) {
                 .then(response => {
                     setAdmin(response.data)
                     navigate("/admin/dashboard");
-
                 })
         }
 
@@ -343,9 +345,9 @@ export function AuthProvider({children}: AuthProviderProps) {
 
         const decoded = jwtDecode<JWTClaims>(accessToken);
         setUserRoles(decoded.roles);
+        setAuthStatus(decoded.auth_status)
         const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
         setUser(userResponse.data);
-
 
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");

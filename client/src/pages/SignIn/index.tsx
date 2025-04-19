@@ -39,7 +39,6 @@ export default function SignIn() {
 
     const handleGoogleSignIn = useGoogleLogin({
         onSuccess: async (response) => {
-            console.log(response)
             await oAuthSignIn(response);
         }
     })
