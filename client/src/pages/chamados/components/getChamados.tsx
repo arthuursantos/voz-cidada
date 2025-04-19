@@ -1,4 +1,4 @@
-import api from "@/lib/axios.ts"
+
 import { AuthContext } from "@/contexts/AuthContext.tsx"
 import DialogChamados from "./dialogGetChamado.tsx"
 import { useState, useEffect, useContext } from "react"
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu.tsx"
 import { FileText, Filter, Plus } from "lucide-react"
 import DialogCreateChamado from "./dialogCreateChamado.tsx"
+import api from "@/shared/axios.ts"
 
 type Status = "concluído" | "em andamento" | "pendente"
 

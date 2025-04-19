@@ -1,6 +1,6 @@
 import { useState, useRef, useContext } from "react"
 import { AuthContext } from "@/contexts/AuthContext"
-import api from "@/lib/axios"
+
 import ProgressBar from "@/components/progressBar/index.tsx"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { ArrowLeft, Camera, Upload, X } from "lucide-react"
+import api from "@/shared/axios"
 
 interface NovoChamadoDialogProps {
     open: boolean

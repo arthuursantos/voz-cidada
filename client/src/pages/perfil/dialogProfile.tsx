@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
-import api from "@/lib/axios";
+import api from "@/shared/axios";
 import {
     Dialog,
     DialogContent,

@@ -2,8 +2,9 @@ import {createContext, ReactNode, useEffect, useState} from "react";
 import api from "@/shared/axios.ts";
 import {setCookie, parseCookies, destroyCookie} from "nookies";
 import {useNavigate} from "react-router-dom"
-import {jwtDecode} from "jwt-decode";
+
 import axios, {AxiosResponse} from "axios";
+import { jwtDecode } from "jwt-decode";
 
 type User = {
     id: number;
@@ -97,9 +98,7 @@ type AuthContextType = {
     oAuthSignIn: (googleData: any) => Promise<void>,
     oAuthSignUp: (profileData: ProfileData) => Promise<void>,
     isGoogleUser: boolean,
-    userProfilePicture: string | null,
-    criarFuncionario: (data: FuncionarioData) => Promise<void>,
-    deletarFuncionario: (id: number) => Promise<void>
+    userProfilePicture: string | null
 }
 
 export const AuthContext = createContext({} as AuthContextType)
@@ -111,8 +110,19 @@ export function AuthProvider({children}: AuthProviderProps) {
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const [authStatus, setAuthStatus] = useState<string | null>(null)
     const isAuthenticated = !!userRoles;
-    const [isGoogleUser, setIsGoogleUser] = useState(false);
-    const [userProfilePicture, setUserProfilePicture] = useState<string | null>(null);
+    const [isGoogleUser, setIsGoogleUser] = useState(() => {
+        if (typeof window !== "undefined") {
+            const storedValue = localStorage.getItem("isGoogleUser");
+            return storedValue ? JSON.parse(storedValue) : false;
+        }
+        return false;
+    });
+    const [userProfilePicture, setUserProfilePicture] = useState<string | null>(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("userProfilePicture") || null;
+        }
+        return null;
+    });
 
     const navigate = useNavigate();
 
@@ -206,7 +216,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         api.get(`/api/usuario/auth/${decoded.sub}`)
             .then(response => {
                 setUser(response.data)
-                navigate("/home");
+                navigate("/dashboard");
             })
             .catch(() => {
                 navigate("/signup/oauth")
@@ -244,7 +254,15 @@ export function AuthProvider({children}: AuthProviderProps) {
         setUserRoles(null);
         setAuthStatus(null);
         setIsGoogleUser(false);
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('isGoogleUser');
+        }
         
+        // Remove a foto do localStorage
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('userProfilePicture');
+        }
+
         // Redireciona para a página de login
         navigate("/signin");
 
@@ -258,13 +276,21 @@ export function AuthProvider({children}: AuthProviderProps) {
                 }
             });
 
-            setIsGoogleUser(true)
+            setIsGoogleUser(true);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('isGoogleUser', JSON.stringify(true));
+            }
 
             const response = await api.post("/auth/oauth/google", {
                 email: googleresponse.data.email
             });
 
-            setUserProfilePicture(googleresponse.data.picture);
+            const pictureUrl = googleresponse.data.picture;
+
+            setUserProfilePicture(pictureUrl);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('userProfilePicture', pictureUrl);
+            }
 
             const {accessToken, refreshToken} = response.data;
             setTokens(accessToken, refreshToken);
@@ -292,7 +318,7 @@ export function AuthProvider({children}: AuthProviderProps) {
                         .then(response => {
                             setUser(response.data)
                         });
-                    navigate("/home");
+                    navigate("/dashboard");
 
                 } catch {
                     console.error("Não foi possível recuperar as informações de usuário.");
@@ -399,68 +425,59 @@ export function AuthProvider({children}: AuthProviderProps) {
     }
 
     async function oAuthSignUp(data: ProfileData) {
-        const infoCep = await getCepApi(data.cep)
-
-        const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        await api.post("/api/usuario", {
-            nome: data.name,
-            dataNascimento: data.birthDate,
-            cpf: data.cpf,
-            cep: data.cep,
-            rua: infoCep.logradouro,
-            bairro: infoCep.bairro,
-            cidade: infoCep.localidade,
-            uf: infoCep.uf,
-            dataCadastro: dataCadastro
-        })
-
-        const {"vozcidada.accessToken": tokenBeforeUpdate} = parseCookies();
-        const decoded = jwtDecode<JWTClaims>(tokenBeforeUpdate);
-
-        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-        setUser(userResponse.data);
-        setIsGoogleUser(true);
-        
-        const updateTokens = await api.patch("/auth/updateAuthStatus");
-        const {accessToken, refreshToken} = updateTokens.data;
-        setTokens(accessToken, refreshToken)
-        setCookie(undefined, "vozcidada.authType", "OAuth", {
-            maxAge: 60 * 60 * 1 // 1h
-        })
-
-        navigate("/dashboard")
-    }
-
-    const criarFuncionario = async (data: FuncionarioData) => {
-
         try {
-            await api.post("/auth/register", {
-                login: data.email,
-                password: data.senha,
-                role: "admin",
-                AuthStatus: "SIGNUP"
-            });
-
+            const infoCep = await getCepApi(data.cep);
+            if (!infoCep) {
+                throw new Error("Erro ao buscar informações do CEP.");
+            }
+    
             const dataCadastro = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            await api.post('/api/funcionario', {
+            await api.post("/api/usuario", {
+                nome: data.name,
+                dataNascimento: data.birthDate,
                 cpf: data.cpf,
-                cargo: data.cargo,
-                setor: data.setor,
+                cep: data.cep,
+                rua: infoCep.logradouro,
+                bairro: infoCep.bairro,
+                cidade: infoCep.localidade,
+                uf: infoCep.uf,
                 dataCadastro: dataCadastro
             });
-
+    
+            const { "vozcidada.accessToken": tokenBeforeUpdate } = parseCookies();
+            if (!tokenBeforeUpdate) {
+                throw new Error("Token de acesso não encontrado.");
+            }
+    
+            const decoded = jwtDecode<JWTClaims>(tokenBeforeUpdate);
+            const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
+            setUser(userResponse.data);
+    
+            setIsGoogleUser(true);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('isGoogleUser', JSON.stringify(true));
+            }
+    
+            const updateTokens = await api.patch("/auth/updateAuthStatus");
+            const { accessToken, refreshToken } = updateTokens.data;
+            setTokens(accessToken, refreshToken);
+            setCookie(undefined, "vozcidada.authType", "OAuth", {
+                maxAge: 60 * 60 * 1 // 1h
+            });
+    
+            // Decodificar o novo token e atualizar os estados
+            const newDecoded = jwtDecode<JWTClaims>(accessToken);
+            setUserRoles(newDecoded.roles);
+            setAuthStatus(newDecoded.auth_status);
+    
+            // Forçar uma atualização do estado antes de navegar
+            setTimeout(() => {
+                navigate("/dashboard", { replace: true });
+            }, 0);
+    
         } catch (error) {
-            console.error("Erro ao criar funcionário:", error);
-            throw new Error("Erro ao criar funcionário. Tente novamente.");
-        }
-    }
-
-    const deletarFuncionario = async (id: number) => {
-        try {
-            await api.delete(`/api/funcionario/${id}`);
-        } catch (error) {
-            console.error("Erro ao deletar funcionário:", error);
-            throw new Error("Erro ao deletar funcionário. Tente novamente.");
+            console.error("Erro durante o cadastro OAuth:", error);
+            alert("Ocorreu um erro durante o cadastro. Tente novamente.");
         }
     }
 
@@ -482,9 +499,7 @@ export function AuthProvider({children}: AuthProviderProps) {
                 oAuthSignIn,
                 oAuthSignUp,
                 isGoogleUser,
-                userProfilePicture,
-                criarFuncionario,
-                deletarFuncionario
+                userProfilePicture
             }}>
             {children}
         </AuthContext.Provider>
