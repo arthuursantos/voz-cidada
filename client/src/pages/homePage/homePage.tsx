@@ -3,13 +3,151 @@
 import { MapPin, Search} from 'lucide-react';
 import Header from "@/components/header";
 import BotaoChamado from '@/components/botaoChamado';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
+import api from '@/shared/axios';
+import CreateChamadoDialog from '../chamados/components/CreateChamadoDialog';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from '@/components/ui/button';
+import GetChamadoDialog from '../chamados/components/GetChamadoDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { FileText, Filter, Plus } from "lucide-react"
+
+
+type Status = "concluído" | "em andamento" | "pendente"
+
+interface Chamado {
+  id: number
+  titulo: string
+  descricao: string
+  dataAbertura: string
+  status: string
+  fotoAntesUrl: string | null
+  fotoDepoisUrl: string | null
+}
+
+interface ApiResponse {
+  _embedded: {
+      chamadoDTOList: Chamado[]
+  }
+  page: {
+      totalElements: number
+  }
+}
+
+const chamadosAleatorios = [
+  {
+    id: 1,
+    titulo: "Buraco na rua",
+    descricao: "Descrição do chamado 1",
+    dataAbertura: "2023-10-01",
+    status: "PENDENTE",
+    fotoAntesUrl: null,
+    fotoDepoisUrl: null,
+  },
+  {
+    id: 2,
+    titulo: "Mato alto no Parque Pet",
+    descricao: "Descrição do chamado 2",
+    dataAbertura: "2023-10-02",
+    status: "EM_ANDAMENTO",
+    fotoAntesUrl: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRUREvlCvHREdbT-Xsf2L2dmgO7AulT-6hqeDRUThJvVKKQwYuPwNatanNGyJiXSwubdlC8iTQHCPxOrsM-uuUCfg",
+    fotoDepoisUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Bra-Cos_%281%29_%28cropped%29.jpg/640px-Bra-Cos_%281%29_%28cropped%29.jpg",
+  },
+]
+
+const formatDate = (dateString: string): string => {
+  try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString("pt-BR")
+  } catch (e) {
+      return dateString
+  }
+}
+
+const STATUS_MAP: Record<string, Status> = {
+  CONCLUIDO: "concluído",
+  EM_ANDAMENTO: "em andamento",
+  PENDENTE: "pendente",
+}
+
+const STATUS_COLORS: Record<Status, string> = {
+  concluído: "bg-green-500",
+  "em andamento": "bg-blue-500",
+  pendente: "bg-yellow-500",
+}
+
+const statusMapping = (apiStatus: string): Status => {
+  return STATUS_MAP[apiStatus] || "pendente"
+}
 
 export default function Dashboard() {
+
+  const { user } = useContext(AuthContext)
+  const [chamados, setChamados] = useState<Chamado[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<Status[]>(["concluído", "em andamento", "pendente"])
+  const [novoChamadoDialogOpen, setNovoChamadoDialogOpen] = useState(false)
+  const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const fetchChamados = useCallback(async () => {
+      if (!user?.id) return
+
+      try {
+          setLoading(true)
+          const response = await api.get<ApiResponse>(`/api/chamado/user/${user.id}`)
+          if (response.data._embedded && response.data._embedded.chamadoDTOList) {
+              setChamados(response.data._embedded.chamadoDTOList)
+          } else {
+              setChamados([])
+          }
+      } catch (err) {
+          setError("Erro ao carregar chamados")
+          console.error("Erro ao buscar chamados:", err)
+      } finally {
+          setLoading(false)
+      }
+  }, [user?.id])
+
+  useEffect(() => {
+      fetchChamados()
+  }, [fetchChamados])
+
+  const filteredChamados = chamadosAleatorios.filter((chamado) =>
+    statusFilter.includes(statusMapping(chamado.status))
+  )
+
+  const toggleStatusFilter = (status: Status) => {
+    if (statusFilter.includes(status)) {
+        setStatusFilter(statusFilter.filter((s) => s !== status))
+    } else {
+        setStatusFilter([...statusFilter, status])
+    }
+}
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <Header/>
-
+    
+    {error?  (
+     <div className="container py-8 max-w-7xl">
+      <div className="flex items-center justify-center min-h-[300px]">
+          <p className="text-red-500">Erro: {error}</p>
+      </div>
+    </div>
+    )
+    :
+      
+    <>
       {/* Search Bar */}
       <div className="max-w-7xl mx-auto p-4">
         <div className="relative">
@@ -20,74 +158,103 @@ export default function Dashboard() {
             className="w-full pl-10 font-lato pr-4 py-2 border rounded-lg"
           />
         </div>
-      </div>
-
-      {/* Grid Cards */}
-      <div className="max-w-7xl font-lato mx-auto p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Square Cards */}
-        <div className="border rounded-lg p-4 space-y-4">
-          <h3 className="font-semibold">Registro do Chamado</h3>
-          <MapPin className="text-red-500 h-6 w-6 mx-auto" />
-          <p className="text-sm text-center text-gray-500">outras informações...</p>
-          <p className="text-sm text-center">Em análise...</p>
-          <div className="flex justify-center">
-            <div className="bg-red-500 rounded-full h-10 w-10" />
-          </div>
-        </div>
-
-        <div className="border rounded-lg p-4 space-y-4">
-          <h3 className="font-semibold">Registro do Chamado</h3>
-          <MapPin className="text-red-500 h-6 w-6 mx-auto" />
-          <p className="text-sm text-center text-gray-500">outras informações...</p>
-          <div className="flex justify-center space-x-1">
-            {[1, 2, 3, 4].map((star) => (
-              <span key={star} className="text-yellow-400">★</span>
-            ))}
-            <span className="text-gray-300">★</span>
-          </div>
-          <div className="flex justify-center">
-            <div className="bg-green-500 rounded-full h-10 w-10" />
-          </div>
+        <div className="mt-4">
+          <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="border-teal text-teal">
+                      <Filter className="mr-2 h-4 w-4" /> Filtrar
+                  </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                  {(Object.keys(STATUS_COLORS) as Status[]).map((status) => (
+                      <DropdownMenuCheckboxItem
+                          key={status}
+                          checked={statusFilter.includes(status)}
+                          onCheckedChange={() => toggleStatusFilter(status)}
+                      >
+                          <div className="flex items-center">
+                              <div className={`w-2 h-2 rounded-full ${STATUS_COLORS[status]} mr-2`}></div>
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </div>
+                      </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      {/* List Cards */}
-      <div className="max-w-7xl mx-auto font-lato p-4 space-y-3">
-        {[1, 2, 3].map((item) => (
-          <div
-            key={item}
-            className="flex items-center border rounded-lg p-3 gap-4"
-          >
-            <MapPin className="text-red-500 h-6 w-6" />
-            <div className="flex-1">
-              <h3 className="font-semibold">Registro do Chamado</h3>
-              <p className="text-sm text-gray-500">outras informações...</p>
-              <p className="text-sm">Em análise...</p>
+      {
+        loading ? (
+          <div className="container py-8 max-w-7xl">
+                <div className="flex items-center justify-center min-h-[300px]">
+                    <p>Carregando chamados...</p>
+                </div>
             </div>
-            <div className="bg-red-500 rounded-full h-8 w-8" />
-          </div>
-        ))}
-      </div>
+        ) : (
+          <>
+
+            {/* List Cards */}
+            <h1 className='text-center'>CHAMADOS</h1>
+            <div className="max-w-7xl mx-auto font-lato p-4 space-y-3">
+              {filteredChamados.map((chamado) => {
+                    const status = statusMapping(chamado.status)
+                    return (
+                        <Card key={chamado.id} className="hover:shadow-md transition-shadow">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                                <CardTitle className="text-md font-medium">{chamado.titulo}</CardTitle>
+                                <FileText className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex justify-between items-center mb-2">
+                                    <p className="text-sm text-muted-foreground">
+                                        Criado em {formatDate(chamado.dataAbertura)}
+                                    </p>
+                                    <Badge className={`${STATUS_COLORS[status]} text-white`}>
+                                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    </Badge>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2 w-full text-teal border-teal hover:bg-teal hover:text-white"
+                                    onClick={() => {
+                                        setSelectedChamado(chamado)
+                                        setDialogOpen(true)
+                                    }}
+                                >
+                                    Abrir Chamado
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    )
+                })}
+            </div>
+
+           
+          </>
+        )
+      }
 
       {/* Open Call Button */}
       <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4">
-        <BotaoChamado/>
+            <BotaoChamado onClick={() => setNovoChamadoDialogOpen(true)}/>
       </div>
 
-      {/* Decorative Waves */}
-      <div className="fixed bottom-0 left-0 right-0 pointer-events-none">
-        <svg
-          viewBox="0 0 1440 320"
-          className="w-full"
-          style={{ transform: "rotate(180deg)" }}
-        >
-          <path
-            fill="#2B87B3"
-            fillOpacity="0.2"
-            d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,133.3C1248,139,1344,149,1392,154.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          ></path>
-        </svg>
-      </div>
+      <GetChamadoDialog
+        chamado={selectedChamado}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
+
+      <CreateChamadoDialog
+        open={novoChamadoDialogOpen}
+        onOpenChange={setNovoChamadoDialogOpen}
+        onSuccess={fetchChamados}
+      />
+
+    </>
+    }
+      
     </div>
   );
 }

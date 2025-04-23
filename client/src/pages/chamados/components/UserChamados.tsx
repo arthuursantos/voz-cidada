@@ -62,7 +62,7 @@ const formatDate = (dateString: string): string => {
 
 export default function UserChamados() {
     const [chamados, setChamados] = useState<Chamado[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [statusFilter, setStatusFilter] = useState<Status[]>(["concluído", "em andamento", "pendente"])
     const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null)
@@ -153,8 +153,8 @@ export default function UserChamados() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button className="bg-teal hover:bg-teal/90" onClick={() => setNovoChamadoDialogOpen(true)}>
-                        <Plus className="mr-1 h-4 w-4" /> Novo Chamado
+                    <Button className="bg-teal text-black hover:bg-teal/90" onClick={() => setNovoChamadoDialogOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Novo Chamado
                     </Button>
                 </div>
             </div>
