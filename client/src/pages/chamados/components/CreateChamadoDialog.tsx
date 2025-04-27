@@ -171,8 +171,8 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <DialogHeader>
-                            <DialogTitle className="tracking-wider text-primary uppercase">Novo Chamado</DialogTitle>
-                            <DialogDescription>
+                            <DialogTitle className="tracking-wider text-primary font-montserrat font-bold  uppercase">Novo Chamado</DialogTitle>
+                            <DialogDescription className="font-lato">
                                 {step === 0 ? "O que está acontecendo?" : "Tirou alguma foto do problema? Envie pra gente."}
                             </DialogDescription>
                         </DialogHeader>
@@ -189,7 +189,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                         name="titulo"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-teal">
+                                                <FormLabel className="text-teal font-bold font-lato">
                                                     Qual é o assunto da sua solicitação?
                                                 </FormLabel>
                                                 <FormControl>
@@ -209,7 +209,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                         name="descricao"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-teal">
+                                                <FormLabel className="text-teal font-bold font-lato">
                                                     Dê mais detalhes sobre sua solicitação.
                                                 </FormLabel>
                                                 <FormControl>
@@ -230,7 +230,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                     name="foto"
                                     render={() => (
                                         <FormItem className="mb-8">
-                                            <FormLabel className="text-teal">Foto do Problema</FormLabel>
+                                            <FormLabel className="text-teal font-bold font-lato">Foto do Problema</FormLabel>
                                             <FormControl>
                                                 {fotoPreview ? (
                                                     <div className="relative mt-2 rounded-md overflow-hidden border border-teal/30">
@@ -254,7 +254,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                                         <Button
                                                             type="button"
                                                             variant="outline"
-                                                            className="border-teal text-teal hover:bg-teal hover:text-white"
+                                                            className="text-[--cor-primaria] border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white"
                                                             onClick={() => fileInputRef.current?.click()}
                                                         >
                                                             <Upload className="mr-2 h-4 w-4" />
@@ -263,7 +263,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                                         <Button
                                                             type="button"
                                                             variant="outline"
-                                                            className="border-teal text-teal hover:bg-teal hover:text-white"
+                                                            className="text-[--cor-primaria] border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white"
                                                             onClick={() => fileInputRef.current?.click()}
                                                         >
                                                             <Camera className="mr-2 h-4 w-4" />
@@ -287,33 +287,34 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                         </div>
 
                         <DialogFooter>
-                            <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center font-bold font-lato text-black justify-between w-full">
                                 <div>
                                     {step === 1 && (
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             onClick={handleBack}
-                                            className="text-teal hover:text-teal/90 hover:bg-teal/10"
+                                            className="text-teal font-bold font-lato hover:text-teal/90 hover:bg-teal/10"
                                         >
                                             <ArrowLeft className="h-5 w-5 mr-2" />
                                             Voltar
                                         </Button>
                                     )}
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 ">
                                     <Button
                                         type="button"
                                         variant="outline"
                                         onClick={() => handleDialogClose(false)}
                                         disabled={isSubmitting}
+                                        className="font-bold font-lato"
                                     >
                                         Cancelar
                                     </Button>
                                     {step === 0 ? (
                                         <Button
                                             type="button"
-                                            className="bg-teal hover:bg-teal/90"
+                                            className="bg-teal font-bold font-lato text-black hover:bg-teal/90"
                                             onClick={handleNext}
                                             disabled={isSubmitting}
                                         >
@@ -322,7 +323,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                     ) : (
                                         <Button
                                             type="submit"
-                                            className="bg-teal hover:bg-teal/90"
+                                            className="bg-teal font-bold font-lato text-black hover:bg-teal/90"
                                             disabled={isSubmitting}
                                         >
                                             {isSubmitting ? "Enviando..." : "Enviar Chamado"}
