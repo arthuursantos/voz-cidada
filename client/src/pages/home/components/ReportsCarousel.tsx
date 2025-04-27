@@ -31,7 +31,7 @@ const chamadosMock: Chamado[] = [
         data: "15/02/2025",
         status: "Concluído",
         avaliacao: 5,
-        imagem: "https://placehold.co/100x500",
+        imagem: "https://i.pinimg.com/236x/a7/02/6a/a7026acccaa4195d4c2b080010c6af35.jpg",
     },
     {
         id: 2,
@@ -40,7 +40,7 @@ const chamadosMock: Chamado[] = [
         data: "28/02/2025",
         status: "Concluído",
         avaliacao: 4,
-        imagem: "https://placehold.co/100x500",
+        imagem: "https://media.istockphoto.com/id/1483109187/pt/foto/man-outdoor-senior-happy-retirement-elderly-portrait-male-active-park-smiling-old-fun-nature.jpg?s=612x612&w=0&k=20&c=EFnXZb3clSx-L-aXv0ssWD3m46AuWsTOhl8eVEtpWjE=",
     },
     {
         id: 3,
@@ -49,7 +49,7 @@ const chamadosMock: Chamado[] = [
         data: "05/03/2025",
         status: "Concluído",
         avaliacao: 5,
-        imagem: "https://placehold.co/100x500",
+        imagem: "https://i.pinimg.com/236x/77/d2/7d/77d27d7bfdfadf1bd295c58f067bba66.jpg",
     },
 ]
 
@@ -71,12 +71,12 @@ export default function ChamadosCarousel() {
             <CardContent className="p-0">
                 <div className="grid md:grid-cols-2 grid-cols-1 min-h-[500px]">
                     {/* Lado direito - Título chamativo (aparece primeiro em telas pequenas) */}
-                    <div className="bg-teal text-white flex flex-col justify-center items-center p-6 relative overflow-hidden min-h-[250px] md:order-2 order-1">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                    <div className="bg-teal text-black flex flex-col justify-center items-center p-6 relative overflow-hidden min-h-[250px] md:order-2 order-1">
+                        <div className="absolute top-0 right-0 w-32 h-32 text-black/80 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 text-black/80 rounded-full translate-y-1/2 -translate-x-1/2"></div>
 
-                        <h2 className="text-3xl font-bold text-center mb-4 relative z-10">Chamados Concluídos</h2>
-                        <p className="text-center text-white/80 mb-6 relative z-10">
+                        <h2 className="text-3xl font-bold text-center mb-4 relative z-10 text-[--cor-primaria]">Chamados Concluídos</h2>
+                        <p className="text-center text-black/80 mb-6 relative z-10">
                             Veja como estamos transformando nossa cidade com a participação dos cidadãos
                         </p>
 
@@ -85,19 +85,19 @@ export default function ChamadosCarousel() {
                                 variant="secondary"
                                 size="icon"
                                 onClick={prevSlide}
-                                className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 text-white"
+                                className="h-8 w-8 rounded-full bg-[--cor-primaria] border-[--cor-primaria] hover:bg-[--cor-primaria2] hover:border-none hover:text-white"
                             >
                                 <ChevronLeft className="h-4 w-4" />
                                 <span className="sr-only">Anterior</span>
                             </Button>
-                            <div className="text-sm text-white/80">
+                            <div className="text-sm text-black/80">
                                 {currentIndex + 1} de {chamadosMock.length}
                             </div>
                             <Button
                                 variant="secondary"
                                 size="icon"
                                 onClick={nextSlide}
-                                className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 text-white"
+                                className="h-8 w-8 rounded-full bg-[--cor-primaria] border-[--cor-primaria] hover:bg-[--cor-primaria2] hover:text-white"
                             >
                                 <ChevronRight className="h-4 w-4" />
                                 <span className="sr-only">Próximo</span>
@@ -135,8 +135,8 @@ export default function ChamadosCarousel() {
 
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" className="w-full">
-                                            <Eye className="mr-2 h-4 w-4" />
+                                        <Button variant="outline" className="w-full text-[--cor-primaria] border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white">
+                                            <Eye className="mr-2 h-4 w-4 " />
                                             Ver foto do problema
                                         </Button>
                                     </DialogTrigger>

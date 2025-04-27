@@ -313,7 +313,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                     {step === 0 ? (
                                         <Button
                                             type="button"
-                                            className="bg-teal text-black hover:bg-teal/90"
+                                            className="bg-teal hover:bg-teal/90"
                                             onClick={handleNext}
                                             disabled={isSubmitting}
                                         >
@@ -322,7 +322,7 @@ export default function CreateChamadoDialog({ open, onOpenChange, onSuccess }: C
                                     ) : (
                                         <Button
                                             type="submit"
-                                            className="bg-teal text-black hover:bg-teal/90"
+                                            className="bg-teal hover:bg-teal/90"
                                             disabled={isSubmitting}
                                         >
                                             {isSubmitting ? "Enviando..." : "Enviar Chamado"}

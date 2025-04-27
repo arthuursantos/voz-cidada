@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Search} from 'lucide-react';
+import { Search} from 'lucide-react';
 import Header from "@/components/header";
 import BotaoChamado from '@/components/botaoChamado';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -17,7 +17,8 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { FileText, Filter, Plus } from "lucide-react"
+import { FileText, Filter } from "lucide-react"
+import ChamadosCarousel from '../home/Components/ReportsCarousel';
 
 
 type Status = "concluído" | "em andamento" | "pendente"
@@ -41,26 +42,26 @@ interface ApiResponse {
   }
 }
 
-const chamadosAleatorios = [
-  {
-    id: 1,
-    titulo: "Buraco na rua",
-    descricao: "Descrição do chamado 1",
-    dataAbertura: "2023-10-01",
-    status: "PENDENTE",
-    fotoAntesUrl: null,
-    fotoDepoisUrl: null,
-  },
-  {
-    id: 2,
-    titulo: "Mato alto no Parque Pet",
-    descricao: "Descrição do chamado 2",
-    dataAbertura: "2023-10-02",
-    status: "EM_ANDAMENTO",
-    fotoAntesUrl: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRUREvlCvHREdbT-Xsf2L2dmgO7AulT-6hqeDRUThJvVKKQwYuPwNatanNGyJiXSwubdlC8iTQHCPxOrsM-uuUCfg",
-    fotoDepoisUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Bra-Cos_%281%29_%28cropped%29.jpg/640px-Bra-Cos_%281%29_%28cropped%29.jpg",
-  },
-]
+// const chamadosAleatorios = [
+//   {
+//     id: 1,
+//     titulo: "Buraco na rua",
+//     descricao: "Descrição do chamado 1",
+//     dataAbertura: "2023-10-01",
+//     status: "PENDENTE",
+//     fotoAntesUrl: null,
+//     fotoDepoisUrl: null,
+//   },
+//   {
+//     id: 2,
+//     titulo: "Mato alto no Parque Pet",
+//     descricao: "Descrição do chamado 2",
+//     dataAbertura: "2023-10-02",
+//     status: "EM_ANDAMENTO",
+//     fotoAntesUrl: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRUREvlCvHREdbT-Xsf2L2dmgO7AulT-6hqeDRUThJvVKKQwYuPwNatanNGyJiXSwubdlC8iTQHCPxOrsM-uuUCfg",
+//     fotoDepoisUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Bra-Cos_%281%29_%28cropped%29.jpg/640px-Bra-Cos_%281%29_%28cropped%29.jpg",
+//   }
+// ]
 
 const formatDate = (dateString: string): string => {
   try {
@@ -121,7 +122,7 @@ export default function Dashboard() {
       fetchChamados()
   }, [fetchChamados])
 
-  const filteredChamados = chamadosAleatorios.filter((chamado) =>
+  const filteredChamados = chamados.filter((chamado) =>
     statusFilter.includes(statusMapping(chamado.status))
   )
 
@@ -161,8 +162,8 @@ export default function Dashboard() {
         <div className="mt-4">
           <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="border-teal text-teal">
-                      <Filter className="mr-2 h-4 w-4" /> Filtrar
+                  <Button variant="outline" className="border-teal font-lato text-teal">
+                      <Filter className="mr-2 font-lato h-4 w-4" /> Filtrar
                   </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -194,9 +195,16 @@ export default function Dashboard() {
           <>
 
             {/* List Cards */}
-            <h1 className='text-center'>CHAMADOS</h1>
+            <h1 className='text-center text-2xl font-montserrat text-[--cor-primaria]'>CHAMADOS</h1>
             <div className="max-w-7xl mx-auto font-lato p-4 space-y-3">
-              {filteredChamados.map((chamado) => {
+              {
+                filteredChamados.length === 0 ? (
+                    <div className="flex items-center justify-center min-h-[300px]">
+                        <p className="text-gray-500">Nenhum chamado encontrado.</p>
+                    </div>
+                )
+              : 
+              filteredChamados.map((chamado) => {
                     const status = statusMapping(chamado.status)
                     return (
                         <Card key={chamado.id} className="hover:shadow-md transition-shadow">
@@ -216,7 +224,7 @@ export default function Dashboard() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="mt-2 w-full text-teal border-teal hover:bg-teal hover:text-white"
+                                    className="mt-2 w-full text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]"
                                     onClick={() => {
                                         setSelectedChamado(chamado)
                                         setDialogOpen(true)
@@ -228,15 +236,18 @@ export default function Dashboard() {
                         </Card>
                     )
                 })}
-            </div>
-
-           
+            </div> 
           </>
         )
       }
+      
+      <div className="container mx-auto py-10 mb-10">
+      <h1 className='text-center text-2xl font-montserrat mb-3 text-[--cor-primaria]'>SAIBA MAIS SOBRE NOSSAS MELHORIAS:</h1>
+        <ChamadosCarousel/>
+      </div>
 
       {/* Open Call Button */}
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4">
+      <div className="fixed z-10 bottom-0 left-0 right-0 flex justify-center p-4 ">
             <BotaoChamado onClick={() => setNovoChamadoDialogOpen(true)}/>
       </div>
 

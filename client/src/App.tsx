@@ -14,7 +14,7 @@ import SignUp from "./pages/signUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
-import Home from "./pages/Home/index.tsx";
+import Home from "./pages/home/index.tsx";
 
 
 type RouteProps = {
@@ -111,45 +111,45 @@ const App = () => {
                         <Route
                             path="/home"
                             element={
-                                <PublicRoute>
+                                <PrivateRoute>
                                     <Home/>
-                                </PublicRoute>
+                                </PrivateRoute>
                             }
                         />
 
                     <Route
                         path="/dashboard"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Dashboard />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
                     <Route
                         path="/about" 
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <About />
-                            </PublicRoute> 
+                            </PrivateRoute> 
                         }
                     />
 
                     <Route
                         path="/contact"
                         element={
-                            <PublicRoute>
+                            <PrivateRoute>
                                 <Contact />
-                            </PublicRoute>
+                            </PrivateRoute>
                         }
                     />
 
                         <Route
                             path="/chamados"
                             element={
-                                <PublicRoute>
+                                <PrivateRoute>
                                     <Chamados/>
-                                </PublicRoute>
+                                </PrivateRoute>
                             }
                         />
 
