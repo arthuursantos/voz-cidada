@@ -19,7 +19,7 @@ const funcionarioService = {
 
     createAdminProfile: (funcionarioData: any) => {
         return api.post('/api/funcionario', funcionarioData);
-    },
+    }
 };
 
 export default funcionarioService;

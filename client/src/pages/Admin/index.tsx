@@ -11,6 +11,7 @@ import authService from "@/shared/services/authServices";
 import { jwtDecode } from "jwt-decode";
 import api from "@/shared/axios";
 import funcionarioService from "./funcionarioServices";
+import chamadoService from "./chamadoService";
 
 // Define the structure of a Funcionario object
 interface Funcionario {
@@ -21,31 +22,68 @@ interface Funcionario {
     email?: string;
 }
 
+interface Chamado {
+    id: number;
+    usuarioId: number;
+    titulo: string;
+    descricao: string;
+    dataAbertura: string;
+    status: string;
+    fotoAntesFile: string | null;
+    fotoAntesUrl: string | null;
+    fotoDepoisUrl: string | null;
+    secretaria: string | null;
+    latitude: number | null;
+    longitude: number | null;
+}
+
+
 export default function AdminDashboard() {
     
     const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
+    const [showEditChamado, setShowEditChamado] = useState(false);
     const [activeTab, setActiveTab] = useState("sectors");
     const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-    //const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
+    const [chamados, setChamados] = useState<Chamado[]>([]);
+    const [editingChamado, setEditingChamado] = useState<Chamado | null>(null);
 
-    const getAlunos = async () => {
+    const getFuncionarios = async () => {
         try {
             const response = await api.get<{ _embedded: { funcionarioDTOList: Funcionario[] } }>('/api/funcionario');
             console.log("Funcionários:", response.data._embedded.funcionarioDTOList);
-            setFuncionarios(Array.isArray(response.data._embedded.funcionarioDTOList) ? response.data._embedded.funcionarioDTOList : []); // Ensure response is an array
+            setFuncionarios(Array.isArray(response.data._embedded.funcionarioDTOList) ? response.data._embedded.funcionarioDTOList : []);
         } catch (error) {
             console.error("Erro ao Buscar Usuários:", error);
-            setFuncionarios([]); // Ensure state is an array even on error
+            setFuncionarios([]);
+        }
+    }
+
+    const getChamados = async () => {
+        try {
+            const response = await chamadoService.getAllChamados(0, 10, "id,desc");
+            console.log("Chamados:", response.data._embedded.chamadoDTOList);
+            const chamadosSecretariaNull = response.data._embedded.chamadoDTOList.filter((chamado: Chamado) => {
+                return chamado.secretaria === null;
+            })
+            setChamados(Array.isArray(chamadosSecretariaNull) ? chamadosSecretariaNull : []);
+        } catch (error) {
+            console.error("Erro ao Buscar Chamados:", error);
         }
     }
 
     useEffect(() => {
         const fetchFuncionarios = async () => {
-           getAlunos();
+           getFuncionarios();
         };
         fetchFuncionarios();
     }, []);
 
+    useEffect(() => {
+        const fetchChamados = async () => {
+            getChamados();
+        };
+        fetchChamados();
+    }, []);
 
     const createFuncionarioSchema = z.object({
         cpf: z.string()
@@ -64,21 +102,38 @@ export default function AdminDashboard() {
         senha: z.string()
             .nonempty("A senha é obrigatória.")
             .min(6, "A senha deve ter pelo menos 6 caracteres."),
-
-    })
+    });
 
     type FuncionarioData = z.infer<typeof createFuncionarioSchema>;
 
-    const { register, handleSubmit, reset,formState: {errors} } = useForm<FuncionarioData>({
-            resolver: zodResolver(createFuncionarioSchema)
-        })
+    const { register, handleSubmit, reset, formState: {errors} } = useForm<FuncionarioData>({
+        resolver: zodResolver(createFuncionarioSchema)
+    });
+
+    const editChamadoSchema = z.object({
+        secretaria: z.enum(["OBRAS", "URBANISMO"], {
+            errorMap: () => ({ message: "Selecione uma secretaria válida." })
+        }).optional(),
+    });
+
+    type ChamadoData = z.infer<typeof editChamadoSchema>;
+
+    const { 
+        register: registerChamado, 
+        handleSubmit: handleSubmitChamado, 
+        reset: resetChamado,
+        formState: { errors: errorsChamado },
+        setValue
+    } = useForm<ChamadoData>({
+        resolver: zodResolver(editChamadoSchema)
+    });
 
     async function handleSubmitFuncionario(data: FuncionarioData) {
-        await authService.registerAdmin({ login: data.email, password: data.senha })
-        const { data: { accessToken } }: any = await authService.login({ login: data.email, password: data.senha })
+        await authService.registerAdmin({ login: data.email, password: data.senha });
+        const { data: { accessToken } }: any = await authService.login({ login: data.email, password: data.senha });
         const jwt = jwtDecode<JWTClaims>(accessToken);
-        await funcionarioService.createAdminProfile({ authId: jwt.sub, cpf: data.cpf, cargo: data.cargo, secretaria: data.secretaria  });
-        await getAlunos();
+        await funcionarioService.createAdminProfile({ authId: jwt.sub, cpf: data.cpf, cargo: data.cargo, secretaria: data.secretaria });
+        await getFuncionarios();
         setShowNewEmployeeDialog(false);
         reset({
             cpf: "",
@@ -89,12 +144,33 @@ export default function AdminDashboard() {
         });
     }
 
+    async function handleSubmitChamadoEdit(data: ChamadoData) {
+        if (!editingChamado) return;
+        
+        try {
+            const updatedChamado = {
+                id: editingChamado.id,
+                secretaria: data.secretaria || "", // Ensure secretaria is a string
+                usuarioId: editingChamado.usuarioId
+            };
+
+            console.log("Chamado atualizado:", updatedChamado);
+            
+            await chamadoService.updateChamado(updatedChamado);
+            console.log("Chamado atualizado com sucesso:", data);
+            await getChamados();
+            setShowEditChamado(false);
+            setEditingChamado(null);
+        } catch (error) {
+            console.error("Erro ao atualizar chamado:", error);
+        }
+    }
+
     function handleDeleteFuncionario(id: number): void {
         console.log(`Funcionario de id: ${id} deletado`);
     }
 
     function handleEditFuncionario(funcionario: Funcionario): void {
-        //setEditingFuncionario(funcionario);
         setShowNewEmployeeDialog(true);
         reset({
             cpf: funcionario.cpf,
@@ -103,6 +179,14 @@ export default function AdminDashboard() {
             email: funcionario.email || '',
             senha: ''
         });
+    }
+
+    function handleEditChamado(chamado: Chamado): void {
+        setEditingChamado(chamado);
+        if (chamado.secretaria) {
+            setValue("secretaria", chamado.secretaria as "OBRAS" | "URBANISMO");
+        }
+        setShowEditChamado(true);
     }
 
     return (
@@ -136,6 +220,12 @@ export default function AdminDashboard() {
                                 >
                                     Funcionários
                                 </button>
+                                <button
+                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "chamados" ? "bg-white text-gray-900 shadow-sm" : ""}`}
+                                    onClick={() => setActiveTab("chamados")}
+                                >
+                                    Chamados
+                                </button>
                             </div>
 
                             <div className="flex gap-2">
@@ -168,7 +258,7 @@ export default function AdminDashboard() {
                                                 Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "OBRAS").length}</span>
                                             </div>
                                             <div>
-                                                Chamados: <span className="font-medium">47</span>
+                                                Chamados: <span className="font-medium">0</span>
                                             </div>
                                         </div>
                                     </div>
@@ -210,7 +300,14 @@ export default function AdminDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {funcionarios.map((funcionario) => (
+                                            {
+                                            funcionarios.length === 0 ? (
+                                                <tr className="border-b hover:bg-gray-50">
+                                                    <td colSpan={5} className="p-4 text-center text-gray-500">Nenhum funcionário encontrado.</td>
+                                                </tr>
+                                            ) :
+                                            
+                                            funcionarios.map((funcionario) => (
                                             <tr key={funcionario.id} className="border-b hover:bg-gray-50">
                                                 <td className="p-4 font-medium">{funcionario.id}</td>
                                                 <td className="p-4">{funcionario.cpf}</td>
@@ -234,10 +331,53 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Chamados Tab content */}
+                        <div className={activeTab === "chamados" ? "block" : "hidden"}>
+                            <h1 className="font-montserrat font-bold text-center text-2xl text-[--cor-primaria]">CHAMADOS NÃO ATRIBUÍDOS:</h1>
+                            <div className="rounded-lg border font-lato bg-white shadow">
+                                {chamados.length === 0 ? (
+                                    <div className="p-4 text-center text-gray-500">Nenhum chamado atribuído.</div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full border-collapse">
+                                            <thead>
+                                                <tr className="border-b bg-gray-100">
+                                                    <th className="p-4 text-left font-medium">ID</th>
+                                                    <th className="p-4 text-left font-medium">Título</th>
+                                                    <th className="p-4 text-left font-medium">Descrição</th>
+                                                    <th className="p-4 text-left font-medium">Status</th>
+                                                    <th className="p-4 text-left font-medium">Secretaria</th>
+                                                    <th className="p-4 text-left font-medium">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {chamados.map((chamado: Chamado) => (
+                                                    <tr key={chamado.id} className="border-b hover:bg-gray-50">
+                                                        <td className="p-4 font-medium">{chamado.id}</td>
+                                                        <td className="p-4">{chamado.titulo}</td>
+                                                        <td className="p-4">{chamado.descricao}</td>
+                                                        <td className="p-4">{chamado.status}</td>
+                                                        <td className="p-4">{chamado.secretaria || "Não atribuído"}</td>
+                                                        <td className="p-4">
+                                                            <button 
+                                                                onClick={() => handleEditChamado(chamado)} 
+                                                                className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center"
+                                                            >
+                                                                <Edit className="h-4 w-4" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
-
 
             {/* Modal para Novo Funcionário */}
             {showNewEmployeeDialog && (
@@ -329,11 +469,7 @@ export default function AdminDashboard() {
                                     className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                                     onClick={() => {
                                         setShowNewEmployeeDialog(false);
-                                        errors.cpf = undefined;
-                                        errors.cargo = undefined;
-                                        errors.secretaria = undefined;
-                                        errors.email = undefined;
-                                        errors.senha = undefined;
+                                        reset();
                                     }}
                                 >
                                     Cancelar
@@ -343,6 +479,70 @@ export default function AdminDashboard() {
                                     type="submit"
                                 >
                                     Salvar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal para Editar Chamado */}
+            {showEditChamado && editingChamado && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+                        <form onSubmit={handleSubmitChamado(handleSubmitChamadoEdit)} className="flex flex-col p-6">
+                            <div className="flex flex-col space-y-1.5 pb-6 border-b">
+                                <h2 className="text-lg font-semibold leading-none tracking-tight">Editar Chamado #{editingChamado.id}</h2>
+                            </div>
+                            <div className="grid gap-4 py-4">
+                                
+                                <div className="grid gap-2">
+                                    <label htmlFor="chamado-secretaria" className="text-sm font-medium leading-none">
+                                        Secretaria
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            {...registerChamado("secretaria")}
+                                            id="chamado-secretaria"
+                                            className="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            defaultValue={editingChamado.secretaria || ""}
+                                        >
+                                            <option value="" disabled>Selecione uma Secretaria</option>
+                                            <option value="OBRAS">Obras Públicas</option>
+                                            <option value="URBANISMO">Urbanismo</option>
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none" />
+                                        {errorsChamado.secretaria && <span className="text-red-500 text-sm">{errorsChamado.secretaria.message}</span>}
+                                    </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <label className="text-sm font-medium leading-none">
+                                        Detalhes
+                                    </label>
+                                    <div className="p-3 border rounded-md bg-gray-50">
+                                        <p className="text-sm"><strong>Título:</strong> {editingChamado.titulo}</p>
+                                        <p className="text-sm mt-1"><strong>Descrição:</strong> {editingChamado.descricao}</p>
+                                        <p className="text-sm mt-1"><strong>Data Abertura:</strong> {new Date(editingChamado.dataAbertura).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-4">
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                    onClick={() => {
+                                        setShowEditChamado(false);
+                                        setEditingChamado(null);
+                                        resetChamado();
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="inline-flex items-center justify-center rounded-md bg-[#1e88e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#1976d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                >
+                                    Salvar Alterações
                                 </button>
                             </div>
                         </form>
