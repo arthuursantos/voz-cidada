@@ -5,7 +5,7 @@ spring:
     name: "Voz Cidadã"
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/voz-cidada
+    url: jdbc:postgresql://localhost:5433/voz-cidada
     username: postgres
     password: admin
   jpa:
@@ -26,6 +26,9 @@ spring:
           google.scope:
             - profile
             - email
+springdoc:
+  swagger-ui:
+    url: /openapi.yml
 security:
   token:
     secret: ${JWT_SECRET:default-secret}

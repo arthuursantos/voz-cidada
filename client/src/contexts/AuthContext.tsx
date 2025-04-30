@@ -1,6 +1,6 @@
 import {createContext, ReactNode, useEffect, useState} from "react";
-import api from "@/lib/axios.ts";
-import {setCookie, parseCookies} from "nookies";
+import api from "@/shared/axios.ts";
+import {setCookie, parseCookies, destroyCookie} from "nookies";
 import {useNavigate} from "react-router-dom"
 import {jwtDecode} from "jwt-decode";
 import axios, {AxiosResponse} from "axios";
@@ -18,7 +18,15 @@ type User = {
     uf: string;
 }
 
-type JWTClaims = {
+type Admin = {
+    id: number;
+    cpf: string;
+    cargo: string;
+    secretaria: string;
+    dataCadastro: string;
+}
+
+export type JWTClaims = {
     sub: string;
     iss: string;
     token_type: string;
@@ -62,6 +70,7 @@ type SignInResponseData = {
 
 type AuthContextType = {
     user: User | null,
+    admin: Admin | null,
     userRoles: string[] | null,
     authStatus: string | null,
     isAuthenticated: boolean,
@@ -76,6 +85,7 @@ export const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({children}: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
+    const [admin, setAdmin] = useState<Admin | null>(null)
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
     const [authStatus, setAuthStatus] = useState<string | null>(null)
@@ -93,31 +103,45 @@ export function AuthProvider({children}: AuthProviderProps) {
                 setAuthStatus(decoded.auth_status)
 
                 if (decoded.auth_status === "SIGNIN") {
-                    navigate("/signup/oauth");
-                } else if (decoded.roles.includes("ROLE_ADMIN")) {
-                    navigate("/admin/dashboard");
-                } else {
-                    navigate("/home");
+                    setTimeout(() => {
+                        navigate("/signup/oauth");
+                    }, 0);
                 }
 
-                api.get(`/api/usuario/auth/${decoded.sub}`)
-                    .then(response => {
-                        setUser(response.data)
-                    })
-                    .catch(() => {
-                        setUser(null)
-                        setUserRoles(null)
-                    })
-                    .finally(() => {
-                        setLoading(false)
-                    })
+                if (decoded.roles.includes("ROLE_ADMIN")) {
+                    api.get(`/api/funcionario/auth/${decoded.sub}`)
+                        .then(response => {
+                            setAdmin(response.data)
+                            navigate("/admin/dashboard");
+                        })
+                        .catch(() => {
+                            setAdmin(null)
+                            setUserRoles(null)
+                        })
+                        .finally(() => {
+                            setLoading(false)
+                        })
+                } else {
+                    api.get(`/api/usuario/auth/${decoded.sub}`)
+                        .then(response => {
+                            setUser(response.data)
+                            navigate("/home");
+                        })
+                        .catch(() => {
+                            setUser(null)
+                            setUserRoles(null)
+                            navigate("/signup/oauth")
+                        })
+                        .finally(() => {
+                            setLoading(false)
+                        })
+                }
 
             } catch {
-
+                setAdmin(null)
                 setUser(null)
                 setUserRoles(null)
                 setLoading(false)
-
             }
         } else {
             setLoading(false)
@@ -125,6 +149,8 @@ export function AuthProvider({children}: AuthProviderProps) {
     }, [])
 
     const setTokens = (accessToken: string, refreshToken: string) => {
+        destroyCookie(undefined, "vozcidada.accessToken")
+        destroyCookie(undefined, "vozcidada.refreshToken")
         setCookie(undefined, "vozcidada.accessToken", accessToken, {
             maxAge: 60 * 60 * 1, // 1h
         });
@@ -141,18 +167,32 @@ export function AuthProvider({children}: AuthProviderProps) {
         });
 
         const {accessToken, refreshToken} = response.data;
-        setTokens(accessToken, refreshToken)
-
         const decoded = jwtDecode<JWTClaims>(accessToken);
-        setUserRoles(decoded.roles);
 
-        const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-        setUser(userResponse.data);
+        setUserRoles(decoded.roles);
+        setAuthStatus(decoded.auth_status);
+        setTokens(accessToken, refreshToken);
+
+        if (decoded.auth_status === "SIGNIN") {
+            navigate("/signup/oauth");
+            return;
+        }
 
         if (decoded.roles.includes("ROLE_ADMIN")) {
-            navigate("/admin/dashboard");
+            api.get(`/api/funcionario/auth/${decoded.sub}`)
+                .then(response => {
+                    setAdmin(response.data);
+                    navigate("/admin/dashboard");
+                });
         } else {
-            navigate("/home");
+            api.get(`/api/usuario/auth/${decoded.sub}`)
+                .then(response => {
+                    setUser(response.data);
+                    navigate("/home");
+                })
+                .catch(() => {
+                    navigate("/signup/oauth");
+                });
         }
     }
 
@@ -181,14 +221,20 @@ export function AuthProvider({children}: AuthProviderProps) {
 
             if (decoded.auth_status !== "SIGNIN") {
                 try {
-                    const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
-                    setUser(userResponse.data);
 
                     if (decoded.roles.includes("ROLE_ADMIN")) {
-                        navigate("/admin/dashboard");
-                    } else {
-                        navigate("/home");
+                        api.get(`/api/funcionario/auth/${decoded.sub}`)
+                            .then(response => {
+                                setAdmin(response.data)
+                            })
+                        navigate("/admin/dashboard")
                     }
+
+                    api.get(`/api/usuario/auth/${decoded.sub}`)
+                        .then(response => {
+                            setUser(response.data)
+                        });
+                    navigate("/home");
 
                 } catch {
                     console.error("Não foi possível recuperar as informações de usuário.");
@@ -230,9 +276,9 @@ export function AuthProvider({children}: AuthProviderProps) {
 
         const decoded = jwtDecode<JWTClaims>(accessToken);
         setUserRoles(decoded.roles);
+        setAuthStatus(decoded.auth_status)
         const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
         setUser(userResponse.data);
-
 
         if (decoded.roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
@@ -260,7 +306,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         setUser(userResponse.data);
 
         const updateTokens = await api.patch("/auth/updateAuthStatus");
-        const { accessToken, refreshToken } = updateTokens.data;
+        const {accessToken, refreshToken} = updateTokens.data;
         setTokens(accessToken, refreshToken)
         setCookie(undefined, "vozcidada.authType", "OAuth", {
             maxAge: 60 * 60 * 1 // 1h
@@ -272,7 +318,18 @@ export function AuthProvider({children}: AuthProviderProps) {
 
     return (
         <AuthContext.Provider
-            value={{user, userRoles, authStatus, isAuthenticated, loading, signIn, signUp, oAuthSignIn, oAuthSignUp}}>
+            value={{
+                user,
+                admin,
+                userRoles,
+                authStatus,
+                isAuthenticated,
+                loading,
+                signIn,
+                signUp,
+                oAuthSignIn,
+                oAuthSignUp
+            }}>
             {children}
         </AuthContext.Provider>
     )

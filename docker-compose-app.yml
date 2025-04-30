@@ -19,17 +19,6 @@ services:
     depends_on:
       - app
 
-  postgres:
-    image: postgres:16
-    ports:
-      - "5433:5432"
-    environment:
-      - POSTGRES_DB=voz-cidada
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=admin
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
 volumes:
   postgres-data:
   uploads-data:
