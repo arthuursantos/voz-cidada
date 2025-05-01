@@ -16,7 +16,7 @@ type RouteProps = {
 }
 
 const PrivateRoute = ({children, requiredRole}: RouteProps) => {
-    const {isAuthenticated, loading, userRoles} = useContext(AuthContext);
+    const {isAuthenticated, loading, userRoles, authStatus} = useContext(AuthContext);
 
     if (loading) {
         return "";
@@ -27,7 +27,11 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
     }
 
     if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
-        return <Navigate to="/admin/home"/>
+        return <Navigate to="/admin/dashboard"/>
+    }
+
+    if (authStatus == "SIGNIN") {
+        return <Navigate to="/signup/oauth"/>
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {
@@ -38,9 +42,12 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
 }
 
 const PublicRoute = ({children}: { children: ReactNode }) => {
-    const {isAuthenticated, loading} = useContext(AuthContext);
+    const {isAuthenticated, loading, authStatus} = useContext(AuthContext);
     if (loading) {
         return "";
+    }
+    if (authStatus == "SIGNIN") {
+        return <Navigate to="/signup/oauth"/>
     }
     if (isAuthenticated) {
         return <Navigate to={"/home"}/>
@@ -50,7 +57,6 @@ const PublicRoute = ({children}: { children: ReactNode }) => {
 
 const OAuthRoute = ({children}: { children: ReactNode }) => {
     const {authStatus, loading} = useContext(AuthContext)
-    console.log("oauth route: " + authStatus)
     if (loading) {
         return "";
     }
@@ -87,7 +93,7 @@ const App = () => {
                         />
 
                         <Route
-                            path="/admin/home"
+                            path="/admin/dashboard"
                             element={
                                 <PrivateRoute requiredRole="ROLE_ADMIN">
                                     <AdminDashboard/>

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class HistoricoService extends GenericService<HistoricoChamado, HistoricoDTO, Long> {
+
     public HistoricoService(HistoricoRepository repository) {
         super(repository, HistoricoDTO.class, HistoricoChamado.class);
     }
