@@ -14,6 +14,8 @@ tags:
     description: Operações relacionadas a funcionários
   - name: Chamado
     description: Operações relacionadas a chamados
+  - name: Upload de imagens
+    description: Operações relacionadas ao upload de imagens para chamados
 
 paths:
   /auth/login:
@@ -93,7 +95,7 @@ paths:
       summary: Registrar novo administrador
       description: Registro de um novo usuário com privilégios de administrador
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -115,7 +117,7 @@ paths:
       summary: Alterar senha
       description: Altera a senha do usuário autenticado
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -137,7 +139,7 @@ paths:
       summary: Atualizar status de autenticação
       description: Atualiza o status de autenticação do usuário
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Status atualizado com sucesso
@@ -155,7 +157,7 @@ paths:
       summary: Renovar token
       description: Renovar token de autenticação usando refresh token
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Tokens renovados com sucesso
@@ -173,7 +175,7 @@ paths:
       summary: Listar todos os funcionários
       description: Retorna uma lista paginada de funcionários
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/pageNumberParam'
@@ -200,7 +202,7 @@ paths:
       summary: Criar perfil de administrador
       description: Cria um novo perfil de administrador
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -224,7 +226,7 @@ paths:
       summary: Buscar funcionário por ID
       description: Retorna os detalhes de um funcionário específico
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -249,7 +251,7 @@ paths:
       summary: Buscar funcionário por ID de usuário autenticado
       description: Retorna os detalhes do funcionário associado ao ID de usuário autenticado
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: authUserId
           in: path
@@ -274,7 +276,7 @@ paths:
       summary: Listar todos os chamados
       description: Retorna uma lista paginada de todos os chamados
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/pageNumberParam'
@@ -303,7 +305,7 @@ paths:
       summary: Criar um novo chamado
       description: Cria um novo chamado com os dados fornecidos
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -329,7 +331,7 @@ paths:
       summary: Buscar chamado por ID
       description: Retorna os detalhes de um chamado específico
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -356,7 +358,7 @@ paths:
       summary: Atualizar um chamado existente
       description: Atualiza os dados de um chamado existente
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -384,7 +386,7 @@ paths:
       summary: Excluir um chamado
       description: Exclui um chamado específico
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -409,7 +411,7 @@ paths:
       summary: Listar chamados por ID de usuário
       description: Retorna uma lista paginada de chamados criados por um usuário específico
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: userId
           in: path
@@ -448,7 +450,7 @@ paths:
       summary: Listar chamados por secretaria
       description: Retorna uma lista paginada de chamados designados a uma secretaria específica
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: secretaria
           in: path
@@ -476,6 +478,76 @@ paths:
           description: Não autenticado
         '403':
           description: Sem permissão para acessar chamados desta secretaria
+  /api/chamado/upload/{filename}:
+    get:
+      tags:
+        - Upload de imagens
+      summary: Recuperar imagem de chamado
+      description: Retorna a imagem associada a um chamado pelo nome do arquivo
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Nome do arquivo da imagem
+      responses:
+        '200':
+          description: Imagem recuperada com sucesso
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Imagem não encontrada
+        '500':
+          description: Erro interno ao recuperar a imagem
+
+  /api/chamado/upload:
+      post:
+        tags:
+          - Upload de imagens
+          - Chamado
+        summary: Criar chamado com imagem
+        description: Cria um novo chamado com upload de imagem
+        security:
+          - bearerAuth: [ ]
+        requestBody:
+          required: true
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  usuarioId:
+                    type: integer
+                    format: int64
+                  secretaria:
+                    type: string
+                  descricao:
+                    type: string
+                  fotoAntesFile:
+                    type: string
+                    format: binary
+        responses:
+          '201':
+            description: Chamado criado com sucesso com imagem
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ChamadoDTO'
+            headers:
+              Location:
+                description: URL do chamado criado
+                schema:
+                  type: string
+          '400':
+            description: Dados inválidos ou falha no upload da imagem
+          '401':
+            description: Não autenticado
+          '403':
+            description: Sem permissão para criar chamado
 
 components:
   securitySchemes:
@@ -613,6 +685,9 @@ components:
         status:
           type: string
           description: Status atual do chamado
+        fotoAntesUrl:
+          type: string
+          description: URL da imagem associada ao chamado
         links:
           type: array
           items:

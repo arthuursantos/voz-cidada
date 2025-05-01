@@ -28,9 +28,6 @@ public class ChamadoUploadController {
     @Autowired
     private ChamadoService service;
 
-    @Autowired
-    private ChamadoRepository repository;
-
     @Value("${app.upload.dir:/app/uploads}")
     private String uploadDir;
 
@@ -65,6 +62,8 @@ public class ChamadoUploadController {
 
         return ResponseEntity.created(location).body(entityModel);
     }
+
+
 
     private String saveImage(MultipartFile file) {
         try {
