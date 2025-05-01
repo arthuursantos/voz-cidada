@@ -460,9 +460,12 @@ export function AuthProvider({children}: AuthProviderProps) {
                 dataCadastro: dataCadastro
             });
     
-            const {"vozcidada.accessToken": tokenBeforeUpdate} = parseCookies();
+            const { "vozcidada.accessToken": tokenBeforeUpdate } = parseCookies();
+            if (!tokenBeforeUpdate) {
+                throw new Error("Token de acesso não encontrado.");
+            }
+    
             const decoded = jwtDecode<JWTClaims>(tokenBeforeUpdate);
-
             const userResponse = await api.get(`/api/usuario/auth/${decoded.sub}`);
             setUser(userResponse.data);
     
@@ -472,12 +475,18 @@ export function AuthProvider({children}: AuthProviderProps) {
             }
     
             const updateTokens = await api.patch("/auth/updateAuthStatus");
-            const {accessToken, refreshToken} = updateTokens.data;
-            setTokens(accessToken, refreshToken)
+            const { accessToken, refreshToken } = updateTokens.data;
+            setTokens(accessToken, refreshToken);
             setCookie(undefined, "vozcidada.authType", "OAuth", {
                 maxAge: 60 * 60 * 1 // 1h
-            })
+            });
     
+            // Decodificar o novo token e atualizar os estados
+            const newDecoded = jwtDecode<JWTClaims>(accessToken);
+            setUserRoles(newDecoded.roles);
+            setAuthStatus(newDecoded.auth_status);
+    
+            // Forçar uma atualização do estado antes de navegar
             setTimeout(() => {
                 navigate("/dashboard", { replace: true });
             }, 0);

@@ -189,6 +189,8 @@ export default function AdminDashboard() {
         setShowEditChamado(true);
     }
 
+    let funcionarioFiltered = funcionarios.filter((f) => f.secretaria === "OBRAS" || f.secretaria === "URBANISMO");
+
     return (
         <div className="flex min-h-screen flex-col">
             {/* Header */}
@@ -301,13 +303,13 @@ export default function AdminDashboard() {
                                         </thead>
                                         <tbody>
                                             {
-                                            funcionarios.length === 0 ? (
+                                            funcionarioFiltered.length === 0 ? (
                                                 <tr className="border-b hover:bg-gray-50">
                                                     <td colSpan={5} className="p-4 text-center text-gray-500">Nenhum funcionário encontrado.</td>
                                                 </tr>
                                             ) :
                                             
-                                            funcionarios.map((funcionario) => (
+                                            funcionarioFiltered.map((funcionario) => (
                                             <tr key={funcionario.id} className="border-b hover:bg-gray-50">
                                                 <td className="p-4 font-medium">{funcionario.id}</td>
                                                 <td className="p-4">{funcionario.cpf}</td>
