@@ -5,4 +5,5 @@ export interface ChamadoInterface {
     secretaria: string;
     dataAbertura: string;
     status: string;
+    fotoAntesUrl: string
 }

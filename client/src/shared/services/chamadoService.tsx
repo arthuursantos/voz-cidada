@@ -1,5 +1,5 @@
 import api from "@/shared/axios.ts";
-import {ChamadoInterface} from "@/pages/Admin/types.ts";
+import {ChamadoInterface} from "@/pages/Admin/types";
 
 type ListChamadosParams = {
     page?: number;

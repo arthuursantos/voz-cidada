@@ -158,7 +158,7 @@ export function AuthProvider({children}: AuthProviderProps) {
                     api.get(`/api/usuario/auth/${decoded.sub}`)
                         .then(response => {
                             setUser(response.data)
-                            navigate("/home");
+                            navigate("/dashboard");
                         })
                         .catch(() => {
                             setUser(null)
@@ -203,29 +203,16 @@ export function AuthProvider({children}: AuthProviderProps) {
         const decoded = jwtDecode<JWTClaims>(accessToken);
 
         setUserRoles(decoded.roles);
-        setAuthStatus(decoded.auth_status);
-        setTokens(accessToken, refreshToken);
+        setAuthStatus(decoded.auth_status)
 
-        if (decoded.auth_status === "SIGNIN") {
-            navigate("/signup/oauth");
-            return;
-        }
+        setTokens(accessToken, refreshToken)
 
         if (decoded.roles.includes("ROLE_ADMIN")) {
             api.get(`/api/funcionario/auth/${decoded.sub}`)
                 .then(response => {
-                    setAdmin(response.data);
+                    setAdmin(response.data)
                     navigate("/admin/dashboard");
-                });
-        } else {
-            api.get(`/api/usuario/auth/${decoded.sub}`)
-                .then(response => {
-                    setUser(response.data);
-                    navigate("/dashboard");
                 })
-                .catch(() => {
-                    navigate("/signup/oauth");
-                });
         }
 
         api.get(`/api/usuario/auth/${decoded.sub}`)
@@ -300,8 +287,8 @@ export function AuthProvider({children}: AuthProviderProps) {
             const response = await api.post("/auth/oauth/google", {
                 email: googleresponse.data.email
             });
-
-            const pictureUrl = googleresponse.data.picture;
+            
+            const pictureUrl = googleresponse.data.picture;    
 
             setUserProfilePicture(pictureUrl);
             if (typeof window !== 'undefined') {
