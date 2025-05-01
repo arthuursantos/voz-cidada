@@ -36,7 +36,7 @@ type Admin = {
     id: number;
     cpf: string;
     cargo: string;
-    setor: string;
+    secretaria: string;
     dataCadastro: string;
 }
 
@@ -139,7 +139,6 @@ export function AuthProvider({children}: AuthProviderProps) {
                     setTimeout(() => {
                         navigate("/signup/oauth");
                     }, 0);
-
                 }
 
                 if (decoded.roles.includes("ROLE_ADMIN")) {
@@ -182,6 +181,8 @@ export function AuthProvider({children}: AuthProviderProps) {
     }, [])
 
     const setTokens = (accessToken: string, refreshToken: string) => {
+        destroyCookie(undefined, "vozcidada.accessToken")
+        destroyCookie(undefined, "vozcidada.refreshToken")
         setCookie(undefined, "vozcidada.accessToken", accessToken, {
             maxAge: 60 * 60 * 1, // 1h
         });
@@ -201,16 +202,29 @@ export function AuthProvider({children}: AuthProviderProps) {
         const decoded = jwtDecode<JWTClaims>(accessToken);
 
         setUserRoles(decoded.roles);
-        setAuthStatus(decoded.auth_status)
+        setAuthStatus(decoded.auth_status);
+        setTokens(accessToken, refreshToken);
 
-        setTokens(accessToken, refreshToken)
+        if (decoded.auth_status === "SIGNIN") {
+            navigate("/signup/oauth");
+            return;
+        }
 
         if (decoded.roles.includes("ROLE_ADMIN")) {
             api.get(`/api/funcionario/auth/${decoded.sub}`)
                 .then(response => {
-                    setAdmin(response.data)
+                    setAdmin(response.data);
                     navigate("/admin/dashboard");
+                });
+        } else {
+            api.get(`/api/usuario/auth/${decoded.sub}`)
+                .then(response => {
+                    setUser(response.data);
+                    navigate("/dashboard");
                 })
+                .catch(() => {
+                    navigate("/signup/oauth");
+                });
         }
 
         api.get(`/api/usuario/auth/${decoded.sub}`)

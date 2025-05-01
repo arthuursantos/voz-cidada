@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Voz Cidadã API
   description: API para o sistema Voz Cidadã
@@ -12,6 +12,8 @@ tags:
     description: Operações relacionadas à autenticação de usuários
   - name: Funcionário
     description: Operações relacionadas a funcionários
+  - name: Chamado
+    description: Operações relacionadas a chamados
 
 paths:
   /auth/login:
@@ -265,6 +267,216 @@ paths:
         '404':
           description: Funcionário não encontrado
 
+  /api/chamado:
+    get:
+      tags:
+        - Chamado
+      summary: Listar todos os chamados
+      description: Retorna uma lista paginada de todos os chamados
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/pageNumberParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: Lista de chamados recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChamadoDTO'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para acessar o recurso
+    post:
+      tags:
+        - Chamado
+      summary: Criar um novo chamado
+      description: Cria um novo chamado com os dados fornecidos
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChamadoDTO'
+      responses:
+        '201':
+          description: Chamado criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChamadoDTO'
+        '400':
+          description: Dados de entrada inválidos
+        '401':
+          description: Não autenticado
+
+  /api/chamado/{id}:
+    get:
+      tags:
+        - Chamado
+      summary: Buscar chamado por ID
+      description: Retorna os detalhes de um chamado específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Chamado encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChamadoDTO'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para acessar o recurso
+        '404':
+          description: Chamado não encontrado
+    put:
+      tags:
+        - Chamado
+      summary: Atualizar um chamado existente
+      description: Atualiza os dados de um chamado existente
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChamadoDTO'
+      responses:
+        '200':
+          description: Chamado atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChamadoDTO'
+        '400':
+          description: Dados de entrada inválidos
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para atualizar este chamado
+        '404':
+          description: Chamado não encontrado
+    delete:
+      tags:
+        - Chamado
+      summary: Excluir um chamado
+      description: Exclui um chamado específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Chamado excluído com sucesso
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para excluir este chamado
+        '404':
+          description: Chamado não encontrado
+
+  /api/chamado/user/{userId}:
+    get:
+      tags:
+        - Chamado
+      summary: Listar chamados por ID de usuário
+      description: Retorna uma lista paginada de chamados criados por um usuário específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/pageNumberParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: Lista de chamados do usuário recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChamadoDTO'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para acessar chamados de outro usuário
+        '404':
+          description: Usuário não encontrado
+
+  /api/chamado/secretaria/{secretaria}:
+    get:
+      tags:
+        - Chamado
+      summary: Listar chamados por secretaria
+      description: Retorna uma lista paginada de chamados designados a uma secretaria específica
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: secretaria
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/pageNumberParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: Lista de chamados da secretaria recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChamadoDTO'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para acessar chamados desta secretaria
+
 components:
   securitySchemes:
     bearerAuth:
@@ -373,6 +585,34 @@ components:
         authUserId:
           type: integer
           format: int64
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+
+    ChamadoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        usuarioId:
+          type: integer
+          format: int64
+          description: ID do usuário que criou o chamado
+        secretaria:
+          type: string
+          description: Secretaria responsável pelo chamado
+        descricao:
+          type: string
+          description: Descrição detalhada do chamado
+        dataCriacao:
+          type: string
+          format: date-time
+          description: Data e hora de criação do chamado
+        status:
+          type: string
+          description: Status atual do chamado
         links:
           type: array
           items:
