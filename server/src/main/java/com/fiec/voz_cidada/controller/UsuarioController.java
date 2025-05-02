@@ -50,6 +50,7 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
     public ResponseEntity<EntityModel<UsuarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
         try {
             var entity = service.findByAuthUserId(authUserId);
+
             service.checkUserAccess(entity.getContent().getId());
             return ResponseEntity.ok(entity);
         } catch (ResourceNotFoundException e) {

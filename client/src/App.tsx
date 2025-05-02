@@ -1,14 +1,21 @@
-import {ReactNode, useContext} from "react";
-import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+import { ReactNode, useContext } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
+import About from "@/pages/about/index.tsx";          
+import Contact from "@/pages/contact/index.tsx";        
+import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
+import AdminDashboard from "./pages/Admin/index.tsx";
+import Dashboard from "./pages/homePage/homePage.tsx";
+import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
+import Profile from "./pages/Profile/index.tsx";
+import Chamados from "./pages/Chamados/index.tsx";
+import SignIn from "./pages/SignIn/index.tsx";
+import SignUp from "./pages/SignUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import SignIn from '@/pages/SignIn';
-import {AuthContext, AuthProvider} from "@/contexts/AuthContext.tsx";
-import AdminDashboard from "@/pages/Admin";
-import SignUp from "@/pages/SignUp";
-import Chamados from "@/pages/Chamados";
-import Home from "@/pages/Home";
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
+import Home from "./pages/Home/index.tsx";
+
 
 type RouteProps = {
     children: ReactNode;
@@ -35,7 +42,7 @@ const PrivateRoute = ({children, requiredRole}: RouteProps) => {
     }
 
     if (requiredRole && !userRoles?.includes(requiredRole)) {
-        return <Navigate to="/home"/>
+        return <Navigate to="/dashboard"/>
     }
 
     return children;
@@ -50,7 +57,7 @@ const PublicRoute = ({children}: { children: ReactNode }) => {
         return <Navigate to="/signup/oauth"/>
     }
     if (isAuthenticated) {
-        return <Navigate to={"/home"}/>
+        return <Navigate to={"/dashboard"}/>
     }
     return children;
 }
@@ -61,7 +68,7 @@ const OAuthRoute = ({children}: { children: ReactNode }) => {
         return "";
     }
     if (authStatus == "SIGNUP") {
-        return <Navigate to="/home"/>
+        return <Navigate to="/dashboard"/>
     } else if (authStatus == null) {
         return <Navigate to="/signin"/>
     }
@@ -95,8 +102,8 @@ const App = () => {
                         <Route
                             path="/admin/dashboard"
                             element={
-                                <PrivateRoute requiredRole="ROLE_ADMIN">
-                                    <AdminDashboard/>
+                                <PrivateRoute requiredRole="ROLE_OWNER">
+                                    <AdminDashboard />
                                 </PrivateRoute>
                             }
                         />
@@ -110,6 +117,33 @@ const App = () => {
                             }
                         />
 
+                    <Route
+                        path="/dashboard"
+                        element={
+                            <PrivateRoute>
+                                <Dashboard />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/about" 
+                        element={
+                            <PrivateRoute>
+                                <About />
+                            </PrivateRoute> 
+                        }
+                    />
+
+                    <Route
+                        path="/contact"
+                        element={
+                            <PrivateRoute>
+                                <Contact />
+                            </PrivateRoute>
+                        }
+                    />
+
                         <Route
                             path="/chamados"
                             element={
@@ -118,6 +152,33 @@ const App = () => {
                                 </PrivateRoute>
                             }
                         />
+
+<Route
+                        path="/abrir-chamado" 
+                        element={
+                            <PrivateRoute>
+                                <AbrirChamado />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/redefinir-senha"
+                        element={
+                            <PrivateRoute>
+                                <ResetPassword />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    <Route 
+                        path="/conta"
+                        element={
+                            <PrivateRoute>
+                                <Profile />
+                            </PrivateRoute>
+                        }
+                    />
 
                         <Route
                             path="/signup/oauth"
@@ -128,8 +189,8 @@ const App = () => {
                             }
                         />
 
-                        <Route path="/" element={<Navigate to="/home"/>}/>
-                        <Route path="*" element={<Navigate to="/home"/>}/>
+                        <Route path="/" element={<Navigate to="/dashboard"/>}/>
+                        <Route path="*" element={<Navigate to="/dashboard"/>}/>
                     </Routes>
                 </AuthProvider>
             </BrowserRouter>
