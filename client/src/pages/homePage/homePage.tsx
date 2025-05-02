@@ -6,11 +6,11 @@ import BotaoChamado from '@/components/botaoChamado';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 import api from '@/shared/axios';
-import CreateChamadoDialog from '../chamados/components/CreateChamadoDialog';
+import CreateChamadoDialog from '../Chamados/components/CreateChamadoDialog';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from '@/components/ui/button';
-import GetChamadoDialog from '../chamados/components/GetChamadoDialog';
+import GetChamadoDialog from '../Chamados/components/GetChamadoDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FileText, Filter } from "lucide-react"
-import ChamadosCarousel from '../home/Components/ReportsCarousel';
+import ChamadosCarousel from '../Home/components/ReportsCarousel';
 
 
 type Status = "concluído" | "em andamento" | "pendente"

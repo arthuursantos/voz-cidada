@@ -83,6 +83,7 @@ type SignInResponseData = {
 }
 
 type AuthContextType = {
+    token: string | null;             // ← Linha adicionada
     user: User | null,
     admin: Admin | null,
     userRoles: string[] | null,
@@ -105,6 +106,7 @@ export const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({children}: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null)
+    const [token, setToken] = useState<string | null>(null)          // ← Linha adicionada
     const [admin, setAdmin] = useState<Admin | null>(null)
     const [loading, setLoading] = useState(true)
     const [userRoles, setUserRoles] = useState<string[] | null>(null)
@@ -129,6 +131,7 @@ export function AuthProvider({children}: AuthProviderProps) {
     useEffect(() => {
         const {"vozcidada.accessToken": accessToken} = parseCookies();
         if (accessToken) {
+            setToken(accessToken);     // linha adicionada
             try {
 
                 const decoded = jwtDecode<JWTClaims>(accessToken);
@@ -189,6 +192,8 @@ export function AuthProvider({children}: AuthProviderProps) {
         setCookie(undefined, "vozcidada.refreshToken", refreshToken, {
             maxAge: 60 * 60 * 24, // 24h
         });
+
+        setToken(accessToken);   // linha adicionada
     }
 
     async function signIn({login, password}: SignInData) {
@@ -484,6 +489,7 @@ export function AuthProvider({children}: AuthProviderProps) {
     return (
         <AuthContext.Provider
             value={{
+                token,     // linha adicionada
                 user,
                 admin,
                 userRoles,
