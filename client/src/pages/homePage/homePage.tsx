@@ -195,7 +195,7 @@ export default function Dashboard() {
           <>
 
             {/* List Cards */}
-            <h1 className='text-center text-2xl font-montserrat text-[--cor-primaria]'>CHAMADOS</h1>
+            <h1 className='text-center text-2xl font-montserrat text-[--cor-primaria]'>SEUS CHAMADOS</h1>
             <div className="max-w-7xl mx-auto font-lato p-4 space-y-3">
               {
                 filteredChamados.length === 0 ? (
