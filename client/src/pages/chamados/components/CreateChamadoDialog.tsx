@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ArrowLeft, Camera, Upload, X, MapPin } from "lucide-react";
 import L from "leaflet";
+import { Icon } from "leaflet";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -60,6 +61,13 @@ interface CreateChamadoDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
+
+const customIcon = new Icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png', // URL do ícone
+  iconSize: [32, 32], // Tamanho do ícone
+  iconAnchor: [16, 32], // Ponto de ancoragem
+  popupAnchor: [0, -32] // Onde o popup deve aparecer em relação ao ícone
+});
 
 export default function CreateChamadoDialog({ 
   open, 
@@ -107,7 +115,7 @@ export default function CreateChamadoDialog({
         if (markerRef.current) {
           markerRef.current.setLatLng([lat, lng]);
         } else {
-          markerRef.current = L.marker([lat, lng]).addTo(mapRef.current!);
+          markerRef.current = L.marker([lat, lng], {icon: customIcon}).addTo(mapRef.current!);
         }
       });
     }
