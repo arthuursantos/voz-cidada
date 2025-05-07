@@ -36,7 +36,7 @@ type Admin = {
     id: number;
     cpf: string;
     cargo: string;
-    setor: string;
+    secretaria: string;
     dataCadastro: string;
 }
 
@@ -142,7 +142,6 @@ export function AuthProvider({children}: AuthProviderProps) {
                     setTimeout(() => {
                         navigate("/signup/oauth");
                     }, 0);
-
                 }
 
                 if (decoded.roles.includes("ROLE_ADMIN")) {
@@ -173,6 +172,7 @@ export function AuthProvider({children}: AuthProviderProps) {
                             setLoading(false)
                         })
                 }
+
             } catch {
                 setAdmin(null)
                 setUser(null)
@@ -185,6 +185,8 @@ export function AuthProvider({children}: AuthProviderProps) {
     }, [])
 
     const setTokens = (accessToken: string, refreshToken: string) => {
+        destroyCookie(undefined, "vozcidada.accessToken")
+        destroyCookie(undefined, "vozcidada.refreshToken")
         setCookie(undefined, "vozcidada.accessToken", accessToken, {
             maxAge: 60 * 60 * 1, // 1h
         });
@@ -256,6 +258,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         
         // Limpa o estado do usuário e roles
         setUser(null);
+        setAdmin(null);
         setUserRoles(null);
         setAuthStatus(null);
         setIsGoogleUser(false);
@@ -289,8 +292,8 @@ export function AuthProvider({children}: AuthProviderProps) {
             const response = await api.post("/auth/oauth/google", {
                 email: googleresponse.data.email
             });
-
-            const pictureUrl = googleresponse.data.picture;
+            
+            const pictureUrl = googleresponse.data.picture;    
 
             setUserProfilePicture(pictureUrl);
             if (typeof window !== 'undefined') {

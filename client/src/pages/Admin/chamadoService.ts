@@ -1,4 +1,5 @@
 import api from "@/shared/axios";
+import { ChamadoInterface } from "./types";
 
 const chamadoService = {
     getAllChamados: (page: number = 0, size: number = 10, sort?: string) => {
@@ -9,16 +10,8 @@ const chamadoService = {
         return api.get('/api/chamado', { params });
     },
 
-    updateChamado: (data: {
-        id: number;
-        secretaria: string;
-        usuarioId: number;
-    }) => {
-        return api.put('/api/chamado', {
-            id: data.id,
-            secretaria: data.secretaria,
-            usuarioId: data.usuarioId
-        });
+    updateChamado: async (data: ChamadoInterface) => {
+        return await api.put('/api/chamado', data);
     }
 };
 

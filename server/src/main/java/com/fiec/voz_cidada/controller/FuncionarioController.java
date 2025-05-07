@@ -36,7 +36,7 @@ public class FuncionarioController extends GenericController<Funcionario, Funcio
         try {
             return ResponseEntity.ok(service.findAll(pageable));
         } catch (Exception e) {
-            throw new UnauthorizedException("Você não tem permissão para acessar este recurso.");
+            throw new RuntimeException("Não foi possível recuperar os funcionários: " + e.getMessage());
         }
     }
 
@@ -51,6 +51,7 @@ public class FuncionarioController extends GenericController<Funcionario, Funcio
     public ResponseEntity<EntityModel<FuncionarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
         try {
             var entity = service.findByAuthUserId(authUserId);
+            System.out.println("auth id da entity: "+entity.getContent().getAuthId());
             service.checkUserAccess(entity.getContent().getId());
             return ResponseEntity.ok(entity);
         } catch (ResourceNotFoundException e) {

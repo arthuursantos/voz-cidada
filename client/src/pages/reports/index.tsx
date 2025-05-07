@@ -1,4 +1,4 @@
-import Sidebar from "../../components/Sidebar/index.tsx"
+import Sidebar from "@/components/Sidebar/index.tsx"
 import ReportsSection from "./components/ReportsSection.tsx"
 
 export default function Reports() {

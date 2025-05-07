@@ -14,6 +14,8 @@ interface Chamado {
     status: string
     fotoAntesUrl: string | null
     fotoDepoisUrl: string | null
+    latitude: number | null
+    longitude: number | null
 }
 
 interface ChamadoDialogProps {
@@ -56,32 +58,27 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
         let depoisObjectUrl: string | null = null
 
         const fetchImages = async () => {
-            if (chamado?.fotoAntesUrl) {
-                try {
+            try {
+                if (chamado?.fotoAntesUrl) {
                     const response = await api.get(chamado.fotoAntesUrl, { responseType: 'blob' })
                     antesObjectUrl = URL.createObjectURL(response.data)
                     setImagemAntes(antesObjectUrl)
-                } catch (error) {
-                    console.error("Erro ao carregar imagem antes:", error)
                 }
-            }
-
-            if (chamado?.fotoDepoisUrl) {
-                try {
+                if (chamado?.fotoDepoisUrl) {
                     const response = await api.get(chamado.fotoDepoisUrl, { responseType: 'blob' })
                     depoisObjectUrl = URL.createObjectURL(response.data)
                     setImagemDepois(depoisObjectUrl)
-                } catch (error) {
-                    console.error("Erro ao carregar imagem depois:", error)
                 }
+            } catch (error) {
+                console.error("Erro ao carregar imagens:", error)
             }
         }
 
         fetchImages()
 
         return () => {
-            if (antesObjectUrl) URL.revokeObjectURL(antesObjectUrl)
-            if (depoisObjectUrl) URL.revokeObjectURL(depoisObjectUrl)
+            if (imagemAntes) URL.revokeObjectURL(imagemAntes)
+            if (imagemDepois) URL.revokeObjectURL(imagemDepois)
         }
     }, [chamado])
 
@@ -113,6 +110,22 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
                         <div className="mt-6">
                             <h3 className="text-sm font-medium mb-2">Descrição</h3>
                             <p className="text-sm text-muted-foreground whitespace-pre-line">{chamado.descricao}</p>
+                        </div>
+
+                        <div className="mt-6">
+                            <h3 className="text-sm font-medium mb-2">Localização:</h3>
+                            {chamado.latitude && chamado.longitude ? (
+                                <iframe
+                                    src={`https://maps.google.com/maps?q=${chamado.latitude},${chamado.longitude}&markers=${chamado.latitude},${chamado.longitude}&z=15&output=embed`}
+                                    width="100%"
+                                    height="300"
+                                    className="border rounded-md"
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                />
+                            ) : (
+                                <p className="text-sm text-muted-foreground">Localização não informada</p>
+                            )}
                         </div>
                     </div>
 

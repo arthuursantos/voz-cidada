@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FileText, Filter } from "lucide-react"
-import ChamadosCarousel from '../Home/components/ReportsCarousel';
+import ChamadosCarousel from '../Home/Components/ReportsCarousel';
 
 
 type Status = "concluído" | "em andamento" | "pendente"
@@ -31,6 +31,8 @@ interface Chamado {
   status: string
   fotoAntesUrl: string | null
   fotoDepoisUrl: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 interface ApiResponse {
@@ -195,7 +197,7 @@ export default function Dashboard() {
           <>
 
             {/* List Cards */}
-            <h1 className='text-center text-2xl font-montserrat text-[--cor-primaria]'>CHAMADOS</h1>
+            <h1 className='text-center text-2xl font-montserrat text-[--cor-primaria]'>SEUS CHAMADOS</h1>
             <div className="max-w-7xl mx-auto font-lato p-4 space-y-3">
               {
                 filteredChamados.length === 0 ? (

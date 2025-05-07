@@ -3,7 +3,8 @@ package com.fiec.voz_cidada.domain.chamado;
 public enum Secretaria {
 
     OBRAS("OBRAS"),
-    URBANISMO("URBANISMO");
+    URBANISMO("URBANISMO"),
+    ALL("ALL");
 
     private String secretaria;
 

@@ -24,6 +24,8 @@ interface Chamado {
     status: string
     fotoAntesUrl: string | null
     fotoDepoisUrl: string | null
+    latitude: number | null
+    longitude: number | null
 }
 
 interface ApiResponse {

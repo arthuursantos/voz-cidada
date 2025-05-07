@@ -4,25 +4,20 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
 
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
-
-import ChamadoDetail from "@/pages/Funcionario/ChamadoDetail.tsx";
-import HistoricoFuncionario from "@/pages/Funcionario/Historico.tsx";
-import ProfileFuncionario from "@/pages/Funcionario/Profile.tsx";
-import DashboardFuncionario from "@/pages/Funcionario/Dashboard.tsx";
-
-import About from "@/pages/about/index.tsx";
-import Contact from "@/pages/contact/index.tsx";
-import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";
-import AdminDashboard from "@/pages/Admin/index.tsx";
-import Home from "@/pages/Home/index.tsx";
-import Dashboard from "@/pages/homePage/homePage.tsx";
-import AbrirChamado from "@/pages/abrirChamado/index.tsx";
-import Profile from "@/pages/Profile/index.tsx";
-import Chamados from "@/pages/Chamados/index.tsx";
-import SignIn from "@/pages/SignIn/index.tsx";
-import SignUp from "@/pages/SignUp/index.tsx";
-import OAuthSignUp from "@/pages/OAuthSignUp/index.tsx";
-
+import About from "@/pages/about/index.tsx";          
+import Contact from "@/pages/contact/index.tsx";        
+import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
+import AdminDashboard from "./pages/Admin/index.tsx";
+import Dashboard from "./pages/homePage/homePage.tsx";
+import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
+import Profile from "./pages/Profile/index.tsx";
+import Chamados from "./pages/Chamados/index.tsx";
+import SignIn from "./pages/SignIn/index.tsx";
+import SignUp from "./pages/SignUp/index.tsx";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import OAuthSignUp from "@/pages/OAuthSignUp";
+import {Toaster} from "react-hot-toast";
+import Home from "./pages/Home/index.tsx";
 
 type RouteProps = {
     children: ReactNode;

@@ -55,6 +55,11 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         }
         AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
 
+        if (currentAuthUser.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_OWNER"))) {
+            return;
+        }
+
         Funcionario entity = repository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
         if (!entity.getAuthUser().getId().equals(currentAuthUser.getId())) {
@@ -81,7 +86,6 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
     public EntityModel<FuncionarioDTO> createAdminProfile(FuncionarioDTO dto) {
         AuthUser authUser = authRepository.findById(dto.getAuthId())
                 .orElseThrow(() -> new ResourceNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
-        System.out.println(dto);
         Funcionario entity = convertToEntity(dto);
         entity.setAuthUser(authUser);
         entity.setDataCadastro(LocalDateTime.now());

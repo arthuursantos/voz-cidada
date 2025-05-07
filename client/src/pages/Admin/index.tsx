@@ -10,8 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import authService from "@/shared/services/authServices";
 import { jwtDecode } from "jwt-decode";
 import api from "@/shared/axios";
-import funcionarioService from "./funcionarioServices";
-import chamadoService from "./chamadoService";
+import funcionarioService from "./funcionarioServices.ts";
+import chamadoService from "./chamadoService.ts";
+import { ChamadoInterface } from "./types.ts";
 
 // Define the structure of a Funcionario object
 interface Funcionario {
@@ -22,30 +23,14 @@ interface Funcionario {
     email?: string;
 }
 
-interface Chamado {
-    id: number;
-    usuarioId: number;
-    titulo: string;
-    descricao: string;
-    dataAbertura: string;
-    status: string;
-    fotoAntesFile: string | null;
-    fotoAntesUrl: string | null;
-    fotoDepoisUrl: string | null;
-    secretaria: string | null;
-    latitude: number | null;
-    longitude: number | null;
-}
-
-
 export default function AdminDashboard() {
     
     const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
     const [showEditChamado, setShowEditChamado] = useState(false);
     const [activeTab, setActiveTab] = useState("sectors");
     const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-    const [chamados, setChamados] = useState<Chamado[]>([]);
-    const [editingChamado, setEditingChamado] = useState<Chamado | null>(null);
+    const [chamados, setChamados] = useState<ChamadoInterface[]>([]);
+    const [editingChamado, setEditingChamado] = useState<ChamadoInterface | null>(null);
 
     const getFuncionarios = async () => {
         try {
@@ -62,7 +47,7 @@ export default function AdminDashboard() {
         try {
             const response = await chamadoService.getAllChamados(0, 10, "id,desc");
             console.log("Chamados:", response.data._embedded.chamadoDTOList);
-            const chamadosSecretariaNull = response.data._embedded.chamadoDTOList.filter((chamado: Chamado) => {
+            const chamadosSecretariaNull = response.data._embedded.chamadoDTOList.filter((chamado: ChamadoInterface) => {
                 return chamado.secretaria === null;
             })
             setChamados(Array.isArray(chamadosSecretariaNull) ? chamadosSecretariaNull : []);
@@ -149,9 +134,8 @@ export default function AdminDashboard() {
         
         try {
             const updatedChamado = {
-                id: editingChamado.id,
-                secretaria: data.secretaria || "", // Ensure secretaria is a string
-                usuarioId: editingChamado.usuarioId
+                ...editingChamado,
+                secretaria: data.secretaria || editingChamado.secretaria,
             };
 
             console.log("Chamado atualizado:", updatedChamado);
@@ -181,13 +165,15 @@ export default function AdminDashboard() {
         });
     }
 
-    function handleEditChamado(chamado: Chamado): void {
+    function handleEditChamado(chamado: ChamadoInterface): void {
         setEditingChamado(chamado);
         if (chamado.secretaria) {
             setValue("secretaria", chamado.secretaria as "OBRAS" | "URBANISMO");
         }
         setShowEditChamado(true);
     }
+
+    let funcionarioFiltered = funcionarios.filter((f) => f.secretaria === "OBRAS" || f.secretaria === "URBANISMO");
 
     return (
         <div className="flex min-h-screen flex-col">
@@ -246,8 +232,6 @@ export default function AdminDashboard() {
                                 <div className="rounded-lg border bg-white shadow">
                                     <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
                                         <h3 className="text-lg font-medium">Obras Públicas</h3>
-                                        <button className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center text-red-500">
-                                        </button>
                                     </div>
                                     <div className="p-4">
                                         <div className="text-sm text-gray-500 mb-2">
@@ -258,7 +242,7 @@ export default function AdminDashboard() {
                                                 Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "OBRAS").length}</span>
                                             </div>
                                             <div>
-                                                Chamados: <span className="font-medium">0</span>
+                                            Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "OBRAS").length}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -267,8 +251,6 @@ export default function AdminDashboard() {
                                 <div className="rounded-lg border bg-white shadow">
                                     <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
                                         <h3 className="text-lg font-medium">Urbanismo</h3>
-                                        <button className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center text-red-500">
-                                        </button>
                                     </div>
                                     <div className="p-4">
                                         <div className="text-sm text-gray-500 mb-2">Responsável pelo planejamento do espaço urbano</div>
@@ -277,7 +259,7 @@ export default function AdminDashboard() {
                                                 Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "URBANISMO").length}</span>
                                             </div>
                                             <div>
-                                                Chamados: <span className="font-medium">0</span>
+                                                Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "URBANISMO").length}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -301,13 +283,13 @@ export default function AdminDashboard() {
                                         </thead>
                                         <tbody>
                                             {
-                                            funcionarios.length === 0 ? (
+                                            funcionarioFiltered.length === 0 ? (
                                                 <tr className="border-b hover:bg-gray-50">
                                                     <td colSpan={5} className="p-4 text-center text-gray-500">Nenhum funcionário encontrado.</td>
                                                 </tr>
                                             ) :
                                             
-                                            funcionarios.map((funcionario) => (
+                                            funcionarioFiltered.map((funcionario) => (
                                             <tr key={funcionario.id} className="border-b hover:bg-gray-50">
                                                 <td className="p-4 font-medium">{funcionario.id}</td>
                                                 <td className="p-4">{funcionario.cpf}</td>
@@ -352,7 +334,7 @@ export default function AdminDashboard() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {chamados.map((chamado: Chamado) => (
+                                                {chamados.map((chamado: ChamadoInterface) => (
                                                     <tr key={chamado.id} className="border-b hover:bg-gray-50">
                                                         <td className="p-4 font-medium">{chamado.id}</td>
                                                         <td className="p-4">{chamado.titulo}</td>

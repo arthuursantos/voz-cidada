@@ -87,11 +87,16 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         }
         AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
 
+        System.out.println(currentAuthUser.getAuthorities());
+        if (currentAuthUser.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
+            return;
+        }
+
         Usuario entity = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
         if (!entity.getAuthUser().getId().equals(currentAuthUser.getId())) {
             throw new UnauthorizedException("Você não tem permissão para acessar este recurso.");
-
         }
     }
 

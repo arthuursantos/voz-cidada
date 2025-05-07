@@ -1,4 +1,18 @@
+version: "3.8"
+
 services:
+  postgres:
+    image: postgres:16
+    container_name: postgres-voz-cidada
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=voz-cidada
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
   app:
     build: server
     ports:
@@ -18,17 +32,6 @@ services:
       - "5173:80"
     depends_on:
       - app
-
-  postgres:
-    image: postgres:16
-    ports:
-      - "5433:5432"
-    environment:
-      - POSTGRES_DB=voz-cidada
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=admin
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
 
 volumes:
   postgres-data:

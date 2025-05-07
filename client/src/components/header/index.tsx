@@ -5,7 +5,7 @@ import { useContext, useState } from 'react'
 import { AuthContext } from '@/contexts/AuthContext'
 
 function Header() {
-    const { isGoogleUser, user, isAuthenticated, signOut, userProfilePicture } = useContext(AuthContext)
+    const { isGoogleUser, user, admin, isAuthenticated, signOut, userProfilePicture } = useContext(AuthContext)
     const location = useLocation() 
     const rotasOcultas = ["/dashboard", "/admin/dashboard"]
     const [showMenu, setShowMenu] = useState(false)
@@ -36,7 +36,7 @@ function Header() {
                     <div className="flex flex-col">
                         <Link to="/conta">
                             <span className="text-sm hover:underline">
-                                {isAuthenticated && user ? user.nome : 'Nome_Cidadao'}
+                                {isAuthenticated ? (user ? user.nome : admin ? admin.cpf : "Nome_Cidadao") : "Nome_Cidadao"}
                             </span>
                         </Link>
                         <button 
