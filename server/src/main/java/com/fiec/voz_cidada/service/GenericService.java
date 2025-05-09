@@ -1,6 +1,9 @@
 package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
+import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
+import com.fiec.voz_cidada.domain.chamado.Secretaria;
+import com.fiec.voz_cidada.domain.funcionario.Funcionario;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.exceptions.UnauthorizedException;
@@ -17,7 +20,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.Serializable;
@@ -29,7 +31,7 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
     private final Class<T> entityClass;
 
     @Autowired
-    private ModelMapper mapper;
+    protected ModelMapper mapper;
     @Autowired
     private UsuarioRepository usuarioRepository;
     @Autowired
@@ -44,7 +46,6 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         this.dtoClass = dtoClass;
         this.entityClass = entityClass;
     }
-
 
     public PagedModel<EntityModel<D>> findAll(Pageable pageable) {
         Page<T> entities = repository.findAll(pageable);
@@ -80,24 +81,25 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         repository.deleteById(id);
     }
 
-    public void checkUserAccess(Long userId) {
+    public void checkAccess(Long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedException("Usuário não autenticado.");
         }
         AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
 
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (currentAuthUser.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
+            return;
+        }
 
-        if (!isAdmin) {
-            Usuario entity = usuarioRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
-            if (!entity.getAuthUser().getId().equals(currentAuthUser.getId())) {
-                throw new UnauthorizedException("Você não tem permissão para acessar este recurso.");
-            }
+        Usuario entity = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+        if (!entity.getAuthUser().getId().equals(currentAuthUser.getId())) {
+            throw new UnauthorizedException("Você não tem permissão para acessar este recurso.");
         }
     }
+
 
     public D convertToDto(T entity) {
         return mapper.map(entity, dtoClass);

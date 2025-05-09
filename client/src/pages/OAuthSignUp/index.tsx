@@ -93,9 +93,9 @@ export default function OAuthSignUp() {
                 await oAuthSignUp(data);
             },
             {
-                loading: "Salvando suas informações...",
-                success: "Suas informações foram salvas!",
-                error: "Verifique suas informações novamente."
+                loading: "Salvando...",
+                success: "Salvo!",
+                error: "Algo deu errado."
             },
         )
     }

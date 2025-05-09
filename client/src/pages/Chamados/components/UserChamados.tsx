@@ -1,4 +1,4 @@
-import api from "@/lib/axios"
+import api from "@/shared/axios.ts"
 import { AuthContext } from "@/contexts/AuthContext"
 import CreateChamadoDialog from './CreateChamadoDialog'
 import GetChamadoDialog from "./GetChamadoDialog"
@@ -12,23 +12,12 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {ChamadoInterface, Status} from "@/shared/types.ts";
 import { FileText, Filter, Plus } from "lucide-react"
-
-type Status = "concluído" | "em andamento" | "pendente"
-
-interface Chamado {
-    id: number
-    titulo: string
-    descricao: string
-    dataAbertura: string
-    status: string
-    fotoAntesUrl: string | null
-    fotoDepoisUrl: string | null
-}
 
 interface ApiResponse {
     _embedded: {
-        chamadoDTOList: Chamado[]
+        chamadoDTOList: ChamadoInterface[]
     }
     page: {
         totalElements: number
@@ -36,36 +25,26 @@ interface ApiResponse {
 }
 
 const STATUS_COLORS: Record<Status, string> = {
-    concluído: "bg-green-500",
-    "em andamento": "bg-blue-500",
-    pendente: "bg-yellow-500",
-}
-
-const STATUS_MAP: Record<string, Status> = {
-    CONCLUIDO: "concluído",
-    EM_ANDAMENTO: "em andamento",
-    PENDENTE: "pendente",
-}
-
-const statusMapping = (apiStatus: string): Status => {
-    return STATUS_MAP[apiStatus] || "pendente"
+    "CONCLUÍDO": "bg-green-500",
+    "EM ANDAMENTO": "bg-blue-500",
+    "PENDENTE": "bg-yellow-500",
 }
 
 const formatDate = (dateString: string): string => {
     try {
         const date = new Date(dateString)
         return date.toLocaleDateString("pt-BR")
-    } catch (e) {
+    } catch {
         return dateString
     }
 }
 
 export default function UserChamados() {
-    const [chamados, setChamados] = useState<Chamado[]>([])
+    const [chamados, setChamados] = useState<ChamadoInterface[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [statusFilter, setStatusFilter] = useState<Status[]>(["concluído", "em andamento", "pendente"])
-    const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null)
+    const [statusFilter, setStatusFilter] = useState<Status[]>(["CONCLUÍDO", "EM ANDAMENTO", "PENDENTE"])
+    const [selectedChamado, setSelectedChamado] = useState<ChamadoInterface | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [novoChamadoDialogOpen, setNovoChamadoDialogOpen] = useState(false)
 
@@ -103,7 +82,7 @@ export default function UserChamados() {
     }
 
     const filteredChamados = chamados.filter((chamado) =>
-        statusFilter.includes(statusMapping(chamado.status))
+        statusFilter.includes(chamado.status)
     )
 
     if (loading) {
@@ -161,7 +140,6 @@ export default function UserChamados() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredChamados.map((chamado) => {
-                    const status = statusMapping(chamado.status)
                     return (
                         <Card key={chamado.id} className="hover:shadow-md transition-shadow">
                             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -173,8 +151,8 @@ export default function UserChamados() {
                                     <p className="text-sm text-muted-foreground">
                                         Criado em {formatDate(chamado.dataAbertura)}
                                     </p>
-                                    <Badge className={`${STATUS_COLORS[status]} text-white`}>
-                                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    <Badge className={`${STATUS_COLORS[chamado.status]} text-white`}>
+                                        {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
                                     </Badge>
                                 </div>
                                 <Button
