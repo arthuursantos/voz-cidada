@@ -18,6 +18,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "chamado")
 public class Chamado implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,20 +28,22 @@ public class Chamado implements Serializable {
     private Usuario usuario;
 
     @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
+    @Fetch(FetchMode.JOIN)
+    private List<HistoricoChamado> historicos;
+
+    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
     private List<Avaliacao> avaliacao;
+
+    @Enumerated(EnumType.STRING)
+    private Secretaria secretaria;
 
     private String titulo;
     private String descricao;
     private LocalDateTime dataAbertura;
     private String status;
-    private String secretaria;
     private String fotoAntesUrl;
     private String fotoDepoisUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
-
-    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
-    @Fetch(FetchMode.JOIN)
-    private List<HistoricoChamado> historicos;
 
 }

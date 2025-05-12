@@ -15,6 +15,7 @@ public class HistoricoDTO extends RepresentationModel<HistoricoDTO> implements S
 
     private Long id;
     private Long chamadoId;
+    private Long funcionarioId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataModificacao;
     private String statusAnterior;

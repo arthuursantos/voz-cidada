@@ -70,7 +70,6 @@ export default function SignUp() {
     }
 
     const handleSignUp: SubmitHandler<SignUpData> = async (data) => {
-        console.log(data)
         await signUp(data)
     }
 

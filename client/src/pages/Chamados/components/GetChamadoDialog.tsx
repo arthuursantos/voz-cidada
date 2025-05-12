@@ -2,40 +2,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
-import api from "@/lib/axios"
-
-type Status = "concluído" | "em andamento" | "pendente"
-
-interface Chamado {
-    id: number
-    titulo: string
-    descricao: string
-    dataAbertura: string
-    status: string
-    fotoAntesUrl: string | null
-    fotoDepoisUrl: string | null
-}
+import api from "@/shared/axios.ts"
+import {ChamadoInterface, Status} from "@/shared/types.ts";
 
 interface ChamadoDialogProps {
-    chamado: Chamado | null
+    chamado: ChamadoInterface | null
     open: boolean
     onOpenChange: (open: boolean) => void
 }
 
-const STATUS_MAP: Record<string, Status> = {
-    CONCLUIDO: "concluído",
-    EM_ANDAMENTO: "em andamento",
-    PENDENTE: "pendente",
-}
-
 const STATUS_COLORS: Record<Status, string> = {
-    concluído: "bg-green-500",
-    "em andamento": "bg-blue-500",
-    pendente: "bg-yellow-500",
-}
-
-const statusMapping = (apiStatus: string): Status => {
-    return STATUS_MAP[apiStatus] || "pendente"
+    "CONCLUÍDO": "bg-green-500",
+    "EM ANDAMENTO": "bg-blue-500",
+    "PENDENTE": "bg-yellow-500",
 }
 
 const formatDate = (dateString: string): string => {
@@ -87,8 +66,7 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
 
     if (!chamado) return null
 
-    const status = statusMapping(chamado.status)
-    const statusColor = STATUS_COLORS[status]
+    const statusColor = STATUS_COLORS[chamado.status]
     const hasFotoAntes = Boolean(chamado.fotoAntesUrl)
     const hasFotoDepois = Boolean(chamado.fotoDepoisUrl)
     const hasAnyPhotos = hasFotoAntes || hasFotoDepois
@@ -102,7 +80,7 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
                             <div className="flex items-center justify-between mb-2">
                                 <DialogTitle className="text-xl">{chamado.titulo}</DialogTitle>
                                 <Badge className={`${statusColor} text-white mr-6`}>
-                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
                                 </Badge>
                             </div>
                             <DialogDescription className="text-sm text-muted-foreground">
@@ -114,6 +92,16 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
                             <h3 className="text-sm font-medium mb-2">Descrição</h3>
                             <p className="text-sm text-muted-foreground whitespace-pre-line">{chamado.descricao}</p>
                         </div>
+
+                        {chamado.historicos.map((historico) => {
+                            return (
+                                <div key={historico.id}>
+                                    <p>{historico.dataModificacao}</p>
+                                    <p>Atualizado para {historico.statusNovo}</p>
+                                    <p>{historico.observacao}</p>
+                                </div>
+                            )
+                        })}
                     </div>
 
                     {hasAnyPhotos ? (

@@ -1,6 +1,6 @@
 import {useState, useContext, useEffect} from "react";
 import {AuthContext} from "@/contexts/AuthContext.tsx";
-import api from "@/lib/axios.ts";
+import api from "@/shared/axios.ts";
 import {
     Dialog,
     DialogContent,
@@ -25,7 +25,7 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {AlertCircle, Users, ArrowLeft} from "lucide-react";
 import {Alert, AlertDescription} from "@/components/ui/alert.tsx";
-import {cn} from "@/lib/utils.ts";
+import {cn} from "@/shared/utils.ts";
 import {parseCookies} from "nookies";
 
 type UpdateUserData = {

@@ -1,7 +1,6 @@
 package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
-import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.service.ChamadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +27,6 @@ public class ChamadoUploadController {
     @Autowired
     private ChamadoService service;
 
-    @Autowired
-    private ChamadoRepository repository;
-
     @Value("${app.upload.dir:/app/uploads}")
     private String uploadDir;
 
@@ -53,7 +49,7 @@ public class ChamadoUploadController {
 
     @PostMapping
     public ResponseEntity<EntityModel<ChamadoDTO>> createWithImage(ChamadoDTO dto) {
-        service.checkUserAccess(dto.getUsuarioId());
+        service.checkAccess(dto.getUsuarioId());
         String fotoAntesUrl = saveImage(dto.getFotoAntesFile());
         dto.setFotoAntesUrl(fotoAntesUrl);
         EntityModel<ChamadoDTO> entityModel = service.create(dto);
@@ -65,6 +61,8 @@ public class ChamadoUploadController {
 
         return ResponseEntity.created(location).body(entityModel);
     }
+
+
 
     private String saveImage(MultipartFile file) {
         try {
