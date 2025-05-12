@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/chamado")
@@ -45,11 +46,17 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
         return ResponseEntity.ok(service.findBySecretaria(secretaria, pageable));
     }
 
+    @GetMapping("/status")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<String>> findAllStatus() {
+        List<String> status = repository.findAllStatus();
+        return ResponseEntity.ok(status);
+    }
+
     @Override
     @PutMapping
-    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<EntityModel<ChamadoDTO>> update(@RequestBody ChamadoDTO dto) {
-        service.checkUserAccess(dto.getUsuarioId());
         EntityModel<ChamadoDTO> entityModel = service.update(dto);
         return ResponseEntity.ok(entityModel);
     }
@@ -59,7 +66,7 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Chamado entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi possível excluir os dados. O chamado não foi encontrado."));
-        service.checkUserAccess(entity.getUsuario().getId());
+        service.checkAccess(entity.getUsuario().getId());
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -67,7 +74,7 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
     @Override
     @PostMapping
     public ResponseEntity<EntityModel<ChamadoDTO>> create(@RequestBody ChamadoDTO dto) {
-        service.checkUserAccess(dto.getUsuarioId());
+        service.checkAccess(dto.getUsuarioId());
         EntityModel<ChamadoDTO> entityModel = service.create(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

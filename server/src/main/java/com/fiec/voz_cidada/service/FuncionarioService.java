@@ -48,7 +48,7 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
     }
 
     @Override
-    public void checkUserAccess(Long userId) {
+    public void checkAccess(Long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedException("Usuário não autenticado.");

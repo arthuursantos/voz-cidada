@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FileText, Filter } from "lucide-react"
-import ChamadosCarousel from '../Home/Components/ReportsCarousel';
+import ChamadosCarousel from '../Home/components/carousel';
 
 
 type Status = "concluído" | "em andamento" | "pendente"

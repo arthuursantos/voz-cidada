@@ -1,8 +1,5 @@
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { Toaster } from "react-hot-toast";
-
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
 import About from "@/pages/about/index.tsx";          
 import Contact from "@/pages/contact/index.tsx";        
@@ -18,6 +15,10 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
 import Home from "./pages/Home/index.tsx";
+import ChamadoDetail from "./pages/Funcionario/ChamadoDetail.tsx";
+import ProfileFuncionario from "./pages/Funcionario/Profile.tsx";
+import HistoricoFuncionario from "./pages/Funcionario/Historico.tsx";
+import DashboardFuncionario from "./pages/Funcionario/Dashboard.tsx";
 
 type RouteProps = {
     children: ReactNode;
@@ -61,6 +62,9 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     }
     if (authStatus === "SIGNIN") {
         return <Navigate to="/signup/oauth" replace />;
+    }
+    if (authStatus == "SIGNIN") {
+        return <Navigate to="/signup/oauth"/>
     }
     if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />;

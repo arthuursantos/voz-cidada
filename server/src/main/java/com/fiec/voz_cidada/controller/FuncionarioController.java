@@ -2,9 +2,7 @@ package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.domain.funcionario.FuncionarioDTO;
 import com.fiec.voz_cidada.domain.funcionario.Funcionario;
-import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
-import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.service.FuncionarioService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -43,7 +41,7 @@ public class FuncionarioController extends GenericController<Funcionario, Funcio
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<FuncionarioDTO>> findById(@PathVariable Long id) {
-        service.checkUserAccess(id);
+        service.checkAccess(id);
         return ResponseEntity.ok(service.findById(id));
     }
 
@@ -51,8 +49,7 @@ public class FuncionarioController extends GenericController<Funcionario, Funcio
     public ResponseEntity<EntityModel<FuncionarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
         try {
             var entity = service.findByAuthUserId(authUserId);
-            System.out.println("auth id da entity: "+entity.getContent().getAuthId());
-            service.checkUserAccess(entity.getContent().getId());
+            service.checkAccess(entity.getContent().getId());
             return ResponseEntity.ok(entity);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();

@@ -7,7 +7,7 @@ import { AuthContext } from '@/contexts/AuthContext'
 function Header() {
     const { isGoogleUser, user, admin, isAuthenticated, signOut, userProfilePicture } = useContext(AuthContext)
     const location = useLocation() 
-    const rotasOcultas = ["/dashboard", "/admin/dashboard"]
+    const rotasOcultas = ["/dashboard", "/admin/dashboard", "/funcionario/dashboard", "/funcionario/historico", "/funcionario/profile",]
     const [showMenu, setShowMenu] = useState(false)
     const [showConta, setShowConta] = useState(false)
 

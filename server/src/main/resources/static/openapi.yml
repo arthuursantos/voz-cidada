@@ -16,8 +16,151 @@ tags:
     description: Operações relacionadas a chamados
   - name: Upload de imagens
     description: Operações relacionadas ao upload de imagens para chamados
+  - name: Histórico
+    description: Operações relacionadas ao histórico de atualizações dos chamados
 
 paths:
+  /api/historico:
+    get:
+      tags:
+        - Histórico
+      summary: Listar todos os históricos
+      description: Retorna uma lista paginada de todos os registros históricos
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/pageNumberParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: Lista de históricos recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HistoricoDTO'
+                  page:
+                    $ref: '#/components/schemas/PageInfo'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para acessar o recurso
+    post:
+      tags:
+        - Histórico
+      summary: Criar um novo registro histórico
+      description: Cria um novo registro histórico com os dados fornecidos
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoricoDTO'
+      responses:
+        '201':
+          description: Registro histórico criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricoDTO'
+          headers:
+            Location:
+              description: URL do registro histórico criado
+              schema:
+                type: string
+        '400':
+          description: Dados de entrada inválidos
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para criar registro histórico
+
+  /api/historico/{id}:
+      get:
+        tags:
+          - Histórico
+        summary: Buscar histórico por ID
+        description: Retorna os detalhes de um registro histórico específico
+        security:
+          - bearerAuth: [ ]
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Registro histórico encontrado com sucesso
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/HistoricoDTO'
+          '401':
+            description: Não autenticado
+          '403':
+            description: Sem permissão para acessar o recurso
+          '404':
+            description: Registro histórico não encontrado
+      put:
+        tags:
+          - Histórico
+        summary: Atualizar um registro histórico existente
+        description: Atualiza os dados de um registro histórico existente
+        security:
+          - bearerAuth: [ ]
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricoDTO'
+        responses:
+          '200':
+            description: Registro histórico atualizado com sucesso
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/HistoricoDTO'
+          '400':
+            description: Dados de entrada inválidos
+          '401':
+            description: Não autenticado
+          '403':
+            description: Sem permissão para atualizar este registro
+          '404':
+            description: Registro histórico não encontrado
+      delete:
+        tags:
+          - Histórico
+        summary: Excluir um registro histórico
+        description: Exclui um registro histórico específico
+        security:
+          - bearerAuth: [ ]
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '204':
+            description: Registro histórico excluído com sucesso
+          '401':
+            description: Não autenticado
+          '403':
+            description: Sem permissão para excluir este registro
+          '404':
+            description: Registro histórico não encontrado
   /auth/login:
     post:
       tags:
@@ -688,6 +831,31 @@ components:
         fotoAntesUrl:
           type: string
           description: URL da imagem associada ao chamado
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+
+    HistoricoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        acao:
+          type: string
+          description: Descrição da ação realizada
+        dataHora:
+          type: string
+          format: date-time
+          description: Data e hora em que a ação foi registrada
+        usuarioId:
+          type: integer
+          format: int64
+          description: ID do usuário que realizou a ação
+        detalhes:
+          type: string
+          description: Detalhes adicionais sobre a ação
         links:
           type: array
           items:

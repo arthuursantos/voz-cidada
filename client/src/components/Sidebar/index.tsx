@@ -1,9 +1,8 @@
-
-import { cn } from "@/shared/utils.ts";
-import { Button } from "@/components/ui/button.tsx";
-import { Separator } from "@/components/ui/separator.tsx";
-import { Link, useLocation } from "react-router-dom";
-import { FileText, Home, Settings, Users, LogOut, History } from "lucide-react";
+import { cn } from "@/shared/utils.ts"
+import { Button } from "@/components/ui/button.tsx"
+import { Separator } from "@/components/ui/separator.tsx"
+import { Link, useLocation } from 'react-router-dom';
+import { FileText, Home, Settings, Users, LogOut } from "lucide-react"
 import { useState, useEffect, useContext } from "react";
 import { ProfileDialog } from "@/components/dialogs/ProfileDialog";
 import { AuthContext } from "@/contexts/AuthContext";
@@ -82,7 +81,7 @@ export default function Sidebar({ className }: React.HTMLAttributes<HTMLDivEleme
   const navItems = isAgente
     ? [
         { icon: FileText, title: "Meus Chamados", path: "/funcionario/Dashboard" },
-        { icon: History, title: "Histórico", path: "/funcionario/Historico" },
+        { icon: FileText, title: "Histórico", path: "/funcionario/Historico" },
         { icon: Users, title: "Perfil", path: "/funcionario/Profile" }
       ]
     : isAdmin

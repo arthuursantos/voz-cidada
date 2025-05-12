@@ -42,7 +42,7 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<UsuarioDTO>> findById(@PathVariable Long id) {
-        service.checkUserAccess(id);
+        service.checkAccess(id);
         return ResponseEntity.ok(service.findById(id));
     }
 
@@ -50,8 +50,7 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
     public ResponseEntity<EntityModel<UsuarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
         try {
             var entity = service.findByAuthUserId(authUserId);
-
-            service.checkUserAccess(entity.getContent().getId());
+            service.checkAccess(entity.getContent().getId());
             return ResponseEntity.ok(entity);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -73,7 +72,7 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
     @Override
     @PutMapping
     public ResponseEntity<EntityModel<UsuarioDTO>> update(@RequestBody UsuarioDTO dto) {
-        service.checkUserAccess(dto.getId());
+        service.checkAccess(dto.getId());
         EntityModel<UsuarioDTO> entityModel = service.update(dto);
         return ResponseEntity.ok(entityModel);
     }
@@ -81,7 +80,7 @@ public class UsuarioController extends GenericController<Usuario, UsuarioDTO, Lo
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.checkUserAccess(id);
+        service.checkAccess(id);
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
