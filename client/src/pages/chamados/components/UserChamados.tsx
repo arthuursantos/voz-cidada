@@ -82,7 +82,7 @@ export default function UserChamados() {
     }
 
     const filteredChamados = chamados.filter((chamado) =>
-        statusFilter.includes(chamado.status)
+        statusFilter.includes(chamado.status as Status)
     )
 
     if (loading) {
@@ -151,7 +151,7 @@ export default function UserChamados() {
                                     <p className="text-sm text-muted-foreground">
                                         Criado em {formatDate(chamado.dataAbertura)}
                                     </p>
-                                    <Badge className={`${STATUS_COLORS[chamado.status]} text-white`}>
+                                    <Badge className={`${STATUS_COLORS[chamado.status as Status]} text-white`}>
                                         {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
                                     </Badge>
                                 </div>

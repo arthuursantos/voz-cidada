@@ -89,7 +89,7 @@ const OAuthRoute = ({ children }: { children: ReactNode }) => {
 
 const App = () => {
     return (
-        <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+        <GoogleOAuthProvider clientId="518788781560-5kjacjm9okd3cnofcs2beq2e6nb7br12.apps.googleusercontent.com">
             <BrowserRouter>
                 <AuthProvider>
                     <Routes>

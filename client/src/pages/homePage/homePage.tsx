@@ -19,25 +19,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { FileText, Filter } from "lucide-react"
 import ChamadosCarousel from '../Home/components/carousel';
+import { ChamadoInterface } from '../Admin/types';
 
 
 type Status = "concluído" | "em andamento" | "pendente"
 
-interface Chamado {
-  id: number
-  titulo: string
-  descricao: string
-  dataAbertura: string
-  status: string
-  fotoAntesUrl: string | null
-  fotoDepoisUrl: string | null
-  latitude: number | null
-  longitude: number | null
-}
-
 interface ApiResponse {
   _embedded: {
-      chamadoDTOList: Chamado[]
+      chamadoDTOList: ChamadoInterface[]
   }
   page: {
       totalElements: number
@@ -93,12 +82,12 @@ const statusMapping = (apiStatus: string): Status => {
 export default function Dashboard() {
 
   const { user } = useContext(AuthContext)
-  const [chamados, setChamados] = useState<Chamado[]>([])
+  const [chamados, setChamados] = useState<ChamadoInterface[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<Status[]>(["concluído", "em andamento", "pendente"])
   const [novoChamadoDialogOpen, setNovoChamadoDialogOpen] = useState(false)
-  const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null)
+  const [selectedChamado, setSelectedChamado] = useState<ChamadoInterface | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const fetchChamados = useCallback(async () => {
@@ -252,7 +241,6 @@ export default function Dashboard() {
       <div className="fixed z-10 bottom-0 left-0 right-0 flex justify-center p-4 ">
             <BotaoChamado onClick={() => setNovoChamadoDialogOpen(true)}/>
       </div>
-
       <GetChamadoDialog
         chamado={selectedChamado}
         open={dialogOpen}

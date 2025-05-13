@@ -6,8 +6,10 @@ export interface ChamadoInterface {
     secretaria: string;
     dataAbertura: string;
     status: Status | string;
-    fotoAntesUrl: string;
-    fotoDepoisUrl: string;
+    latitude: number | null
+    longitude: number | null
+    fotoAntesUrl: string | null;
+    fotoDepoisUrl: string | null;
     historicos: HistoricoInterface[];
 }
 
