@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +45,11 @@ public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
     }
 
     @Transactional
-    public EntityModel<UsuarioDTO> findByAuthUserId(Long authUserId) {
+    public ResponseEntity<EntityModel<UsuarioDTO>> findByAuthUserId(Long authUserId) {
         try {
             var entity = usuarioRepository.findByAuthUser_Id(authUserId);
             var dto = convertToDto(entity);
-            return EntityModel.of(dto, generateLinks(dto));
+            return ResponseEntity.ok(EntityModel.of(dto, generateLinks(dto)));
         } catch (Exception e) {
             throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado.");
         }

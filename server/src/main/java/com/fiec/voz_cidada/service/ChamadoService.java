@@ -17,11 +17,13 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
@@ -36,7 +38,9 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
         super(repository, ChamadoDTO.class, Chamado.class);
     }
 
+    @Override
     public EntityModel<ChamadoDTO> create(ChamadoDTO dto) {
+        checkAccess(dto.getUsuarioId());
         Chamado entity = convertToEntity(dto);
 
         if (dto.getFotoAntesUrl() != null && !dto.getFotoAntesUrl().isEmpty()) {
@@ -51,32 +55,43 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
             entity.setStatus("PENDENTE");
         }
 
-        Chamado savedEntity = repository.save(entity);
-        ChamadoDTO savedDto = convertToDto(savedEntity);
+        ChamadoDTO savedDto = convertToDto(repository.save(entity));
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
-    public PagedModel<EntityModel<ChamadoDTO>> findByUserId(Long id, Pageable pageable) {
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findByUserId(Long id, Pageable pageable) {
         checkAccess(id);
         Page<Chamado> entities = repository.findChamadoByUsuario_Id(pageable, id);
         Page<ChamadoDTO> dtos = entities.map(this::convertToDto);
-        return assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto)));
+        return ResponseEntity.ok(assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto))));
     }
 
-    public PagedModel<EntityModel<ChamadoDTO>> findBySecretaria(String secretaria, Pageable pageable) {
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findBySecretaria(String secretaria, Pageable pageable) {
         Page<Chamado> entities = repository.findChamadoBySecretaria(pageable, Secretaria.valueOf(secretaria.toUpperCase()));
         Page<ChamadoDTO> dtos = entities.map(this::convertToDto);
-        return assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto)));
+        return ResponseEntity.ok(assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto))));
+    }
+
+    public ResponseEntity<List<String>> findAllStatus() {
+        return ResponseEntity.ok(repository.findAllStatus());
     }
 
     @Override
-    public EntityModel<ChamadoDTO> update(ChamadoDTO dto) {
+    public ResponseEntity<EntityModel<ChamadoDTO>> update(ChamadoDTO dto) {
         checkSecretariaAccess(dto);
         Chamado entity = repository.findById(dto.getId()).orElseThrow(() ->
-                new ResourceNotFoundException("Nenhum recurso com ID " + dto.getId() + " encontrado."));
+                new ResourceNotFoundException("Nenhum chamado encontrado."));
         mapper.map(dto, entity);
         ChamadoDTO savedDto = convertToDto(repository.save(entity));
-        return EntityModel.of(savedDto, generateLinks(savedDto));
+        return ResponseEntity.ok(EntityModel.of(savedDto, generateLinks(savedDto)));
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        Chamado entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Nenhum chamado encontrado."));
+        checkAccess(entity.getUsuario().getId());
+        repository.delete(entity);
     }
 
     public void checkSecretariaAccess(ChamadoDTO dto) {
