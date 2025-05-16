@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.swing.text.html.parser.Entity;
 import java.net.URI;
 
 @RestController
@@ -25,7 +26,7 @@ public class FuncionarioController {
 
     @PostMapping()
     @PreAuthorize("hasAuthority('ROLE_OWNER')")
-    public ResponseEntity<?> create(@RequestBody FuncionarioDTO dto) {
+    public ResponseEntity<EntityModel<FuncionarioDTO>> create(@RequestBody FuncionarioDTO dto) {
         EntityModel<FuncionarioDTO> model = service.createAdminProfile(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -37,22 +38,22 @@ public class FuncionarioController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_OWNER')")
-    public ResponseEntity<?> findAll(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<PagedModel<EntityModel<FuncionarioDTO>>> findAll(@PageableDefault(size = 10) Pageable pageable) {
         return service.findAll(pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<FuncionarioDTO>> findById(@PathVariable Long id) {
         return service.findById(id);
     }
 
     @GetMapping("/auth/{authUserId}")
-    public ResponseEntity<?> findByAuthUserId(@PathVariable Long authUserId) {
-        return service.findByAuthUserId(authUserId);
+    public ResponseEntity<EntityModel<FuncionarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
+        return ResponseEntity.ok(service.findByAuthUserId(authUserId));
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }

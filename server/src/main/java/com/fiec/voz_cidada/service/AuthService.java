@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,21 +19,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService implements UserDetailsService {
 
-    @Autowired
-    private AuthRepository repository;
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-    @Autowired
-    private AuthenticationManager authManager;
-    @Autowired
-    private TokenService tokenService;
+    private final AuthRepository repository;
+    private final UsuarioRepository usuarioRepository;
+    private final TokenService tokenService;
+    private final AuthenticationConfiguration authenticationConfiguration;
 
-    public AuthService(AuthRepository repository) {
+    @Autowired
+    public AuthService(AuthRepository repository,
+                       UsuarioRepository usuarioRepository,
+                       TokenService tokenService,
+                       AuthenticationConfiguration authenticationConfiguration) {
         this.repository = repository;
+        this.usuarioRepository = usuarioRepository;
+        this.tokenService = tokenService;
+        this.authenticationConfiguration = authenticationConfiguration;
     }
-
     public ResponseEntity<?> login(AuthenticationDTO dto) {
         try {
+            AuthenticationManager authManager = authenticationConfiguration.getAuthenticationManager();
             var credentials = new UsernamePasswordAuthenticationToken(dto.login(), dto.password());
             var auth = authManager.authenticate(credentials);
             return ResponseEntity.ok(tokenService.createAuthTokens((AuthUser) auth.getPrincipal()));

@@ -48,7 +48,7 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
-    public ResponseEntity<?> findById(Long id) {
+    public ResponseEntity<EntityModel<FuncionarioDTO>> findById(Long id) {
         checkAccess(id);
         EntityModel<FuncionarioDTO> model = repository.findById(id)
                 .map(this::convertToDto)
@@ -57,13 +57,14 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         return ResponseEntity.ok(model);
     }
 
-    public ResponseEntity<?> findByAuthUserId(Long authUserId) {
+    public EntityModel<FuncionarioDTO> findByAuthUserId(Long authUserId) {
         try {
             var entity = repository.findByAuthUser_Id(authUserId);
             var dto = convertToDto(entity);
-            return ResponseEntity.ok(EntityModel.of(dto, generateLinks(dto)));
+            return EntityModel.of(dto, generateLinks(dto));
         } catch (Exception e) {
-            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado.");
+            e.printStackTrace();
+            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado." + e.getMessage());
         }
     }
 
