@@ -19,9 +19,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.swing.text.html.parser.Entity;
 import java.io.Serializable;
 
 public abstract class GenericService<T, D extends RepresentationModel<D>, ID extends Serializable> {
@@ -47,17 +49,18 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         this.entityClass = entityClass;
     }
 
-    public PagedModel<EntityModel<D>> findAll(Pageable pageable) {
+    public ResponseEntity<PagedModel<EntityModel<D>>> findAll(Pageable pageable) {
         Page<T> entities = repository.findAll(pageable);
         Page<D> dtos = entities.map(this::convertToDto);
-        return assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto)));
+        return ResponseEntity.ok(assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto))));
     }
 
-    public EntityModel<D> findById(ID id) {
-        return repository.findById(id)
+    public ResponseEntity<EntityModel<D>> findById(ID id) {
+        EntityModel<D> model = repository.findById(id)
                 .map(this::convertToDto)
                 .map(dto -> EntityModel.of(dto, generateLinks(dto)))
                 .orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado."));
+        return ResponseEntity.ok(model);
     }
 
     public EntityModel<D> create(D dto) {
@@ -67,13 +70,13 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
-    public EntityModel<D> update(D dto) {
+    public ResponseEntity<EntityModel<D>> update(D dto) {
         ID id = getResourceID(dto);
         T existingEntity = repository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Nenhum recurso com ID " + id + " encontrado."));
         mapper.map(dto, existingEntity);
         D savedDto = convertToDto(repository.save(existingEntity));
-        return EntityModel.of(savedDto, generateLinks(savedDto));
+        return ResponseEntity.ok(EntityModel.of(savedDto, generateLinks(savedDto)));
     }
 
     @Transactional

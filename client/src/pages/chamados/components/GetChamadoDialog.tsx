@@ -71,8 +71,7 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
 
     if (!chamado) return null
 
-    const status = statusMapping(chamado.status)
-    const statusColor = STATUS_COLORS[status]
+    const statusColor = STATUS_COLORS[statusMapping(chamado.status)]
     const hasFotoAntes = Boolean(chamado.fotoAntesUrl)
     const hasFotoDepois = Boolean(chamado.fotoDepoisUrl)
     const hasAnyPhotos = hasFotoAntes || hasFotoDepois
@@ -86,7 +85,7 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
                             <div className="flex items-center justify-between mb-2">
                                 <DialogTitle className="text-xl">{chamado.titulo}</DialogTitle>
                                 <Badge className={`${statusColor} text-white mr-6`}>
-                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
                                 </Badge>
                             </div>
                             <DialogDescription className="text-sm text-muted-foreground">

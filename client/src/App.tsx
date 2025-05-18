@@ -65,6 +65,9 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     if (authStatus == "SIGNIN") {
         return <Navigate to="/signup/oauth" />
     }
+    if (authStatus == "SIGNIN") {
+        return <Navigate to="/signup/oauth"/>
+    }
     if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />;
     }
@@ -133,9 +136,9 @@ const App = () => {
                         <Route
                             path="/funcionario/dashboard"
                             element={
-                                <PublicRoute requiredRole="ROLE_ADMIN">
+                                <PrivateRoute requiredRole="ROLE_ADMIN">
                                     <FuncionarioDashboard />
-                                </PublicRoute>
+                                </PrivateRoute>
                             }
                         />
 

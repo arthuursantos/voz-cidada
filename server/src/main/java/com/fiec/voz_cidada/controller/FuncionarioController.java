@@ -4,6 +4,7 @@ import com.fiec.voz_cidada.domain.funcionario.FuncionarioDTO;
 import com.fiec.voz_cidada.domain.funcionario.Funcionario;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.service.FuncionarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.EntityModel;
@@ -17,49 +18,14 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/funcionario")
-public class FuncionarioController extends GenericController<Funcionario, FuncionarioDTO, Long> {
+public class FuncionarioController {
 
-    private final FuncionarioService service;
+    @Autowired
+    private FuncionarioService service;
 
-    public FuncionarioController(FuncionarioService service) {
-        super(service);
-        this.service = service;
-    }
-
-    @Override
-    @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_OWNER')")
-    public ResponseEntity<PagedModel<EntityModel<FuncionarioDTO>>> findAll(
-            @PageableDefault(size = 10) Pageable pageable) {
-        try {
-            return ResponseEntity.ok(service.findAll(pageable));
-        } catch (Exception e) {
-            throw new RuntimeException("Não foi possível recuperar os funcionários: " + e.getMessage());
-        }
-    }
-
-    @Override
-    @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<FuncionarioDTO>> findById(@PathVariable Long id) {
-        service.checkAccess(id);
-        return ResponseEntity.ok(service.findById(id));
-    }
-
-    @GetMapping("/auth/{authUserId}")
-    public ResponseEntity<EntityModel<FuncionarioDTO>> findByAuthUserId(@PathVariable Long authUserId) {
-        try {
-            var entity = service.findByAuthUserId(authUserId);
-            service.checkAccess(entity.getContent().getId());
-            return ResponseEntity.ok(entity);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @Override
     @PostMapping()
     @PreAuthorize("hasAuthority('ROLE_OWNER')")
-    public ResponseEntity<EntityModel<FuncionarioDTO>> create(@RequestBody FuncionarioDTO dto) {
+    public ResponseEntity<?> create(@RequestBody FuncionarioDTO dto) {
         EntityModel<FuncionarioDTO> model = service.createAdminProfile(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -67,6 +33,28 @@ public class FuncionarioController extends GenericController<Funcionario, Funcio
                 .buildAndExpand(service.getResourceID(model.getContent()))
                 .toUri();
         return ResponseEntity.created(location).body(model);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ResponseEntity<?> findAll(@PageableDefault(size = 10) Pageable pageable) {
+        return service.findAll(pageable);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findById(@PathVariable Long id) {
+        return service.findById(id);
+    }
+
+    @GetMapping("/auth/{authUserId}")
+    public ResponseEntity<?> findByAuthUserId(@PathVariable Long authUserId) {
+        return service.findByAuthUserId(authUserId);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

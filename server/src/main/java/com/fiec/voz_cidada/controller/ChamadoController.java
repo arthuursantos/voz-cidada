@@ -20,61 +20,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chamado")
-public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Long> {
-
-    private final ChamadoRepository repository;
+public class ChamadoController {
 
     @Autowired
     private ChamadoService service;
 
-    public ChamadoController(ChamadoService service, ChamadoRepository repository) {
-        super(service);
-        this.repository = repository;
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findByUserId(
-            @PathVariable Long userId,
-            @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(service.findByUserId(userId, pageable));
-    }
-
-    @GetMapping("/secretaria/{secretaria}")
-    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findBySecretaria(
-            @PathVariable String secretaria,
-            @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(service.findBySecretaria(secretaria, pageable));
-    }
-
-    @GetMapping("/status")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<String>> findAllStatus() {
-        List<String> status = repository.findAllStatus();
-        return ResponseEntity.ok(status);
-    }
-
-    @Override
-    @PutMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<EntityModel<ChamadoDTO>> update(@RequestBody ChamadoDTO dto) {
-        EntityModel<ChamadoDTO> entityModel = service.update(dto);
-        return ResponseEntity.ok(entityModel);
-    }
-
-    @Override
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        Chamado entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Não foi possível excluir os dados. O chamado não foi encontrado."));
-        service.checkAccess(entity.getUsuario().getId());
-        service.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Override
     @PostMapping
     public ResponseEntity<EntityModel<ChamadoDTO>> create(@RequestBody ChamadoDTO dto) {
-        service.checkAccess(dto.getUsuarioId());
         EntityModel<ChamadoDTO> entityModel = service.create(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -82,6 +34,44 @@ public class ChamadoController extends GenericController<Chamado, ChamadoDTO, Lo
                 .buildAndExpand(dto.getId())
                 .toUri();
         return ResponseEntity.created(location).body(entityModel);
+    }
+
+    @GetMapping
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findAll(@PageableDefault(size = 10) Pageable pageable) {
+        return service.findAll(pageable);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EntityModel<ChamadoDTO>> findById(@PathVariable Long id) {
+        return service.findById(id);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findByUserId(@PathVariable Long userId, @PageableDefault(size = 10) Pageable pageable) {
+        return service.findByUserId(userId, pageable);
+    }
+
+    @GetMapping("/secretaria/{secretaria}")
+    public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findBySecretaria(@PathVariable String secretaria, @PageableDefault(size = 10) Pageable pageable) {
+        return service.findBySecretaria(secretaria, pageable);
+    }
+
+    @GetMapping("/status")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<String>> findAllStatus() {
+        return service.findAllStatus();
+    }
+
+    @PutMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<EntityModel<ChamadoDTO>> update(@RequestBody ChamadoDTO dto) {
+        return service.update(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

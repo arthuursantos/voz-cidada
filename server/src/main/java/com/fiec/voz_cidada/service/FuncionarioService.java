@@ -2,6 +2,7 @@ package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.controller.FuncionarioController;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
+import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.domain.funcionario.FuncionarioDTO;
 import com.fiec.voz_cidada.domain.funcionario.Funcionario;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
@@ -11,11 +12,13 @@ import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.FuncionarioRepository;
 import jakarta.transaction.Transactional;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,40 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
 
     public FuncionarioService(FuncionarioRepository repository) {
         super(repository, FuncionarioDTO.class, Funcionario.class);
+    }
+
+    public EntityModel<FuncionarioDTO> createAdminProfile(FuncionarioDTO dto) {
+        AuthUser authUser = authRepository.findById(dto.getAuthId())
+                .orElseThrow(() -> new ResourceNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
+        Funcionario entity = convertToEntity(dto);
+        entity.setAuthUser(authUser);
+        entity.setDataCadastro(LocalDateTime.now());
+        FuncionarioDTO savedDto = convertToDto(repository.save(entity));
+        return EntityModel.of(savedDto, generateLinks(savedDto));
+    }
+
+    public ResponseEntity<?> findById(Long id) {
+        checkAccess(id);
+        EntityModel<FuncionarioDTO> model = repository.findById(id)
+                .map(this::convertToDto)
+                .map(dto -> EntityModel.of(dto, generateLinks(dto)))
+                .orElseThrow(() -> new ResourceNotFoundException("Funcionário não encontrado."));
+        return ResponseEntity.ok(model);
+    }
+
+    public ResponseEntity<?> findByAuthUserId(Long authUserId) {
+        try {
+            var entity = repository.findByAuthUser_Id(authUserId);
+            var dto = convertToDto(entity);
+            return ResponseEntity.ok(EntityModel.of(dto, generateLinks(dto)));
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado.");
+        }
+    }
+
+    public void deleteById(Long id) {
+        checkAccess(id);
+        repository.deleteById(id);
     }
 
     @Override
@@ -67,29 +104,9 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         }
     }
 
-    @Transactional
-    public EntityModel<FuncionarioDTO> findByAuthUserId(Long authUserId) {
-        try {
-            var entity = repository.findByAuthUser_Id(authUserId);
-            var dto = convertToDto(entity);
-            return EntityModel.of(dto, generateLinks(dto));
-        } catch (Exception e) {
-            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado.");
-        }
-    }
-
     @Override
     public Long getResourceID(FuncionarioDTO dto) {
         return dto.getId();
     }
 
-    public EntityModel<FuncionarioDTO> createAdminProfile(FuncionarioDTO dto) {
-        AuthUser authUser = authRepository.findById(dto.getAuthId())
-                .orElseThrow(() -> new ResourceNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
-        Funcionario entity = convertToEntity(dto);
-        entity.setAuthUser(authUser);
-        entity.setDataCadastro(LocalDateTime.now());
-        FuncionarioDTO savedDto = convertToDto(repository.save(entity));
-        return EntityModel.of(savedDto, generateLinks(savedDto));
-    }
 }

@@ -9,7 +9,7 @@ import { ImageIcon, ClipboardList, CheckCircle, Clock, AlertTriangle } from "luc
 import chamadoService from "@/shared/services/chamadoService.ts"
 import uploadService from "@/shared/services/uploadService.ts"
 import historicoService from "@/pages/Funcionario/historicoService.ts"
-import { AuthContext, type JWTClaims } from "@/contexts/AuthContext.tsx"
+import { AuthContext } from "@/contexts/AuthContext.tsx"
 import type { ChamadoInterface, HistoricoInterface } from "@/shared/types.ts"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -340,7 +340,7 @@ export default function FuncionarioDashboard() {
                                                                                     size="icon"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation()
-                                                                                        handleOpenImageDialog(chamado.fotoAntesUrl.split("/").pop() || "")
+                                                                                        handleOpenImageDialog(chamado.fotoAntesUrl ? chamado.fotoAntesUrl.split("/").pop() || "" : "")
                                                                                     }}
                                                                                 >
                                                                                     <ImageIcon className="h-4 w-4" />
@@ -469,7 +469,7 @@ export default function FuncionarioDashboard() {
                                                                     variant="outline"
                                                                     className="w-full flex items-center justify-center gap-2"
                                                                     onClick={() =>
-                                                                        handleOpenImageDialog(selectedChamado.fotoAntesUrl.split("/").pop() || "")
+                                                                        handleOpenImageDialog(selectedChamado.fotoAntesUrl ? selectedChamado.fotoAntesUrl.split("/").pop() || "" : "")
                                                                     }
                                                                 >
                                                                     <ImageIcon className="h-4 w-4" />
