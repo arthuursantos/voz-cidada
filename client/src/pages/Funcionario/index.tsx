@@ -27,6 +27,10 @@ export default function FuncionarioDashboard() {
     const { userRoles, admin, loading } = useContext(AuthContext)
 
     const [chamados, setChamados] = useState<ChamadoInterface[]>([])
+
+    const [filteredChamados, setFilteredChamados] = useState<ChamadoInterface[]>([])//
+    const [activeFilter, setActiveFilter] = useState("todos") //
+
     const [statusCount, setStatusCount] = useState({
         PENDENTE: 0,
         "EM ANDAMENTO": 0,
@@ -85,6 +89,7 @@ export default function FuncionarioDashboard() {
                     },
                 } = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
                 setChamados(chamadoDTOList)
+                applyFilter(chamadoDTOList)//
             }
 
             setSelectedChamado((prev) => (prev ? { ...prev, status: formData.statusNovo } : null))
@@ -94,7 +99,27 @@ export default function FuncionarioDashboard() {
             console.error("Erro ao atualizar chamado:", error)
         }
     }
+    //
+    function applyFilter(chamadosList: ChamadoInterface[]) {
+        if (activeFilter === "todos") {
+            setFilteredChamados(chamadosList)
+        } else {
+            const statusMap: Record<string, string> = {
+                pendentes: "PENDENTE",
+                andamento: "EM ANDAMENTO",
+                concluidos: "CONCLUÍDO",
+            }
+            const filteredStatus = statusMap[activeFilter]
+            setFilteredChamados(chamadosList.filter((chamado) => chamado.status === filteredStatus))
+        }
+    }
 
+    useEffect(() => {
+        applyFilter(chamados)
+    }, [activeFilter, chamados])
+
+
+    //
     useEffect(() => {
         async function fetchChamados() {
             try {
@@ -115,6 +140,7 @@ export default function FuncionarioDashboard() {
                         page: pageData,
                     } = response.data
                     setChamados(chamadoDTOList)
+                    setFilteredChamados(chamadoDTOList)
                     setPage({
                         totalElements: pageData.totalElements,
                         totalPages: pageData.totalPages,
@@ -204,33 +230,33 @@ export default function FuncionarioDashboard() {
 
                         <TabsContent value="chamados" className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <Card>
+                                <Card className="bg-teal-600 text-white text-center">
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-lg font-medium">Total de Chamados</CardTitle>
-                                        <CardDescription>Todos os chamados registrados</CardDescription>
+                                        <CardTitle className="text-lg font-bold">Total de Chamados</CardTitle>
+                                        <CardDescription className="text-white">Todos os chamados registrados</CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-3xl font-bold text-teal-600">{page.totalElements}</div>
+                                        <div className="text-3xl font-bold text-white">{page.totalElements}</div>
                                     </CardContent>
                                 </Card>
 
-                                <Card>
+                                <Card className="bg-amber-500 text-white text-center">
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-lg font-medium">Pendentes</CardTitle>
-                                        <CardDescription>Chamados aguardando atendimento</CardDescription>
+                                        <CardTitle className="text-lg font-bold">Pendentes</CardTitle>
+                                        <CardDescription className="text-white">Chamados aguardando atendimento</CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-3xl font-bold text-amber-500">{statusCount["PENDENTE"]}</div>
+                                        <div className="text-3xl font-bold text-white">{statusCount["PENDENTE"]}</div>
                                     </CardContent>
                                 </Card>
 
-                                <Card>
+                                <Card className="bg-green-600 text-white text-center">
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-lg font-medium">Respondidos</CardTitle>
-                                        <CardDescription>Chamados finalizados ou em andamento</CardDescription>
+                                        <CardTitle className="text-lg font-bold">Respondidos</CardTitle>
+                                        <CardDescription className="text-white">Chamados finalizados ou em andamento</CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-3xl font-bold text-green-600">
+                                        <div className="text-3xl font-bold text-white">
                                             {statusCount["CONCLUÍDO"] + statusCount["EM ANDAMENTO"]}
                                         </div>
                                     </CardContent>
@@ -241,9 +267,28 @@ export default function FuncionarioDashboard() {
                                 <Card className="lg:col-span-3">
                                     <CardHeader>
                                         <CardTitle>Lista de Chamados</CardTitle>
-                                        <CardDescription>Selecione um chamado para ver detalhes</CardDescription>
+                                        <CardDescription>Selecione um chamado para ver detalhes
+                                            
+                                        </CardDescription>
+
                                     </CardHeader>
                                     <CardContent>
+                                        <div className="mb-4">
+                                            <Tabs
+                                                defaultValue="todos"
+                                                value={activeFilter}
+                                                onValueChange={setActiveFilter}
+                                                className="w-full"
+                                            >
+                                                <TabsList className="grid grid-cols-4 w-full">
+                                                    <TabsTrigger value="todos">Todos</TabsTrigger>
+                                                    <TabsTrigger value="pendentes">Pendentes</TabsTrigger>
+                                                    <TabsTrigger value="andamento">Em Andamento</TabsTrigger>
+                                                    <TabsTrigger value="concluidos">Concluídos</TabsTrigger>
+                                                </TabsList>
+                                            </Tabs>
+                                        </div>
+
                                         <div className="rounded-md border overflow-auto h-[500px]">
                                             <Table>
                                                 <TableHeader>
@@ -263,7 +308,7 @@ export default function FuncionarioDashboard() {
                                                             </TableCell>
                                                         </TableRow>
                                                     ) : (
-                                                        chamados.map((chamado) => (
+                                                        filteredChamados.map((chamado) => (
                                                             <TableRow
                                                                 key={chamado.id}
                                                                 onClick={() => setSelectedChamado(chamado)}
@@ -277,7 +322,9 @@ export default function FuncionarioDashboard() {
                                                                         </span>
                                                                     </div>
                                                                 </TableCell>
-                                                                <TableCell className="hidden md:table-cell">{formatDate(chamado.dataAbertura)}</TableCell>
+                                                                <TableCell className="hidden md:table-cell">
+                                                                    {formatDate(chamado.dataAbertura)}
+                                                                </TableCell>
                                                                 <TableCell>{getStatusBadge(chamado.status)}</TableCell>
                                                                 <TableCell className="hidden md:table-cell">
                                                                     <Badge variant="outline" className="bg-gray-100">

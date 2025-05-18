@@ -1,6 +1,3 @@
-// src/pages/Funcionario/historico.tsx
-
-import React from "react";
 
 export default function Historico() {
   return (
