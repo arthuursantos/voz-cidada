@@ -1,9 +1,11 @@
+import FuncionarioDashboard from "./pages/Funcionario/index.tsx";
+
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
-import About from "@/pages/about/index.tsx";          
-import Contact from "@/pages/contact/index.tsx";        
-import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";    
+import About from "@/pages/about/index.tsx";
+import Contact from "@/pages/contact/index.tsx";
+import ResetPassword from "@/pages/resetPassword/ResetPassoword.tsx";
 import AdminDashboard from "./pages/Admin/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
@@ -13,12 +15,9 @@ import SignIn from "./pages/SignIn/index.tsx";
 import SignUp from "./pages/SignUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import OAuthSignUp from "@/pages/OAuthSignUp";
-import {Toaster} from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home/index.tsx";
-import ChamadoDetail from "./pages/Funcionario/ChamadoDetail.tsx";
-import ProfileFuncionario from "./pages/Funcionario/Profile.tsx";
-import HistoricoFuncionario from "./pages/Funcionario/Historico.tsx";
-import DashboardFuncionario from "./pages/Funcionario/Dashboard.tsx";
+
 
 type RouteProps = {
     children: ReactNode;
@@ -64,7 +63,7 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
         return <Navigate to="/signup/oauth" replace />;
     }
     if (authStatus == "SIGNIN") {
-        return <Navigate to="/signup/oauth"/>
+        return <Navigate to="/signup/oauth" />
     }
     if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />;
@@ -130,40 +129,13 @@ const App = () => {
                             }
                         />
 
-                        {/* ROTAS FUNCIONÁRIO  */}
+                        {/* ROTAS FUNCIONÁRIO, mudar para publicroute*/}
                         <Route
-                            path="/funcionario/Dashboard"
+                            path="/funcionario/dashboard"
                             element={
-                                <PrivateRoute requiredRole="ROLE_AGENT">
-                                    <DashboardFuncionario />
-                                </PrivateRoute>
-                            }
-                        />
-
-                        <Route
-                            path="/funcionario/Historico"
-                            element={
-                                <PrivateRoute requiredRole="ROLE_AGENT">
-                                    <HistoricoFuncionario />
-                                </PrivateRoute>
-                            }
-                        />
-
-                        <Route
-                            path="/funcionario/Profile"
-                            element={
-                                <PrivateRoute requiredRole="ROLE_AGENT">
-                                    <ProfileFuncionario />
-                                </PrivateRoute>
-                            }
-                        />
-
-                        <Route
-                            path="/funcionario/chamados/:id"
-                            element={
-                                <PrivateRoute requiredRole="ROLE_AGENT">
-                                    <ChamadoDetail />
-                                </PrivateRoute>
+                                <PublicRoute requiredRole="ROLE_ADMIN">
+                                    <FuncionarioDashboard />
+                                </PublicRoute>
                             }
                         />
 
