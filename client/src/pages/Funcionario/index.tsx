@@ -1,30 +1,17 @@
 "use client"
 import Header from "@/components/header";
 import { useContext, useEffect, useState } from "react"
-import { jwtDecode } from "jwt-decode"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { ImageIcon, ClipboardList, UserPlus, ArrowRight, CheckCircle, Clock, AlertTriangle } from "lucide-react"
-import authService from "@/shared/services/authService.ts"
+import { ImageIcon, ClipboardList, CheckCircle, Clock, AlertTriangle } from "lucide-react"
+//import authService from "@/shared/services/authService.ts"
 import chamadoService from "@/shared/services/chamadoService.ts"
-import funcionarioService from "@/pages/Admin/funcionarioService.ts"
 import uploadService from "@/shared/services/uploadService.ts"
-import historicoService from "@/pages/Admin/historicoService.ts"
+import historicoService from "@/pages/Funcionario/historicoService.ts"
 import { AuthContext, type JWTClaims } from "@/contexts/AuthContext.tsx"
 import type { ChamadoInterface, HistoricoInterface } from "@/shared/types.ts"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -61,17 +48,6 @@ export default function FuncionarioDashboard() {
         },
     })
 
-
-    async function handleSetSecretaria(data: ChamadoInterface, secretaria: string) {
-        try {
-            const updatedChamado = { ...data, secretaria }
-            await chamadoService.update(updatedChamado)
-            // Atualiza a lista de chamados após a alteração
-            
-        } catch (error) {
-            console.error("Erro ao atualizar secretaria:", error)
-        }
-    }
 
     async function handleOpenImageDialog(filename: string) {
         try {

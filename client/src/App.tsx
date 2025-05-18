@@ -133,9 +133,9 @@ const App = () => {
                         <Route
                             path="/funcionario/dashboard"
                             element={
-                                <PrivateRoute requiredRole="ROLE_ADMIN">
+                                <PublicRoute requiredRole="ROLE_ADMIN">
                                     <FuncionarioDashboard />
-                                </PrivateRoute>
+                                </PublicRoute>
                             }
                         />
 
