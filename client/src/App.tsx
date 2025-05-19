@@ -36,7 +36,7 @@ const PrivateRoute = ({ children, requiredRole }: RouteProps) => {
     }
 
     // Se não for rota com role e for admin, manda pro admin dashboard
-    if (!requiredRole && userRoles?.includes("ROLE_OWNER")) {
+    if (!requiredRole && userRoles?.includes("ROLE_ADMIN")) {
         return <Navigate to="/admin/dashboard" replace />;
     }
 
@@ -61,13 +61,8 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     }
     if (authStatus === "SIGNIN") {
         return <Navigate to="/signup/oauth" replace />;
-    }
-    if (authStatus == "SIGNIN") {
-        return <Navigate to="/signup/oauth" />
-    }
-    if (authStatus == "SIGNIN") {
-        return <Navigate to="/signup/oauth"/>
-    }
+    }    
+    
     if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />;
     }

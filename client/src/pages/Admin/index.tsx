@@ -1,9 +1,9 @@
 "use client"
-import { SVGProps, useState, useEffect } from "react"
+import { SVGProps, useState, useEffect, useContext } from "react"
 import { ChevronDown, Plus, Search, Trash } from "lucide-react"
 import Header from "@/components/header";
 import { JSX } from "react/jsx-runtime";
-import { JWTClaims } from "@/contexts/AuthContext";
+import { AuthContext, JWTClaims } from "@/contexts/AuthContext";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,7 @@ import api from "@/shared/axios";
 import funcionarioService from "./funcionarioServices.ts";
 import chamadoService from "./chamadoService.ts";
 import { ChamadoInterface } from "./types.ts";
+import FuncionarioDashboard from "../Funcionario/index.tsx";
 
 // Define the structure of a Funcionario object
 interface Funcionario {
@@ -24,6 +25,7 @@ interface Funcionario {
 }
 
 export default function AdminDashboard() {
+    const { userRoles } = useContext(AuthContext);
     
     const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
     const [showEditChamado, setShowEditChamado] = useState(false);
@@ -175,7 +177,7 @@ export default function AdminDashboard() {
 
     let funcionarioFiltered = funcionarios.filter((f) => f.secretaria === "OBRAS" || f.secretaria === "URBANISMO");
 
-    return (
+    userRoles?.includes("ROLE_OWNER") && (
         <div className="flex min-h-screen flex-col">
             {/* Header */}
             <Header />
@@ -533,6 +535,10 @@ export default function AdminDashboard() {
             )}
         </div>
     );
+
+    return (
+        <FuncionarioDashboard />
+    )
 }
 
 // Edit icon

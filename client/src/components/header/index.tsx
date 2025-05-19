@@ -36,7 +36,7 @@ function Header() {
                     <div className="flex flex-col">
                         <Link to="/conta">
                             <span className="text-sm hover:underline">
-                                {isAuthenticated ? (user ? user.nome : admin ? admin.cpf : "Nome_Cidadao") : "Nome_Cidadao"}
+                                {isAuthenticated ? (user ? user.nome : admin ? admin.cargo : "Nome_Cidadao") : "Nome_Cidadao"}
                             </span>
                         </Link>
                         <button 
@@ -50,7 +50,7 @@ function Header() {
                 </div>
                 
                 {/* Navegação - Desktop */}
-                {location.pathname !== "/admin/dashboard" && (
+                {(location.pathname !== "/admin/dashboard" && location.pathname !== "/funcionario/dashboard") && (
                     <nav className="hidden md:flex items-center gap-8">
                         <Link to="/" className="hover:underline font-montserrat">
                             HOME
