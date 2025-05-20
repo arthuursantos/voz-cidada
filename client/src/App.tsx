@@ -59,8 +59,8 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     }
     if (authStatus === "SIGNIN") {
         return <Navigate to="/signup/oauth" replace />;
-    }    
-    
+    }
+
     if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />;
     }
@@ -124,6 +124,7 @@ const App = () => {
                                 </PrivateRoute>
                             }
                         />
+
 
                         {/* ROTAS AUTENTICADAS GERAIS */}
                         <Route

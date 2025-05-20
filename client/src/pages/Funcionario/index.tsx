@@ -268,7 +268,7 @@ export default function FuncionarioDashboard() {
                                     <CardHeader>
                                         <CardTitle>Lista de Chamados</CardTitle>
                                         <CardDescription>Selecione um chamado para ver detalhes
-                                            
+
                                         </CardDescription>
 
                                     </CardHeader>
@@ -517,7 +517,7 @@ export default function FuncionarioDashboard() {
                                                                 <div className="space-y-2">
                                                                     <Label htmlFor="statusNovo">Novo Status</Label>
                                                                     <Select
-                                                                        onValueChange={(value) => updateChamadoForm.setValue("statusNovo", value)}
+                                                                        onValueChange={(value: string) => updateChamadoForm.setValue("statusNovo", value)}
                                                                         defaultValue={updateChamadoForm.getValues("statusNovo")}
                                                                     >
                                                                         <SelectTrigger>
