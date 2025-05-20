@@ -268,7 +268,7 @@ export default function FuncionarioDashboard() {
                                     <CardHeader>
                                         <CardTitle>Lista de Chamados</CardTitle>
                                         <CardDescription>Selecione um chamado para ver detalhes
-                                            
+
                                         </CardDescription>
 
                                     </CardHeader>

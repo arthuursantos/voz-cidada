@@ -17,6 +17,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home/index.tsx";
+import HistoricoChamados from "./pages/funcionario/index.tsx";
 
 
 type RouteProps = {
@@ -61,8 +62,8 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     }
     if (authStatus === "SIGNIN") {
         return <Navigate to="/signup/oauth" replace />;
-    }    
-    
+    }
+
     if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />;
     }
@@ -131,9 +132,18 @@ const App = () => {
                         <Route
                             path="/funcionario/dashboard"
                             element={
-                                <PrivateRoute requiredRole="ROLE_ADMIN">
+                                <PublicRoute requiredRole="ROLE_ADMIN">
                                     <FuncionarioDashboard />
-                                </PrivateRoute>
+                                </PublicRoute>
+                            }
+                        />
+
+                        <Route
+                            path="/funcionario/historico"
+                            element={
+                                <PublicRoute requiredRole="ROLE_ADMIN">
+                                    <HistoricoChamados />
+                                </PublicRoute>
                             }
                         />
 
