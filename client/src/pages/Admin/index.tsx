@@ -177,7 +177,7 @@ export default function AdminDashboard() {
 
     let funcionarioFiltered = funcionarios.filter((f) => f.secretaria === "OBRAS" || f.secretaria === "URBANISMO");
 
-    userRoles?.includes("ROLE_OWNER") && (
+    if (userRoles?.includes("ROLE_OWNER")) return (
         <div className="flex min-h-screen flex-col">
             {/* Header */}
             <Header />
