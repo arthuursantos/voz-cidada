@@ -1,5 +1,3 @@
-import FuncionarioDashboard from "./pages/Funcionario/index.tsx";
-
 import { ReactNode, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthContext, AuthProvider } from "@/contexts/AuthContext.tsx";
@@ -121,22 +119,11 @@ const App = () => {
                         <Route
                             path="/admin/dashboard"
                             element={
-                                <PrivateRoute requiredRole="ROLE_OWNER">
+                                <PrivateRoute requiredRole="ROLE_ADMIN">
                                     <AdminDashboard />
                                 </PrivateRoute>
                             }
                         />
-
-                        {/* ROTAS FUNCIONÁRIO, mudar para publicroute*/}
-                        <Route
-                            path="/funcionario/dashboard"
-                            element={
-                                <PrivateRoute requiredRole="ROLE_ADMIN">
-                                    <FuncionarioDashboard />
-                                </PrivateRoute>
-                            }
-                        />
-
 
                         {/* ROTAS AUTENTICADAS GERAIS */}
                         <Route

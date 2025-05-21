@@ -20,9 +20,7 @@ import {
 import { FileText, Filter } from "lucide-react"
 import ChamadosCarousel from '../Home/components/carousel';
 import { ChamadoInterface } from '../Admin/types';
-
-
-type Status = "concluído" | "em andamento" | "pendente"
+import { Status } from '@/shared/types';
 
 interface ApiResponse {
   _embedded: {
@@ -32,27 +30,6 @@ interface ApiResponse {
       totalElements: number
   }
 }
-
-// const chamadosAleatorios = [
-//   {
-//     id: 1,
-//     titulo: "Buraco na rua",
-//     descricao: "Descrição do chamado 1",
-//     dataAbertura: "2023-10-01",
-//     status: "PENDENTE",
-//     fotoAntesUrl: null,
-//     fotoDepoisUrl: null,
-//   },
-//   {
-//     id: 2,
-//     titulo: "Mato alto no Parque Pet",
-//     descricao: "Descrição do chamado 2",
-//     dataAbertura: "2023-10-02",
-//     status: "EM_ANDAMENTO",
-//     fotoAntesUrl: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRUREvlCvHREdbT-Xsf2L2dmgO7AulT-6hqeDRUThJvVKKQwYuPwNatanNGyJiXSwubdlC8iTQHCPxOrsM-uuUCfg",
-//     fotoDepoisUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Bra-Cos_%281%29_%28cropped%29.jpg/640px-Bra-Cos_%281%29_%28cropped%29.jpg",
-//   }
-// ]
 
 const formatDate = (dateString: string): string => {
   try {
@@ -64,19 +41,19 @@ const formatDate = (dateString: string): string => {
 }
 
 const STATUS_MAP: Record<string, Status> = {
-  CONCLUIDO: "concluído",
-  EM_ANDAMENTO: "em andamento",
-  PENDENTE: "pendente",
+  "CONCLUÍDO": "CONCLUÍDO",
+  "EM ANDAMENTO": "EM ANDAMENTO",
+  PENDENTE: "PENDENTE",
 }
 
 const STATUS_COLORS: Record<Status, string> = {
-  concluído: "bg-green-500",
-  "em andamento": "bg-blue-500",
-  pendente: "bg-yellow-500",
+  "CONCLUÍDO": "bg-green-500",
+  "EM ANDAMENTO": "bg-blue-500",
+  "PENDENTE": "bg-yellow-500",
 }
 
 const statusMapping = (apiStatus: string): Status => {
-  return STATUS_MAP[apiStatus] || "pendente"
+  return STATUS_MAP[apiStatus] || "PENDENTE"
 }
 
 export default function Dashboard() {
@@ -85,7 +62,7 @@ export default function Dashboard() {
   const [chamados, setChamados] = useState<ChamadoInterface[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<Status[]>(["concluído", "em andamento", "pendente"])
+  const [statusFilter, setStatusFilter] = useState<Status[]>(["CONCLUÍDO", "EM ANDAMENTO", "PENDENTE"])
   const [novoChamadoDialogOpen, setNovoChamadoDialogOpen] = useState(false)
   const [selectedChamado, setSelectedChamado] = useState<ChamadoInterface | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -209,7 +186,7 @@ export default function Dashboard() {
                                         Criado em {formatDate(chamado.dataAbertura)}
                                     </p>
                                     <Badge className={`${STATUS_COLORS[status]} text-white`}>
-                                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                                        {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
                                     </Badge>
                                 </div>
                                 <Button

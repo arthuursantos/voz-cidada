@@ -12,19 +12,19 @@ interface ChamadoDialogProps {
 }
 
 const STATUS_MAP: Record<string, Status> = {
-    CONCLUIDO: "CONCLUÍDO",
-    EM_ANDAMENTO: "EM ANDAMENTO",
-    PENDENTE: "PENDENTE",
+  "CONCLUÍDO": "CONCLUÍDO",
+  "EM ANDAMENTO": "EM ANDAMENTO",
+  PENDENTE: "PENDENTE",
 }
 
 const STATUS_COLORS: Record<Status, string> = {
-    "CONCLUÍDO": "bg-green-500",
-    "EM ANDAMENTO": "bg-blue-500",
-    "PENDENTE": "bg-yellow-500",
+  "CONCLUÍDO": "bg-green-500",
+  "EM ANDAMENTO": "bg-blue-500",
+  "PENDENTE": "bg-yellow-500",
 }
 
 const statusMapping = (apiStatus: string): Status => {
-    return STATUS_MAP[apiStatus] || "pendente"
+  return STATUS_MAP[apiStatus] || "PENDENTE"
 }
 
 const formatDate = (dateString: string): string => {
@@ -71,7 +71,7 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
 
     if (!chamado) return null
 
-    const statusColor = STATUS_COLORS[statusMapping(chamado.status)]
+    const status = statusMapping(chamado.status)
     const hasFotoAntes = Boolean(chamado.fotoAntesUrl)
     const hasFotoDepois = Boolean(chamado.fotoDepoisUrl)
     const hasAnyPhotos = hasFotoAntes || hasFotoDepois
@@ -84,8 +84,8 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
                         <DialogHeader>
                             <div className="flex items-center justify-between mb-2">
                                 <DialogTitle className="text-xl">{chamado.titulo}</DialogTitle>
-                                <Badge className={`${statusColor} text-white mr-6`}>
-                                    {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
+                                <Badge className={`${STATUS_COLORS[status]} text-white mr-6`}>
+                                    {status.charAt(0).toUpperCase() + status.slice(1)}
                                 </Badge>
                             </div>
                             <DialogDescription className="text-sm text-muted-foreground">
