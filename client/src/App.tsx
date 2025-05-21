@@ -125,6 +125,7 @@ const App = () => {
                             }
                         />
 
+
                         {/* ROTAS AUTENTICADAS GERAIS */}
                         <Route
                             path="/home"
