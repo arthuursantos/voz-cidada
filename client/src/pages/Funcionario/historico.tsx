@@ -1,13 +1,13 @@
 "use client"
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import chamadoService from "@/shared/services/chamadoService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import historicoService from "./historicoService";
 
 export default function HistoricoChamados() {
   const { admin } = useContext(AuthContext);
@@ -19,10 +19,7 @@ export default function HistoricoChamados() {
     const fetchChamadosConcluidos = async () => {
       try {
         setLoading(true);
-        const response = await chamadoService.findBySecretariaAndStatus({
-          secretaria: admin?.secretaria || "",
-          status: "CONCLUÍDO"
-        });
+        const response = await historicoService.findAll();
         setChamados(response.data._embedded?.chamadoDTOList || []);
       } catch (error) {
         console.error("Erro ao buscar chamados:", error);
