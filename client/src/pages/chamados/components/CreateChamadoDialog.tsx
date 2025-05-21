@@ -70,10 +70,10 @@ const customIcon = new Icon({
   popupAnchor: [0, -32] // Onde o popup deve aparecer em relação ao ícone
 });
 
-export default function CreateChamadoDialog({ 
-  open, 
-  onOpenChange, 
-  onSuccess 
+export default function CreateChamadoDialog({
+  open,
+  onOpenChange,
+  onSuccess
 }: CreateChamadoDialogProps) {
   const [step, setStep] = useState(0);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
@@ -100,7 +100,7 @@ export default function CreateChamadoDialog({
     if (step === 1 && open && mapContainerRef.current && !mapRef.current) {
       // Cria o mapa apenas se não existir
       mapRef.current = L.map(mapContainerRef.current).setView([-23.092, -47.21], 13);
-      
+
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -111,12 +111,12 @@ export default function CreateChamadoDialog({
         const { lat, lng } = e.latlng;
         form.setValue('latitude', lat);
         form.setValue('longitude', lng);
-        
+
         // Atualiza ou cria o marcador
         if (markerRef.current) {
           markerRef.current.setLatLng([lat, lng]);
         } else {
-          markerRef.current = L.marker([lat, lng], {icon: customIcon}).addTo(mapRef.current!);
+          markerRef.current = L.marker([lat, lng], { icon: customIcon }).addTo(mapRef.current!);
         }
       });
     }
@@ -136,14 +136,14 @@ export default function CreateChamadoDialog({
   useEffect(() => {
     const latitude = form.watch('latitude');
     const longitude = form.watch('longitude');
-    
+
     if (mapRef.current && latitude && longitude) {
       if (markerRef.current) {
         markerRef.current.setLatLng([latitude, longitude]);
       } else {
         markerRef.current = L.marker([latitude, longitude]).addTo(mapRef.current);
       }
-      
+
       // Centraliza o mapa nas novas coordenadas
       mapRef.current.setView([latitude, longitude]);
     }
@@ -176,12 +176,12 @@ export default function CreateChamadoDialog({
   };
 
   const handleNext = async () => {
-    const fields = step === 0 
-      ? ["titulo", "descricao"] 
+    const fields = step === 0
+      ? ["titulo", "descricao"]
       : step === 1
-      ? ["latitude", "longitude"]
-      : []; // No passo 2 (foto), não exigimos validação
-    
+        ? ["latitude", "longitude"]
+        : []; // No passo 2 (foto), não exigimos validação
+
     const isValid = await form.trigger(fields as any);
     if (isValid) setStep(step + 1);
   };
@@ -204,14 +204,14 @@ export default function CreateChamadoDialog({
     }
 
     toast.info("Obtendo localização...");
-    
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const pos = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        
+
         form.setValue("latitude", pos.lat);
         form.setValue("longitude", pos.lng);
         setLocationInformed(true);
@@ -234,14 +234,14 @@ export default function CreateChamadoDialog({
     try {
       setIsSubmitting(true);
       const formData = new FormData();
-      
+
       formData.append("titulo", values.titulo);
       formData.append("descricao", values.descricao);
       formData.append("usuarioId", user.id.toString());
       formData.append("status", "PENDENTE");
       formData.append("latitude", values.latitude.toString());
       formData.append("longitude", values.longitude.toString());
-      
+
       if (values.foto) {
         formData.append("fotoAntesFile", values.foto);
       } else {
@@ -291,9 +291,9 @@ export default function CreateChamadoDialog({
                       <FormItem>
                         <FormLabel>Assunto</FormLabel>
                         <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder="Ex: 'Buraco na rua'" 
+                          <Input
+                            {...field}
+                            placeholder="Ex: 'Buraco na rua'"
                           />
                         </FormControl>
                         <FormMessage />
@@ -307,9 +307,9 @@ export default function CreateChamadoDialog({
                       <FormItem>
                         <FormLabel>Descrição</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            {...field} 
-                            placeholder="Descreva o problema" 
+                          <Textarea
+                            {...field}
+                            placeholder="Descreva o problema"
                             rows={4}
                           />
                         </FormControl>
@@ -330,14 +330,14 @@ export default function CreateChamadoDialog({
                     Usar Localização Atual
                   </Button>
 
-                  <div id="map" ref={mapContainerRef} className="relative h-[300px] w-full rounded-md overflow-hidden border"/>
+                  <div id="map" ref={mapContainerRef} className="relative h-[300px] w-full rounded-md overflow-hidden border" />
 
                   {!locationInformed && form.formState.errors.latitude && (
                     <p className="text-sm font-medium text-destructive">
                       Informe o endereço do chamado
                     </p>
                   )}
-                  
+
 
                   <div className="hidden grid-cols-2 gap-4 mt-4">
                     <FormField
@@ -354,7 +354,7 @@ export default function CreateChamadoDialog({
                               onChange={(e) => {
                                 const value = parseFloat(e.target.value);
                                 field.onChange(value);
-                               
+
                               }}
                             />
                           </FormControl>
@@ -376,7 +376,7 @@ export default function CreateChamadoDialog({
                               onChange={(e) => {
                                 const value = parseFloat(e.target.value);
                                 field.onChange(value);
-                                
+
                               }}
                             />
                           </FormControl>
