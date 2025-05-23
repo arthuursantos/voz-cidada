@@ -31,11 +31,6 @@ export default function FuncionarioDashboard() {
     const [filteredChamados, setFilteredChamados] = useState<ChamadoInterface[]>([])//
     const [activeFilter, setActiveFilter] = useState("todos") //
 
-    const [statusCount, setStatusCount] = useState({
-        PENDENTE: 0,
-        "EM ANDAMENTO": 0,
-        CONCLUÍDO: 0,
-    })
     const [page, setPage] = useState({
         totalElements: 0,
         totalPages: 0,
@@ -123,15 +118,6 @@ export default function FuncionarioDashboard() {
     useEffect(() => {
         async function fetchChamados() {
             try {
-                const { data } = await chamadoService.findAllStatus()
-                const count = { PENDENTE: 0, "EM ANDAMENTO": 0, CONCLUÍDO: 0 }
-                data.forEach((status: "PENDENTE" | "EM ANDAMENTO" | "CONCLUÍDO") => {
-                    if (count[status] !== undefined) {
-                        count[status]++
-                    }
-                })
-                setStatusCount(count)
-
 
                 if (userRoles?.includes("ROLE_ADMIN") && !loading && admin?.secretaria) {
                     const response = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
@@ -229,40 +215,6 @@ export default function FuncionarioDashboard() {
                         </TabsList>
 
                         <TabsContent value="chamados" className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <Card className="bg-teal-600 text-white text-center">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-lg font-bold">Total de Chamados</CardTitle>
-                                        <CardDescription className="text-white">Todos os chamados registrados</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-3xl font-bold text-white">{page.totalElements}</div>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="bg-amber-500 text-white text-center">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-lg font-bold">Pendentes</CardTitle>
-                                        <CardDescription className="text-white">Chamados aguardando atendimento</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-3xl font-bold text-white">{statusCount["PENDENTE"]}</div>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="bg-green-600 text-white text-center">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-lg font-bold">Respondidos</CardTitle>
-                                        <CardDescription className="text-white">Chamados finalizados ou em andamento</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-3xl font-bold text-white">
-                                            {statusCount["CONCLUÍDO"] + statusCount["EM ANDAMENTO"]}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-
                             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                                 <Card className="lg:col-span-3">
                                     <CardHeader>

@@ -19,8 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { FileText, Filter } from "lucide-react"
 import ChamadosCarousel from '../Home/components/carousel';
-import { ChamadoInterface } from '../Admin/types';
-import { Status } from '@/shared/types';
+import { ChamadoInterface, Status } from '@/shared/types';
 
 interface ApiResponse {
   _embedded: {
