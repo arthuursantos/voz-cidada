@@ -1,10 +1,8 @@
 "use client"
-import Historico from "./historico"; //vitor
-
 import Header from "@/components/header";
 import { useContext, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { ImageIcon, ClipboardList, CheckCircle, Clock, AlertTriangle } from "lucide-react"
+import { ImageIcon, ClipboardList, CheckCircle, Clock, AlertTriangle, Calendar, History } from "lucide-react"
 //import authService from "@/shared/services/authService.ts"
 import chamadoService from "@/shared/services/chamadoService.ts"
 import uploadService from "@/shared/services/uploadService.ts"
@@ -16,12 +14,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label.tsx"
+import api from "@/shared/axios";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function FuncionarioDashboard() {
     const { userRoles, admin, loading } = useContext(AuthContext)
@@ -48,6 +48,8 @@ export default function FuncionarioDashboard() {
             observacao: "",
         },
     })
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [userNames, setUserNames] = useState<Record<number, string>>({});
 
 
     async function handleOpenImageDialog(filename: string) {
@@ -133,6 +135,24 @@ export default function FuncionarioDashboard() {
                         number: pageData.number,
                     })
                 }
+
+                if (!admin?.secretaria) return;
+                        const response = await chamadoService.findBySecretaria({ secretaria: admin?.secretaria });
+                        const chamadosData = response.data._embedded?.chamadoDTOList || [];
+                        setChamados(chamadosData);
+                        
+                        // Prefetch user names
+                        const names: Record<number, string> = {};
+                        await Promise.all(chamadosData.map(async (chamado: ChamadoInterface) => {
+                          try {
+                            const userResponse = await api.get(`/api/usuario/${chamado.usuarioId}`);
+                            names[chamado.id] = userResponse.data.nome;
+                          } catch (error) {
+                            console.error("Erro ao buscar usuário:", error);
+                            names[chamado.id] = "Usuário não encontrado";
+                          }
+                        }));
+                        setUserNames(names);
             } catch (error) {
                 console.error("Erro ao buscar chamados:", error)
             } finally {
@@ -184,6 +204,11 @@ export default function FuncionarioDashboard() {
         }).format(date)
     }
 
+    const handleRowClick = (chamado: ChamadoInterface) => {
+        setSelectedChamado(chamado);
+        setDialogOpen(true);
+    };
+
     if (loading || loadingChamados) {
         return (
             <div className="container mx-auto p-6">
@@ -206,15 +231,7 @@ export default function FuncionarioDashboard() {
             <div className="container mx-auto p-4 md:p-6">
 
                 <div className="space-y-8">
-
-
-                    <Tabs defaultValue="chamados" className="w-full">
-                        <TabsList className="mb-6">
-                            <TabsTrigger value="chamados">Chamados</TabsTrigger>
-                            <TabsTrigger value="historico">Histórico</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="chamados" className="space-y-6">
+                        
                             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                                 <Card className="lg:col-span-3">
                                     <CardHeader>
@@ -250,6 +267,7 @@ export default function FuncionarioDashboard() {
                                                         <TableHead>Status</TableHead>
                                                         <TableHead className="hidden md:table-cell">Secretaria</TableHead>
                                                         <TableHead className="hidden md:table-cell">Imagem</TableHead>
+                                                        <TableHead className="hidden md:table-cell">Histórico</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
@@ -319,6 +337,17 @@ export default function FuncionarioDashboard() {
                                                                             </DialogContent>
                                                                         </Dialog>
                                                                     )}
+                                                                </TableCell>
+                                                                <TableCell className="hidden md:table-cell">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="icon"
+                                                                        onClick={() => {
+                                                                            handleRowClick(chamado)
+                                                                        }}
+                                                                    >
+                                                                        <History className="h-4 w-4" />
+                                                                    </Button>
                                                                 </TableCell>
                                                             </TableRow>
                                                         ))
@@ -447,6 +476,75 @@ export default function FuncionarioDashboard() {
                                                                     </div>
                                                                 )}
                                                             </DialogContent>
+                                                            <DialogTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className="w-full flex items-center justify-center gap-2"
+                                                                    onClick={() =>
+                                                                        handleOpenImageDialog(selectedChamado.fotoAntesUrl ? selectedChamado.fotoAntesUrl.split("/").pop() || "" : "")
+                                                                    }
+                                                                >
+                                                                    <History className="h-4 w-4" />
+                                                                    <span>Histórico</span>
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                            <DialogContent className="sm:max-w-[600px]">
+                                                            <DialogHeader>
+                                                                <DialogTitle className="flex items-center gap-2">
+                                                                <span>Histórico do Chamado:</span>
+                                                                <span className="truncate max-w-[300px]">{selectedChamado?.titulo}</span>
+                                                                </DialogTitle>
+                                                            </DialogHeader>
+                                                            
+                                                            <div className="space-y-4">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                {selectedChamado && getStatusBadge(selectedChamado.status)}
+                                                                <div className="text-sm text-gray-500">
+                                                                    Aberto em: {selectedChamado && formatDate(selectedChamado.dataAbertura)}
+                                                                </div>
+                                                                <div className="text-sm text-gray-500">
+                                                                    Solicitante: {selectedChamado && userNames[selectedChamado.id]}
+                                                                </div>
+                                                                </div>
+
+                                                                <ScrollArea className="h-[300px] pr-4">
+                                                                <div className="space-y-4">
+                                                                    {selectedChamado?.historicos?.length ? (
+                                                                    selectedChamado.historicos.map((item, index) => {
+                                                                        const [date, time] = item.dataModificacao.split(" ");
+                                                                        return (
+                                                                        <div key={index} className="border-l-2 border-gray-200 pl-4 pb-4 relative">
+                                                                            <div className="absolute w-3 h-3 bg-cyan-600 rounded-full -left-[7px] top-0"></div>
+                                                                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-1">
+                                                                            <div className="flex items-center gap-1">
+                                                                                <Calendar className="h-3 w-3" />
+                                                                                {date}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-1">
+                                                                                <Clock className="h-3 w-3" />
+                                                                                {time}
+                                                                                <span className="text-gray-400"> (modificado)</span>
+                                                                            </div>
+                                                                            </div>
+                                                                            <p className="font-medium">{item.observacao}</p>
+                                                                            <p className="text-sm text-gray-500">
+                                                                                Status Anterior: {getStatusBadge(item.statusAnterior)}
+                                                                            </p>
+                                                                            <p className="text-sm text-gray-500">
+                                                                                Status Modificado: {getStatusBadge(item.statusNovo)}
+                                                                            </p>
+                                                                        </div>
+                                                                        );
+                                                                    })
+                                                                    ) : (
+                                                                    <div className="text-center text-gray-500 py-4">
+                                                                        Nenhum histórico registrado para este chamado
+                                                                    </div>
+                                                                    )}
+                                                                </div>
+                                                                </ScrollArea>
+                                                            </div>
+                                                        </DialogContent>
                                                         </Dialog>
                                                     </div>
                                                 )}
@@ -520,13 +618,66 @@ export default function FuncionarioDashboard() {
                                     </CardContent>
                                 </Card>
                             </div>
-                        </TabsContent>
-                        <TabsContent value="historico">
-                            <Historico /> {/* 👈 componente ou conteúdo da página historico.tsx */}
-                        </TabsContent>
 
+                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                            <DialogContent className="sm:max-w-[600px]">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                <span>Histórico do Chamado:</span>
+                                <span className="truncate max-w-[300px]">{selectedChamado?.titulo}</span>
+                                </DialogTitle>
+                            </DialogHeader>
+                            
+                            <div className="space-y-4">
+                                <div className="flex flex-wrap items-center gap-2">
+                                {selectedChamado && getStatusBadge(selectedChamado.status)}
+                                <div className="text-sm text-gray-500">
+                                    Aberto em: {selectedChamado && formatDate(selectedChamado.dataAbertura)}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                    Solicitante: {selectedChamado && userNames[selectedChamado.id]}
+                                </div>
+                                </div>
 
-                    </Tabs>
+                                <ScrollArea className="h-[300px] pr-4">
+                                <div className="space-y-4">
+                                    {selectedChamado?.historicos?.length ? (
+                                    selectedChamado.historicos.map((item, index) => {
+                                        const [date, time] = item.dataModificacao.split(" ");
+                                        return (
+                                        <div key={index} className="border-l-2 border-gray-200 pl-4 pb-4 relative">
+                                            <div className="absolute w-3 h-3 bg-cyan-600 rounded-full -left-[7px] top-0"></div>
+                                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-1">
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="h-3 w-3" />
+                                                {date}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="h-3 w-3" />
+                                                {time}
+                                                <span className="text-gray-400"> (modificado)</span>
+                                            </div>
+                                            </div>
+                                            <p className="font-medium">{item.observacao}</p>
+                                            <p className="text-sm text-gray-500 mb-2">
+                                                Status Anterior: {getStatusBadge(item.statusAnterior)}
+                                            </p>
+                                            <p className="text-sm text-gray-500">
+                                                Status Modificado: {getStatusBadge(item.statusNovo)}
+                                            </p>
+                                        </div>
+                                        );
+                                    })
+                                    ) : (
+                                    <div className="text-center text-gray-500 py-4">
+                                        Nenhum histórico registrado para este chamado
+                                    </div>
+                                    )}
+                                </div>
+                                </ScrollArea>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </div>
