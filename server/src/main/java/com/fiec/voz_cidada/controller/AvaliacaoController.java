@@ -1,11 +1,10 @@
 package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.domain.avaliacao.AvaliacaoDTO;
-import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
-import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.service.AvaliacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-
+    
 @RestController
 @RequestMapping("/api/avaliacao")
 public class AvaliacaoController {
@@ -33,7 +32,7 @@ public class AvaliacaoController {
     }
 
     @GetMapping
-    public ResponseEntity<PagedModel<EntityModel<AvaliacaoDTO>>> findAll(@RequestParam Pageable pageable) {
+    public ResponseEntity<PagedModel<EntityModel<AvaliacaoDTO>>> findAll(@PageableDefault(size = 10) Pageable pageable) {
         return service.findAll(pageable);
     }
 
@@ -49,7 +48,7 @@ public class AvaliacaoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.deleteById(id);
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 

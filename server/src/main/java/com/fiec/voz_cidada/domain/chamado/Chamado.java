@@ -5,6 +5,8 @@ import com.fiec.voz_cidada.domain.historico.HistoricoChamado;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -14,7 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "chamado")
 public class Chamado implements Serializable {
@@ -27,17 +30,18 @@ public class Chamado implements Serializable {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chamado", orphanRemoval = true)
     @Fetch(FetchMode.JOIN)
     private List<HistoricoChamado> historicos;
 
-    @OneToMany(mappedBy = "chamado", cascade = CascadeType.ALL)
-    private List<Avaliacao> avaliacao;
+    @OneToOne(mappedBy = "chamado", cascade = CascadeType.REMOVE)
+    private Avaliacao avaliacao;
 
     @Enumerated(EnumType.STRING)
     private Secretaria secretaria;
 
     private String titulo;
+
     private String descricao;
     private LocalDateTime dataAbertura;
     private String status;
@@ -45,5 +49,7 @@ public class Chamado implements Serializable {
     private String fotoDepoisUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
+
+
 
 }

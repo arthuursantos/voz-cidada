@@ -8,6 +8,7 @@ import com.fiec.voz_cidada.domain.historico.HistoricoDTO;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.repository.AvaliacaoRepository;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -36,6 +37,14 @@ public class AvaliacaoService extends GenericService<Avaliacao, AvaliacaoDTO, Lo
     public EntityModel<AvaliacaoDTO> create(AvaliacaoDTO dto) {
         Chamado entity = chamadoRepository.findById(dto.getChamadoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi possível avaliar. O chamado não existe."));
+        System.out.println(entity.getStatus());
+        if (!"CONCLUÍDO".equalsIgnoreCase(entity.getStatus())) {
+            throw new RuntimeException("Não é possível avaliar um chamado que não esteja concluído.");
+        }
+        if (repository.existsByChamadoId(dto.getChamadoId())) {
+            throw new RuntimeException("O chamado só pode ser avaliado uma vez.");
+        }
+        checkAccess(entity.getUsuario().getId());
         checkAccess(dto.getUsuarioId());
         Avaliacao savedEntity = repository.save(convertToEntity(dto));
         return EntityModel.of(convertToDto(savedEntity), generateLinks(dto));
@@ -45,18 +54,19 @@ public class AvaliacaoService extends GenericService<Avaliacao, AvaliacaoDTO, Lo
     public ResponseEntity<EntityModel<AvaliacaoDTO>> update(AvaliacaoDTO dto) {
         Avaliacao entity = repository.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("A avaliação não existe."));
-        checkAccess(entity.getUsuario().getId());
+        checkAccess(entity.getChamado().getUsuario().getId());
+        checkAccess(dto.getUsuarioId());
         mapper.map(dto, entity);
         AvaliacaoDTO savedDto = convertToDto(repository.save(entity));
         return ResponseEntity.ok(EntityModel.of(savedDto));
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         Avaliacao entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("A avaliação não existe."));
         checkAccess(entity.getUsuario().getId());
-        repository.deleteById(id);
+        repository.delete(entity);
     }
 
     @Override

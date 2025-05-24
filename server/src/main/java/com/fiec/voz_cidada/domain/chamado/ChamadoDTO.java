@@ -1,6 +1,8 @@
 package com.fiec.voz_cidada.domain.chamado;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
+import com.fiec.voz_cidada.domain.avaliacao.AvaliacaoDTO;
 import com.fiec.voz_cidada.domain.historico.HistoricoDTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +21,7 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
 
     private Long id;
     private Long usuarioId;
+    private String usuarioNome;
     private String titulo;
     private String descricao;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -30,6 +33,7 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
     private String secretaria;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private AvaliacaoDTO avaliacao;
     private List<HistoricoDTO> historicos;
 
 }

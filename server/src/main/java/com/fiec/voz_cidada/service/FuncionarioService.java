@@ -68,7 +68,7 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         }
     }
 
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         checkAccess(id);
         repository.deleteById(id);
     }
