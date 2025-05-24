@@ -5,6 +5,7 @@ import com.fiec.voz_cidada.domain.auth_user.*;
 import com.fiec.voz_cidada.exceptions.InvalidAuthenticationException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +16,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.View;
 
+@Slf4j
 @Service
 public class AuthService implements UserDetailsService {
 
@@ -23,16 +26,18 @@ public class AuthService implements UserDetailsService {
     private final UsuarioRepository usuarioRepository;
     private final TokenService tokenService;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final View error;
 
     @Autowired
     public AuthService(AuthRepository repository,
                        UsuarioRepository usuarioRepository,
                        TokenService tokenService,
-                       AuthenticationConfiguration authenticationConfiguration) {
+                       AuthenticationConfiguration authenticationConfiguration, View error) {
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
         this.tokenService = tokenService;
         this.authenticationConfiguration = authenticationConfiguration;
+        this.error = error;
     }
     public ResponseEntity<?> login(AuthenticationDTO dto) {
         try {
@@ -41,6 +46,7 @@ public class AuthService implements UserDetailsService {
             var auth = authManager.authenticate(credentials);
             return ResponseEntity.ok(tokenService.createAuthTokens((AuthUser) auth.getPrincipal()));
         } catch (Exception e) {
+            log.error("AuthService - login - ", e);
             throw new InvalidAuthenticationException("Seu login ou senha estão incorretos!");
         }
     }
@@ -59,6 +65,7 @@ public class AuthService implements UserDetailsService {
             LoginResponseDTO tokens = tokenService.createAuthTokens(user);
             return ResponseEntity.ok(tokens);
         } catch (Exception e) {
+            log.error("AuthService - loginWithGoogle - ", e);
             throw new InvalidAuthenticationException("Não foi possível se autenticar com a conta Google.");
         }
     }
@@ -69,6 +76,7 @@ public class AuthService implements UserDetailsService {
             String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
             AuthUser newUser = new AuthUser(dto.login(), encryptedPassword, UserRole.USER, AuthStatus.SIGNUP);
             repository.save(newUser);
+            log.info();
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Não foi possível criar o usuário.");

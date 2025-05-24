@@ -2,11 +2,13 @@ package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.domain.auth_user.*;
 import com.fiec.voz_cidada.service.AuthService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -20,6 +22,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationDTO dto){
+        log.info("AuthController - login - [{}]", dto.login());
         return service.login(dto);
     }
 
