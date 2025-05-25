@@ -23,3 +23,12 @@ export interface HistoricoInterface {
     statusNovo: string;
     observacao: string;
 }
+
+export interface AvaliacaoInterface {
+    id?: number;
+    chamadoId: number;
+    usuarioId: number;
+    estrelas: number;
+    comentario?: string | null;
+    dataAvaliacao: string;
+}

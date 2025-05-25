@@ -24,13 +24,12 @@ public class HistoricoService extends GenericService<HistoricoChamado, Historico
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         HistoricoChamado entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nenhum histórico encontrado."));
         checkAccess(entity.getChamado().getUsuario().getId());
         repository.delete(entity);
     }
-
 
     @Override
     protected Link[] generateLinks(HistoricoDTO dto) {

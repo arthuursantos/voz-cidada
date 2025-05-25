@@ -24,5 +24,4 @@ Um usuário administrador é responsável por manipular as denúncias e prossegu
 
 <h2 id="routes">📍 Endpoints</h2>
 
-Alguns dos endpoints podem ser visualizados acessando a documentação Swagger na porta 8080.
-O restante ainda está sendo documentado.
+Os endpoints estão documentados via Swagger. <br> Eles podem ser acessados pelo endereço http://localhost:8080/swagger-ui/index.html.

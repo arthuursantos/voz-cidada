@@ -56,12 +56,6 @@ public class ChamadoController {
         return service.findBySecretaria(secretaria, pageable);
     }
 
-    @GetMapping("/status")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<String>> findAllStatus() {
-        return service.findAllStatus();
-    }
-
     @PutMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<EntityModel<ChamadoDTO>> update(@RequestBody ChamadoDTO dto) {
@@ -70,7 +64,7 @@ public class ChamadoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.deleteById(id);
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 

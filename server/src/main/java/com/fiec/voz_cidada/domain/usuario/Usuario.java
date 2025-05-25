@@ -35,8 +35,4 @@ public class Usuario implements Serializable {
     private String uf;
     private LocalDateTime dataCadastro;
 
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Chamado> chamados;
-
 }

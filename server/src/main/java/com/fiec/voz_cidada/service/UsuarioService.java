@@ -57,7 +57,7 @@ public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
 
     @Transactional
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
         authRepository.deleteById(usuario.getAuthUser().getId());

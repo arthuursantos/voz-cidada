@@ -87,7 +87,7 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         Chamado entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nenhum chamado encontrado."));
         checkAccess(entity.getUsuario().getId());

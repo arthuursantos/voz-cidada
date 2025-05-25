@@ -80,7 +80,7 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
     }
 
     @Transactional
-    public void deleteById(ID id) {
+    public void delete(ID id) {
         repository.deleteById(id);
     }
 
