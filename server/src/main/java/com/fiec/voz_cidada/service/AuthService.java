@@ -76,7 +76,7 @@ public class AuthService implements UserDetailsService {
             String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
             AuthUser newUser = new AuthUser(dto.login(), encryptedPassword, UserRole.USER, AuthStatus.SIGNUP);
             repository.save(newUser);
-            log.info();
+            log.info("Usuário criado com sucesso.");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Não foi possível criar o usuário.");
