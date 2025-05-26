@@ -4,11 +4,16 @@ import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
 import api from "@/shared/axios.ts"
 import { ChamadoInterface, Status } from "@/shared/types"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import Rating from '@mui/material/Rating';
+import { Textarea } from "@/components/ui/textarea"
+import AvaliacaoArea from "@/components/avaliacao"
 
 interface ChamadoDialogProps {
     chamado: ChamadoInterface | null
     open: boolean
     onOpenChange: (open: boolean) => void
+    atualizarChamado?: () => void
 }
 
 const STATUS_MAP: Record<string, Status> = {
@@ -36,7 +41,7 @@ const formatDate = (dateString: string): string => {
     }
 }
 
-export default function GetChamadoDialog({ chamado, open, onOpenChange }: ChamadoDialogProps) {
+export default function GetChamadoDialog({ chamado, open, onOpenChange, atualizarChamado }: ChamadoDialogProps) {
     const [imagemAntes, setImagemAntes] = useState<string | null>(null)
     const [imagemDepois, setImagemDepois] = useState<string | null>(null)
 
@@ -78,42 +83,78 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange }: Chamad
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[800px] max-h-[90vh] p-0 overflow-auto">
+            <DialogContent className="sm:max-w-[900px] max-h-[90vh] p-0 overflow-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+                    <ScrollArea className="h-full">
                     <div className="p-6 overflow-y-auto max-h-[80vh]">
-                        <DialogHeader>
-                            <div className="flex items-center justify-between mb-2">
-                                <DialogTitle className="text-xl">{chamado.titulo}</DialogTitle>
-                                <Badge className={`${STATUS_COLORS[status]} text-white mr-6`}>
-                                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                                </Badge>
+                        
+                            <DialogHeader>
+                                <div className="flex items-center justify-between mb-2">
+                                    <DialogTitle className="text-xl">{chamado.titulo}</DialogTitle>
+                                    <Badge className={`${STATUS_COLORS[status]} text-white mr-6`}>
+                                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    </Badge>
+                                </div>
+                                <DialogDescription className="text-sm text-muted-foreground">
+                                    Chamado #{chamado.id} • Aberto em {formatDate(chamado.dataAbertura)}
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="mt-6">
+                                <h3 className="text-sm font-medium mb-2">Descrição</h3>
+                                <p className="text-sm text-muted-foreground whitespace-pre-line">{chamado.descricao}</p>
                             </div>
-                            <DialogDescription className="text-sm text-muted-foreground">
-                                Chamado #{chamado.id} • Aberto em {formatDate(chamado.dataAbertura)}
-                            </DialogDescription>
-                        </DialogHeader>
 
-                        <div className="mt-6">
-                            <h3 className="text-sm font-medium mb-2">Descrição</h3>
-                            <p className="text-sm text-muted-foreground whitespace-pre-line">{chamado.descricao}</p>
-                        </div>
+                            <div className="mt-6">
+                                <h3 className="text-sm font-medium mb-2">Localização:</h3>
+                                {chamado.latitude && chamado.longitude ? (
+                                    <iframe
+                                        src={`https://maps.google.com/maps?q=${chamado.latitude},${chamado.longitude}&markers=${chamado.latitude},${chamado.longitude}&z=15&output=embed`}
+                                        width="100%"
+                                        height="300"
+                                        className="border rounded-md"
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                    />
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">Localização não informada</p>
+                                )}
+                            </div>
 
-                        <div className="mt-6">
-                            <h3 className="text-sm font-medium mb-2">Localização:</h3>
-                            {chamado.latitude && chamado.longitude ? (
-                                <iframe
-                                    src={`https://maps.google.com/maps?q=${chamado.latitude},${chamado.longitude}&markers=${chamado.latitude},${chamado.longitude}&z=15&output=embed`}
-                                    width="100%"
-                                    height="300"
-                                    className="border rounded-md"
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                />
-                            ) : (
-                                <p className="text-sm text-muted-foreground">Localização não informada</p>
+                            {/* AVALIAÇÂO - SE ESTIVER CONCLUÍDO */}
+                            {status === "CONCLUÍDO" && !chamado.avaliacao && (
+                                <AvaliacaoArea id={chamado.id} atualizarChamado={() => { atualizarChamado && atualizarChamado(); }} />
                             )}
-                        </div>
+                            {status === "CONCLUÍDO" && chamado.avaliacao && (
+                                <div className="mt-6">
+                                    <h3 className="text-sm font-bold font-montserrat mb-2">Sua avaliação:</h3>
+                                    <div className="flex items-center mb-2">
+                                        <Rating
+                                            name="avaliacao"
+                                            value={chamado.avaliacao.estrelas}
+                                            readOnly
+                                            precision={1}
+                                        />
+                                        <span className="ml-2 text-sm text-muted-foreground">
+                                            {chamado.avaliacao.estrelas} Estrelas
+                                        </span>
+                                    </div>
+                                    {chamado.avaliacao.comentario && (
+                                        <Textarea
+                                            value={chamado.avaliacao.comentario}
+                                            readOnly
+                                            className="bg-muted"
+                                            rows={5}
+                                        />
+                                    )}
+                                </div>
+                            )}
+
+                            {/* HISTÓRICO */}
+                        
                     </div>
+                    </ScrollArea>
+
 
                     {hasAnyPhotos ? (
                         <div className="bg-muted border-l h-full flex flex-col">

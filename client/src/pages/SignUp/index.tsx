@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormEvent, useContext, useState } from "react";
 import ProgressBar from "@/components/progressBar";
+import toast from "react-hot-toast";
 
 export default function SignUp() {
     const { signUp } = useContext(AuthContext)
@@ -68,7 +69,18 @@ export default function SignUp() {
     }
 
     const handleSignUp: SubmitHandler<SignUpData> = async (data) => {
-        await signUp(data)
+        await toast.promise(
+            async () => {
+                await signUp(data);
+            },
+            {
+                loading: "Criando conta...",
+                success: "Conta criada com sucesso!",
+                error: (err) => {
+                    return err instanceof Error ? err.message : "Erro ao criar conta.";
+                }
+            }
+        )
     }
 
     return (

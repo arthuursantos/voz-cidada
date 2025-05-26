@@ -10,7 +10,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -24,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { ArrowLeft, Camera, Upload, X, MapPin } from "lucide-react";
 import L from "leaflet";
 import { Icon } from "leaflet";
@@ -33,8 +32,12 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const detailsFormSchema = z.object({
-  titulo: z.string().min(1, "O título é obrigatório"),
-  descricao: z.string().min(1, "A descrição é obrigatória"),
+  titulo: z.string().min(1, "O título é obrigatório").refine((val) => val.trim().length > 0, {
+    message: "O título não pode ser apenas espaços em branco",
+  }),
+  descricao: z.string().min(1, "A descrição é obrigatória").refine((val) => val.trim().length > 0, {
+    message: "A descrição não pode ser apenas espaços em branco",
+  }),
 });
 
 const locationFormSchema = z.object({
@@ -44,15 +47,18 @@ const locationFormSchema = z.object({
 
 const photoFormSchema = z.object({
   foto: z
-    .instanceof(File, { message: "Por favor, envie um arquivo válido" })
-    .refine((file) => file.size <= MAX_FILE_SIZE, "Arquivo deve ter no máximo 5MB")
-    .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      "Apenas JPG, PNG e WebP são aceitos"
-    )
+    .union([
+      z.instanceof(File)
+        .refine((file) => file.size <= MAX_FILE_SIZE, "Arquivo deve ter no máximo 5MB")
+        .refine(
+          (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+          "Apenas JPG, PNG e WebP são aceitos"
+        ),
+      z.null()
+    ])
     .optional()
-    .or(z.literal('')),
 });
+
 
 const chamadoFormSchema = detailsFormSchema.merge(locationFormSchema).merge(photoFormSchema);
 type ChamadoFormValues = z.infer<typeof chamadoFormSchema>;
@@ -93,6 +99,7 @@ export default function CreateChamadoDialog({
       descricao: "",
       latitude: undefined,
       longitude: undefined,
+      foto: null
     },
   });
 
@@ -162,7 +169,7 @@ export default function CreateChamadoDialog({
       toast.error("Apenas JPG, PNG e WebP são aceitos");
       return;
     }
-
+    
     form.setValue("foto", file);
     const reader = new FileReader();
     reader.onload = (event) => setFotoPreview(event.target?.result as string);
@@ -170,7 +177,7 @@ export default function CreateChamadoDialog({
   };
 
   const handleRemoveFoto = () => {
-    form.setValue("foto", undefined);
+    form.setValue("foto", null);
     setFotoPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -180,10 +187,17 @@ export default function CreateChamadoDialog({
       ? ["titulo", "descricao"]
       : step === 1
         ? ["latitude", "longitude"]
-        : []; // No passo 2 (foto), não exigimos validação
+        : [];
 
     const isValid = await form.trigger(fields as any);
-    if (isValid) setStep(step + 1);
+    if (isValid) {
+      setStep(step + 1);
+    } else {
+      // Mostra os erros de validação
+      Object.entries(form.formState.errors).forEach(([_, error]) => {
+        toast.error((error as { message?: string })?.message || "Preencha todos os campos obrigatórios");
+      });
+    }
   };
 
   const handleBack = () => setStep(step - 1);
@@ -203,8 +217,6 @@ export default function CreateChamadoDialog({
       return;
     }
 
-    toast.info("Obtendo localização...");
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const pos = {
@@ -215,7 +227,6 @@ export default function CreateChamadoDialog({
         form.setValue("latitude", pos.lat);
         form.setValue("longitude", pos.lng);
         setLocationInformed(true);
-        toast.success("Localização obtida com sucesso!");
       },
       (error) => {
         console.error("Erro ao obter localização:", error);
@@ -225,8 +236,11 @@ export default function CreateChamadoDialog({
     );
   };
 
-  const onSubmit: SubmitHandler<ChamadoFormValues> = async (values) => {
-    if (!user?.id) {
+  const onSubmit: SubmitHandler<ChamadoFormValues> = async (values) => { 
+    if (step < 2) {
+      return;
+    }
+    if (!user) {
       toast.error("Usuário não autenticado");
       return;
     }
@@ -239,13 +253,11 @@ export default function CreateChamadoDialog({
       formData.append("descricao", values.descricao);
       formData.append("usuarioId", user.id.toString());
       formData.append("status", "PENDENTE");
-      formData.append("latitude", values.latitude.toString());
-      formData.append("longitude", values.longitude.toString());
+      formData.append("latitude", values.latitude?.toString() ?? "");
+      formData.append("longitude", values.longitude?.toString() ?? "");
 
-      if (values.foto) {
+      if (values.foto instanceof File) {
         formData.append("fotoAntesFile", values.foto);
-      } else {
-        formData.append("fotoAntesFile", "");
       }
 
       await api.post("/api/chamado/upload", formData, {
@@ -267,7 +279,7 @@ export default function CreateChamadoDialog({
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-[500px]">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-4">
             <DialogHeader>
               <DialogTitle className="text-primary uppercase tracking-wider">
                 Novo Chamado
@@ -323,6 +335,7 @@ export default function CreateChamadoDialog({
               {step === 1 && (
                 <>
                   <Button
+                    type="button"
                     onClick={handleGetLocation}
                     className="w-full mb-4 text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white"
                   >
@@ -449,56 +462,54 @@ export default function CreateChamadoDialog({
               )}
             </div>
 
-            <DialogFooter>
-              <div className="flex justify-between w-full">
-                {step > 0 ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="text-[--cor-primaria] hover:text-[--cor-primaria]"
-                    onClick={handleBack}
-                    disabled={isSubmitting}
-                  >
-                    <ArrowLeft className="h-5 w-5 mr-2" />
-                    Voltar
-                  </Button>
-                ) : (
-                  <div />
-                )}
+            
+            <div className="flex justify-between w-full">
+              {step > 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="text-[--cor-primaria] hover:text-[--cor-primaria]"
+                  onClick={handleBack}
+                  disabled={isSubmitting}
+                >
+                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  Voltar
+                </Button>
+              ) : (
+                <div />
+              )}
 
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleDialogClose(false)}
-                    disabled={isSubmitting}
-                    className="text-[--cor-error] bg-white border-[--cor-error] hover:border-white hover:bg-[--cor-error] hover:text-white"
-                  >
-                    Cancelar
-                  </Button>
-
-                  {step < 2 ? (
-                    <Button
-                      type="button"
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleDialogClose(false)}
+                  disabled={isSubmitting}
+                  className="text-[--cor-error] bg-white border-[--cor-error] hover:border-white hover:bg-[--cor-error] hover:text-white"
+                >
+                  Cancelar
+                </Button>
+                
+                {step < 2 ? (
+                    <Button 
+                      type="button" 
                       onClick={handleNext}
-                      disabled={isSubmitting}
-                      className="text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white"
-                    >
-                      Avançar
+                      className="text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white">
+                      Próximo
                     </Button>
                   ) : (
-                    <Button
-                      type="submit"
+                    <Button 
+                      type="submit" 
                       disabled={isSubmitting}
-                      className="text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white"
-                    >
+                      onClick={form.handleSubmit(onSubmit)}
+                      className="text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white">
                       {isSubmitting ? "Enviando..." : "Enviar Chamado"}
                     </Button>
-                  )}
-                </div>
+                )}
               </div>
-            </DialogFooter>
-          </form>
+            </div>
+            
+          </div>
         </Form>
       </DialogContent>
     </Dialog>

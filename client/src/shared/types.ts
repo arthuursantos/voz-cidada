@@ -11,6 +11,7 @@ export interface ChamadoInterface {
     longitude: number | null
     fotoAntesUrl: string | null;
     fotoDepoisUrl: string | null;
+    avaliacao: AvaliacaoInterface | null;
     historicos: HistoricoInterface[];
 }
 

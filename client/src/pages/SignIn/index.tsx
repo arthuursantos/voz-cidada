@@ -1,14 +1,14 @@
 import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthContext } from "@/contexts/AuthContext.tsx";
-import { useContext, useState } from "react";
-import { AlertCircle, Chrome } from "lucide-react";
+import { useContext } from "react";
+import { Chrome } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from '@react-oauth/google';
+import toast from 'react-hot-toast';
 
 export default function SignIn() {
 
@@ -25,38 +25,48 @@ export default function SignIn() {
         resolver: zodResolver(SignInSchema)
     });
 
-    const { signIn, oAuthSignIn } = useContext(AuthContext);
-    const [error, setError] = useState<string | null>(null);
+    const { signIn, oAuthSignIn, authStatus } = useContext(AuthContext);
 
     const handleSignIn: SubmitHandler<SignInData> = async (data) => {
-        try {
-            setError(null);
-            await signIn(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Ocorreu um erro ao fazer login");
-        }
+        await toast.promise(
+            async () => {
+                await signIn(data);
+            },
+            {
+                loading: "Fazendo login...",
+                success: "Login realizado com sucesso!",
+                error: (err) => err instanceof Error ? err.message : "Ocorreu um erro ao fazer login"
+            }
+        )
+       
     };
 
     const handleGoogleSignIn = useGoogleLogin({
         onSuccess: async (response) => {
-            await oAuthSignIn(response);
+            await toast.promise(
+                oAuthSignIn(response),
+                {
+                    loading: "Autenticando com Google...",
+                    success: () => {
+                        // Verifica se foi redirecionado para cadastro
+                        if (authStatus === 'SIGNIN') {
+                            return "Complete seu cadastro para continuar";
+                        }
+                        return "Login com Google realizado com sucesso!";
+                    },
+                    error: (err) => {
+                        return err instanceof Error ? err.message : "Ocorreu um erro ao fazer login com Google";
+                    }
+                }
+            );
+        },
+        onError: () => {
+            toast.error("Falha ao conectar com a conta Google");
         }
-    })
+    });
 
     return (
         <div className="flex flex-col min-h-screen max-h-screen bg-white md:flex-row">
-            {/* Container do alerta de erro */}
-            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
-                {error && (
-                    <Alert
-                        variant="destructive"
-                        className="border-red-500 bg-red-50 animate-in fade-in slide-in-from-top duration-300 shadow-lg"
-                    >
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
-            </div>
 
             <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
                 <img

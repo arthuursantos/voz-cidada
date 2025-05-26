@@ -445,106 +445,110 @@ export default function FuncionarioDashboard() {
                                                     <div className="space-y-2">
                                                         <p className="text-sm font-medium text-gray-500">Imagem</p>
                                                         <Dialog>
-                                                            <DialogTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="w-full flex items-center justify-center gap-2"
-                                                                    onClick={() =>
-                                                                        handleOpenImageDialog(selectedChamado.fotoAntesUrl ? selectedChamado.fotoAntesUrl.split("/").pop() || "" : "")
-                                                                    }
-                                                                >
-                                                                    <ImageIcon className="h-4 w-4" />
-                                                                    <span>Visualizar imagem</span>
-                                                                </Button>
-                                                            </DialogTrigger>
-                                                            <DialogContent>
-                                                                <DialogHeader>
-                                                                    <DialogTitle>Foto do chamado</DialogTitle>
-                                                                    <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
-                                                                </DialogHeader>
-                                                                {imageAntesUrl ? (
-                                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-                                                                        <img
-                                                                            src={imageAntesUrl || "/placeholder.svg"}
-                                                                            alt="Foto do chamado"
-                                                                            className="object-cover w-full h-full"
-                                                                        />
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                                                                        <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
-                                                                    </div>
-                                                                )}
-                                                            </DialogContent>
-                                                            <DialogTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="w-full flex items-center justify-center gap-2"
-                                                                    onClick={() =>
-                                                                        handleOpenImageDialog(selectedChamado.fotoAntesUrl ? selectedChamado.fotoAntesUrl.split("/").pop() || "" : "")
-                                                                    }
-                                                                >
-                                                                    <History className="h-4 w-4" />
-                                                                    <span>Histórico</span>
-                                                                </Button>
-                                                            </DialogTrigger>
-                                                            <DialogContent className="sm:max-w-[600px]">
-                                                            <DialogHeader>
-                                                                <DialogTitle className="flex items-center gap-2">
-                                                                <span>Histórico do Chamado:</span>
-                                                                <span className="truncate max-w-[300px]">{selectedChamado?.titulo}</span>
-                                                                </DialogTitle>
-                                                            </DialogHeader>
-                                                            
-                                                            <div className="space-y-4">
-                                                                <div className="flex flex-wrap items-center gap-2">
-                                                                {selectedChamado && getStatusBadge(selectedChamado.status)}
-                                                                <div className="text-sm text-gray-500">
-                                                                    Aberto em: {selectedChamado && formatDate(selectedChamado.dataAbertura)}
-                                                                </div>
-                                                                <div className="text-sm text-gray-500">
-                                                                    Solicitante: {selectedChamado && userNames[selectedChamado.id]}
-                                                                </div>
-                                                                </div>
-
-                                                                <ScrollArea className="h-[300px] pr-4">
-                                                                <div className="space-y-4">
-                                                                    {selectedChamado?.historicos?.length ? (
-                                                                    selectedChamado.historicos.map((item, index) => {
-                                                                        const [date, time] = item.dataModificacao.split(" ");
-                                                                        return (
-                                                                        <div key={index} className="border-l-2 border-gray-200 pl-4 pb-4 relative">
-                                                                            <div className="absolute w-3 h-3 bg-cyan-600 rounded-full -left-[7px] top-0"></div>
-                                                                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-1">
-                                                                            <div className="flex items-center gap-1">
-                                                                                <Calendar className="h-3 w-3" />
-                                                                                {date}
-                                                                            </div>
-                                                                            <div className="flex items-center gap-1">
-                                                                                <Clock className="h-3 w-3" />
-                                                                                {time}
-                                                                                <span className="text-gray-400"> (modificado)</span>
-                                                                            </div>
-                                                                            </div>
-                                                                            <p className="font-medium">{item.observacao}</p>
-                                                                            <p className="text-sm text-gray-500">
-                                                                                Status Anterior: {getStatusBadge(item.statusAnterior)}
-                                                                            </p>
-                                                                            <p className="text-sm text-gray-500">
-                                                                                Status Modificado: {getStatusBadge(item.statusNovo)}
-                                                                            </p>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="w-full flex items-center justify-center gap-2"
+                                                                        onClick={() =>
+                                                                            handleOpenImageDialog(selectedChamado.fotoAntesUrl ? selectedChamado.fotoAntesUrl.split("/").pop() || "" : "")
+                                                                        }
+                                                                    >
+                                                                        <ImageIcon className="h-4 w-4" />
+                                                                        <span>Visualizar imagem</span>
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>Foto do chamado</DialogTitle>
+                                                                        <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
+                                                                    </DialogHeader>
+                                                                    {imageAntesUrl ? (
+                                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                                                                            <img
+                                                                                src={imageAntesUrl || "/placeholder.svg"}
+                                                                                alt="Foto do chamado"
+                                                                                className="object-cover w-full h-full"
+                                                                            />
                                                                         </div>
-                                                                        );
-                                                                    })
                                                                     ) : (
-                                                                    <div className="text-center text-gray-500 py-4">
-                                                                        Nenhum histórico registrado para este chamado
-                                                                    </div>
+                                                                        <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+                                                                            <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
+                                                                        </div>
                                                                     )}
+                                                                </DialogContent>
+                                                        </Dialog>
+                                                        <p className="text-sm font-medium text-gray-500 mt-2">Histórico</p>
+                                                        <Dialog>
+                                                            <div>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="w-full flex items-center justify-center gap-2"
+                                                                        onClick={() =>
+                                                                            handleOpenImageDialog(selectedChamado.fotoAntesUrl ? selectedChamado.fotoAntesUrl.split("/").pop() || "" : "")
+                                                                        }
+                                                                    >
+                                                                        <History className="h-4 w-4" />
+                                                                        <span>Histórico</span>
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent className="sm:max-w-[600px]">
+                                                                <DialogHeader>
+                                                                    <DialogTitle className="flex items-center gap-2">
+                                                                    <span>Histórico do Chamado:</span>
+                                                                    <span className="truncate max-w-[300px]">{selectedChamado?.titulo}</span>
+                                                                    </DialogTitle>
+                                                                </DialogHeader>
+                                                                
+                                                                <div className="space-y-4">
+                                                                    <div className="flex flex-wrap items-center gap-2">
+                                                                    {selectedChamado && getStatusBadge(selectedChamado.status)}
+                                                                    <div className="text-sm text-gray-500">
+                                                                        Aberto em: {selectedChamado && formatDate(selectedChamado.dataAbertura)}
+                                                                    </div>
+                                                                    <div className="text-sm text-gray-500">
+                                                                        Solicitante: {selectedChamado && userNames[selectedChamado.id]}
+                                                                    </div>
+                                                                    </div>
+                                                                    <ScrollArea className="h-[300px] pr-4">
+                                                                    <div className="space-y-4">
+                                                                        {selectedChamado?.historicos?.length ? (
+                                                                        selectedChamado.historicos.map((item, index) => {
+                                                                            const [date, time] = item.dataModificacao.split(" ");
+                                                                            return (
+                                                                            <div key={index} className="border-l-2 border-gray-200 pl-4 pb-4 relative">
+                                                                                <div className="absolute w-3 h-3 bg-cyan-600 rounded-full -left-[7px] top-0"></div>
+                                                                                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-1">
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <Calendar className="h-3 w-3" />
+                                                                                    {date}
+                                                                                </div>
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <Clock className="h-3 w-3" />
+                                                                                    {time}
+                                                                                    <span className="text-gray-400"> (modificado)</span>
+                                                                                </div>
+                                                                                </div>
+                                                                                <p className="font-medium">{item.observacao}</p>
+                                                                                <p className="text-sm text-gray-500">
+                                                                                    Status Anterior: {getStatusBadge(item.statusAnterior)}
+                                                                                </p>
+                                                                                <p className="text-sm text-gray-500">
+                                                                                    Status Modificado: {getStatusBadge(item.statusNovo)}
+                                                                                </p>
+                                                                            </div>
+                                                                            );
+                                                                        })
+                                                                        ) : (
+                                                                        <div className="text-center text-gray-500 py-4">
+                                                                            Nenhum histórico registrado para este chamado
+                                                                        </div>
+                                                                        )}
+                                                                    </div>
+                                                                    </ScrollArea>
                                                                 </div>
-                                                                </ScrollArea>
+                                                                                                                                                                                    </DialogContent>
                                                             </div>
-                                                        </DialogContent>
                                                         </Dialog>
                                                     </div>
                                                 )}

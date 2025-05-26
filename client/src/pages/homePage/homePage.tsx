@@ -20,6 +20,7 @@ import {
 import { FileText, Filter } from "lucide-react"
 import ChamadosCarousel from '../Home/components/carousel';
 import { ChamadoInterface, Status } from '@/shared/types';
+import Rating from '@mui/material/Rating';
 
 interface ApiResponse {
   _embedded: {
@@ -54,6 +55,73 @@ const STATUS_COLORS: Record<Status, string> = {
 const statusMapping = (apiStatus: string): Status => {
   return STATUS_MAP[apiStatus] || "PENDENTE"
 }
+
+// id: number;
+//     usuarioId: number;
+//     titulo: string;
+//     descricao: string;
+//     secretaria: string;
+//     dataAbertura: string;
+//     status: Status | string;
+//     latitude: number | null
+//     longitude: number | null
+//     fotoAntesUrl: string | null;
+//     fotoDepoisUrl: string | null;
+
+// const chamadosInventados: ChamadoInterface[] = [
+//   {
+//     id: 1,
+//     usuarioId: 1,
+//     titulo: "Problema com a internet",
+//     descricao: "A internet está muito lenta.",
+//     secretaria: "URBANISMO",
+//     dataAbertura: "2023-10-01T10:00:00Z",
+//     status: "EM ANDAMENTO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: null,
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: []
+//   },
+//   {
+//     id: 2,
+//     usuarioId: 1,
+//     titulo: "Buraco na rua",
+//     descricao: "Há um buraco grande na rua principal.",
+//     secretaria: "INFRAESTRUTURA",
+//     dataAbertura: "2023-10-02T11:00:00Z",
+//     status: "CONCLUÍDO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: null,
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: []
+//   },
+//   {
+//     id: 3,
+//     usuarioId: 1,
+//     titulo: "Lixo acumulado",
+//     descricao: "Há lixo acumulado na esquina da minha rua",
+//     secretaria: "SAÚDE",
+//     dataAbertura: "2023-10-03T12:00:00Z",
+//     status: "CONCLUÍDO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: null,
+//     fotoDepoisUrl: null,
+//     avaliacao: {
+//       id: 1,
+//       chamadoId: 3,
+//       usuarioId: 1,
+//       estrelas: 5,
+//       comentario: "Ótimo atendimento!",
+//       dataAvaliacao: "2023-10-04T13:00:00Z"
+//     },
+//     historicos: []
+//   },
+// ]
 
 export default function Dashboard() {
 
@@ -174,7 +242,7 @@ export default function Dashboard() {
               filteredChamados.map((chamado) => {
                     const status = statusMapping(chamado.status)
                     return (
-                        <Card key={chamado.id} className="hover:shadow-md transition-shadow">
+                        <Card key={chamado.id} className="hover:shadow-md font-lato transition-shadow">
                             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                                 <CardTitle className="text-md font-medium">{chamado.titulo}</CardTitle>
                                 <FileText className="h-4 w-4 text-muted-foreground" />
@@ -188,6 +256,23 @@ export default function Dashboard() {
                                         {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
                                     </Badge>
                                 </div>
+                                {chamado.status === "CONCLUÍDO" && !chamado.avaliacao && (
+                                  <p className="text-sm text-[--cor-primaria2]">
+                                    Chamado concluído, deixe sua avaliação!
+                                  </p>
+                                )}
+                                {chamado.status === "CONCLUÍDO" && chamado.avaliacao && (
+                                  <>
+                                  <p>Avaliado com:</p>
+                                  <div className='flex flex-row'>
+                                    <Rating value={chamado.avaliacao.estrelas} readOnly />
+                                    <span className="ml-2 text-sm text-muted-foreground">
+                                            {chamado.avaliacao.estrelas} Estrelas
+                                    </span>
+                                  </div>
+                                  </>
+                                  
+                                )}
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -221,6 +306,7 @@ export default function Dashboard() {
         chamado={selectedChamado}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        atualizarChamado={() => { fetchChamados(); }}
       />
 
       <CreateChamadoDialog
