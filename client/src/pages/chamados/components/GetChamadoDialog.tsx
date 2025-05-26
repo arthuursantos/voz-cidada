@@ -121,6 +121,15 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange, atualiza
                                 )}
                             </div>
 
+                            {(status === "EM ANDAMENTO" || status === "CONCLUÍDO")  && (
+                                <div className="mt-6">
+                                    <h3 className="text-sm font-bold font-montserrat mb-2">Devolutiva do servidor público:</h3>
+                                    <Textarea className="bg-muted font-lato" readOnly>
+                                        {chamado.historicos[chamado.historicos.length - 1].observacao}
+                                    </Textarea>
+                                </div>
+                            )}
+
                             {/* AVALIAÇÂO - SE ESTIVER CONCLUÍDO */}
                             {status === "CONCLUÍDO" && !chamado.avaliacao && (
                                 <AvaliacaoArea id={chamado.id} atualizarChamado={() => { atualizarChamado && atualizarChamado(); }} />

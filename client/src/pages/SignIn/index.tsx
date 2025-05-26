@@ -25,7 +25,7 @@ export default function SignIn() {
         resolver: zodResolver(SignInSchema)
     });
 
-    const { signIn, oAuthSignIn, authStatus } = useContext(AuthContext);
+    const { signIn, oAuthSignIn } = useContext(AuthContext);
 
     const handleSignIn: SubmitHandler<SignInData> = async (data) => {
         await toast.promise(
@@ -43,22 +43,25 @@ export default function SignIn() {
 
     const handleGoogleSignIn = useGoogleLogin({
         onSuccess: async (response) => {
-            await toast.promise(
-                oAuthSignIn(response),
-                {
-                    loading: "Autenticando com Google...",
-                    success: () => {
-                        // Verifica se foi redirecionado para cadastro
-                        if (authStatus === 'SIGNIN') {
-                            return "Complete seu cadastro para continuar";
+            try {
+                await toast.promise(
+                    oAuthSignIn(response),
+                    {
+                        loading: "Autenticando com Google...",
+                        success: (result) => {
+                            return result.needsRegistration
+                                ? "Complete seu cadastro para continuar"
+                                : "Login com Google realizado com sucesso!";
+                        },
+                        error: (err) => {
+                            return err instanceof Error ? err.message : "Ocorreu um erro ao fazer login com Google";
                         }
-                        return "Login com Google realizado com sucesso!";
-                    },
-                    error: (err) => {
-                        return err instanceof Error ? err.message : "Ocorreu um erro ao fazer login com Google";
                     }
-                }
-            );
+                );
+            } catch (error) {
+                console.error("Error during Google sign in:", error);
+                toast.error("Erro durante o login com Google");
+            }
         },
         onError: () => {
             toast.error("Falha ao conectar com a conta Google");

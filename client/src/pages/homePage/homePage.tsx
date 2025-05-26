@@ -82,7 +82,26 @@ const statusMapping = (apiStatus: string): Status => {
 //     fotoAntesUrl: null,
 //     fotoDepoisUrl: null,
 //     avaliacao: null,
-//     historicos: []
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 1,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-01T11:00:00Z",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       },
+//       {
+//         id: 2,
+//         chamadoId: 1,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-02T12:00:00Z",
+//         observacao: "Técnico agendado para amanhã.",
+//         statusAnterior: "EM ANDAMENTO",
+//         statusNovo: "EM ANDAMENTO"
+//       }
+//     ]
 //   },
 //   {
 //     id: 2,
@@ -119,7 +138,9 @@ const statusMapping = (apiStatus: string): Status => {
 //       comentario: "Ótimo atendimento!",
 //       dataAvaliacao: "2023-10-04T13:00:00Z"
 //     },
-//     historicos: []
+//     historicos: [
+      
+//     ]
 //   },
 // ]
 
