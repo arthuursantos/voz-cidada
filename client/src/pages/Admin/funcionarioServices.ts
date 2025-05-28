@@ -19,6 +19,10 @@ const funcionarioService = {
 
     createAdminProfile: (funcionarioData: any) => {
         return api.post('/api/funcionario', funcionarioData);
+    },
+
+    deleteById: (id: number) => {
+        return api.delete(`/api/funcionario/${id}`);
     }
 };
 

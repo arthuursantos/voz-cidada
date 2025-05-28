@@ -14,6 +14,7 @@ import funcionarioService from "./funcionarioServices.ts";
 import chamadoService from "./chamadoService.ts";
 import { ChamadoInterface } from "./types.ts";
 import FuncionarioDashboard from "../Funcionario/index.tsx";
+import toast from "react-hot-toast";
 
 // Define the structure of a Funcionario object
 interface Funcionario {
@@ -152,19 +153,21 @@ export default function AdminDashboard() {
         }
     }
 
-    function handleDeleteFuncionario(id: number): void {
-        console.log(`Funcionario de id: ${id} deletado`);
-    }
-
-    function handleEditFuncionario(funcionario: Funcionario): void {
-        setShowNewEmployeeDialog(true);
-        reset({
-            cpf: funcionario.cpf,
-            cargo: funcionario.cargo,
-            secretaria: funcionario.secretaria as "OBRAS" | "URBANISMO",
-            email: funcionario.email || '',
-            senha: ''
-        });
+    async function handleDeleteFuncionario(id: number): Promise<void> {    
+            await toast.promise(
+                async () => {
+                    await funcionarioService.deleteById(id)
+                        .catch(error => {
+                            console.error("Erro ao excluir funcionário:", error);
+                        });
+                    await getFuncionarios();
+                },
+                {
+                    loading: "Excluindo funcionário...",
+                    success: "Funcionário excluído com sucesso!",
+                    error: (error) => `Erro ao excluir funcionário: ${error.message || "Erro desconhecido"}`
+                }
+            );
     }
 
     function handleEditChamado(chamado: ChamadoInterface): void {
@@ -298,13 +301,30 @@ export default function AdminDashboard() {
                                                 <td className="p-4">{funcionario.cargo}</td>
                                                 <td className="p-4">{funcionario.secretaria}</td>
                                                 <td className="p-4 text-right">
-                                                <button 
-                                                    onClick={() => handleEditFuncionario(funcionario)} 
-                                                    className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </button>
-                                                    <button onClick={() => handleDeleteFuncionario(funcionario.id)} className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center text-red-500">
+                                                    <button onClick={() => toast.custom(
+                                                        (t) => (
+                                                            <div className={`bg-white p-4 rounded shadow-md ${t.visible ? "animate-enter" : "animate-leave"}`}>
+                                                                <p className="text-sm text-gray-700">Tem certeza que deseja excluir este funcionário?</p>
+                                                                <div className="mt-4 flex justify-end space-x-2">
+                                                                    <button 
+                                                                        onClick={async () => {
+                                                                            await handleDeleteFuncionario(funcionario.id);
+                                                                            toast.dismiss(t.id);
+                                                                        }} 
+                                                                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                                                    >
+                                                                        Sim
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => toast.dismiss(t.id)} 
+                                                                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                                                    >
+                                                                        Não
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )} className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center text-red-500">
                                                         <Trash className="h-4 w-4" />
                                                     </button>
                                                 </td>
