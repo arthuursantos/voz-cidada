@@ -10,6 +10,7 @@ import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.repository.FuncionarioRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
 
@@ -56,6 +58,10 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
         }
 
         ChamadoDTO savedDto = convertToDto(repository.save(entity));
+        StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+        String logMsg = "Chamado criado. ID " + savedDto.getId();
+        log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
@@ -82,7 +88,12 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
         Chamado entity = repository.findById(dto.getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Nenhum chamado encontrado."));
         mapper.map(dto, entity);
+
         ChamadoDTO savedDto = convertToDto(repository.save(entity));
+        StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+        String logMsg = "Chamado atualizado. ID " + savedDto.getId();
+        log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
         return ResponseEntity.ok(EntityModel.of(savedDto, generateLinks(savedDto)));
     }
 

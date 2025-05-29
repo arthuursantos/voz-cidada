@@ -11,7 +11,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     open-in-view: false
   servlet:
     multipart:
@@ -29,6 +29,13 @@ spring:
 springdoc:
   swagger-ui:
     url: /openapi.yml
+logging:
+  file:
+    name: logs/app.log
+  pattern:
+    console: "%d{yy yy-MM HH:mm} %logger{40} : %msg%n"
+  level:
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: OFF
 security:
   token:
     secret: ${JWT_SECRET:default-secret}

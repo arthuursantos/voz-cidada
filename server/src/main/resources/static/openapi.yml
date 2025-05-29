@@ -1107,8 +1107,6 @@ components:
       required:
         - login
         - password
-        - role
-        - authStatus
       properties:
         login:
           type: string
@@ -1117,10 +1115,6 @@ components:
           type: string
           description: Senha do usuário
           format: password
-        role:
-          $ref: '#/components/schemas/UserRole'
-        authStatus:
-          $ref: '#/components/schemas/AuthStatus'
 
     # Avaliacao DTO
     AvaliacaoDTO:
