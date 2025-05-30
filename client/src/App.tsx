@@ -5,10 +5,10 @@ import SignIn from '@/pages/SignIn';
 import {AuthContext, AuthProvider} from "@/contexts/AuthContext.tsx";
 import AdminDashboard from "@/pages/Admin";
 import SignUp from "@/pages/SignUp";
-import Chamados from "@/pages/Chamados";
 import Home from "@/pages/Home";
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
+import Chamados from "@/pages/Chamados";
 
 type RouteProps = {
     children: ReactNode;
