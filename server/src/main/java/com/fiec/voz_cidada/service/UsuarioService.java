@@ -9,6 +9,7 @@ import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
 
@@ -40,7 +42,12 @@ public class UsuarioService extends GenericService<Usuario, UsuarioDTO, Long> {
                 .orElseThrow(() -> new ResourceNotFoundException("Você não está autenticado. Crie uma conta antes de prosseguir."));
         Usuario entity = convertToEntity(dto);
         entity.setAuthUser(authUser);
+
         UsuarioDTO savedDto = convertToDto(usuarioRepository.save(entity));
+        StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+        String logMsg = "Perfil de usuário criado. ID " + savedDto.getId();
+        log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 

@@ -12,6 +12,7 @@ import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.FuncionarioRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class FuncionarioService extends GenericService<Funcionario, FuncionarioDTO, Long> {
 
@@ -44,7 +46,12 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         Funcionario entity = convertToEntity(dto);
         entity.setAuthUser(authUser);
         entity.setDataCadastro(LocalDateTime.now());
+
         FuncionarioDTO savedDto = convertToDto(repository.save(entity));
+        StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+        String logMsg = "Perfil de administrador criado. ID " + savedDto.getId();
+        log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
@@ -64,7 +71,7 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
             return EntityModel.of(dto, generateLinks(dto));
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado." + e.getMessage());
+            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado: " + e.getMessage());
         }
     }
 

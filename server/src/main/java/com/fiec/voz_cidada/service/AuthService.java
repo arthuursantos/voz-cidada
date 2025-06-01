@@ -60,7 +60,12 @@ public class AuthService implements UserDetailsService {
                         new BCryptPasswordEncoder().encode("google-oauth-" + dto.email()),
                         UserRole.USER,
                         AuthStatus.SIGNIN);
-                repository.save(user);
+
+                AuthUser savedAuth = repository.save(user);
+                StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+                String logMsg = "Usuário de autenticação criado com OAuth. ID " + savedAuth.getId();
+                log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
             }
             LoginResponseDTO tokens = tokenService.createAuthTokens(user);
             return ResponseEntity.ok(tokens);
@@ -75,8 +80,12 @@ public class AuthService implements UserDetailsService {
             if (repository.findByLogin(dto.login()) != null) return ResponseEntity.badRequest().build();
             String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
             AuthUser newUser = new AuthUser(dto.login(), encryptedPassword, UserRole.USER, AuthStatus.SIGNUP);
+
             repository.save(newUser);
-            log.info("Usuário criado com sucesso.");
+            StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+            String logMsg = "Usuário de autenticação criado. ID " + newUser.getId();
+            log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Não foi possível criar o usuário.");
@@ -88,7 +97,12 @@ public class AuthService implements UserDetailsService {
             if (repository.findByLogin(dto.login()) != null) return ResponseEntity.badRequest().build();
             String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
             AuthUser newUser = new AuthUser(dto.login(), encryptedPassword, UserRole.ADMIN, AuthStatus.SIGNUP);
+
             repository.save(newUser);
+            StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+            String logMsg = "Usuário de autenticação com ROLE_ADMIN criado. ID " + newUser.getId();
+            log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Não foi possível criar o administrador.");
@@ -112,7 +126,12 @@ public class AuthService implements UserDetailsService {
 
             String encryptedPassword = passwordEncoder.encode(dto.newPassword());
             user.changePassword(encryptedPassword);
+
             repository.save(user);
+            StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+            String logMsg = "Senha alterada. AuthUser ID " + user.getId();
+            log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             throw new InvalidAuthenticationException("Não foi possível alterar a senha.");
@@ -133,9 +152,13 @@ public class AuthService implements UserDetailsService {
             if (profile == null) {
                 throw new InvalidAuthenticationException("Não foi possível atualizar a autenticação do usuário.");
             }
-
             user.updateAuthStatus("SIGNUP");
+
             repository.save(user);
+            StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+            String logMsg = "Status de autenticação do usuário alterado. AuthUser ID " + user.getId();
+            log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
             LoginResponseDTO tokens = tokenService.createAuthTokens(user);
 
             return ResponseEntity.ok(tokens);

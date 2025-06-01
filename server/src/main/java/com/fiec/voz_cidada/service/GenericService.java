@@ -10,6 +10,7 @@ import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.repository.GenericRepository;
 import com.fiec.voz_cidada.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.swing.text.html.parser.Entity;
 import java.io.Serializable;
 
+@Slf4j
 public abstract class GenericService<T, D extends RepresentationModel<D>, ID extends Serializable> {
 
     private final GenericRepository<T, ID> repository;
@@ -67,6 +69,11 @@ public abstract class GenericService<T, D extends RepresentationModel<D>, ID ext
         T entity = convertToEntity(dto);
         T savedEntity = repository.save(entity);
         D savedDto = convertToDto(savedEntity);
+
+        StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
+        String logMsg = entityClass.getSimpleName() + " criado. ID " + getResourceID(savedDto);
+        log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
+
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
