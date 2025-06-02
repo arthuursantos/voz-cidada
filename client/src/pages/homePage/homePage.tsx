@@ -1,5 +1,6 @@
 "use client";
 
+import { History } from 'lucide-react';
 import { Search} from 'lucide-react';
 import Header from "@/components/header";
 import BotaoChamado from '@/components/botaoChamado';
@@ -21,6 +22,7 @@ import { FileText, Filter } from "lucide-react"
 import ChamadosCarousel from '../Home/components/carousel';
 import { ChamadoInterface, Status } from '@/shared/types';
 import Rating from '@mui/material/Rating';
+import HistoricoChamado from '@/components/HistoricoChamado';
 
 interface ApiResponse {
   _embedded: {
@@ -75,11 +77,11 @@ const statusMapping = (apiStatus: string): Status => {
 //     titulo: "Problema com a internet",
 //     descricao: "A internet está muito lenta.",
 //     secretaria: "URBANISMO",
-//     dataAbertura: "2023-10-01T10:00:00Z",
-//     status: "EM ANDAMENTO",
+//     dataAbertura: "2023-10-01 10:00:00",
+//     status: "PENDENTE",
 //     latitude: null,
 //     longitude: null,
-//     fotoAntesUrl: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
 //     fotoDepoisUrl: null,
 //     avaliacao: null,
 //     historicos: [
@@ -87,7 +89,7 @@ const statusMapping = (apiStatus: string): Status => {
 //         id: 1,
 //         chamadoId: 1,
 //         funcionarioId: 1,
-//         dataModificacao: "2023-10-01T11:00:00Z",
+//         dataModificacao: "2023-10-01 11:00:00",
 //         observacao: "Chamado aberto.",
 //         statusAnterior: "PENDENTE",
 //         statusNovo: "EM ANDAMENTO"
@@ -96,10 +98,10 @@ const statusMapping = (apiStatus: string): Status => {
 //         id: 2,
 //         chamadoId: 1,
 //         funcionarioId: 1,
-//         dataModificacao: "2023-10-02T12:00:00Z",
+//         dataModificacao: "2023-10-02 12:00:00",
 //         observacao: "Técnico agendado para amanhã.",
 //         statusAnterior: "EM ANDAMENTO",
-//         statusNovo: "EM ANDAMENTO"
+//         statusNovo: "PENDENTE"
 //       }
 //     ]
 //   },
@@ -109,14 +111,33 @@ const statusMapping = (apiStatus: string): Status => {
 //     titulo: "Buraco na rua",
 //     descricao: "Há um buraco grande na rua principal.",
 //     secretaria: "INFRAESTRUTURA",
-//     dataAbertura: "2023-10-02T11:00:00Z",
+//     dataAbertura: "2023-10-02 11:00:00",
 //     status: "CONCLUÍDO",
 //     latitude: null,
 //     longitude: null,
-//     fotoAntesUrl: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
 //     fotoDepoisUrl: null,
 //     avaliacao: null,
-//     historicos: []
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 2,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-02 12:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       },
+//       {
+//         id: 2,
+//         chamadoId: 2,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-03 13:00:00",
+//         observacao: "Buraco consertado.",
+//         statusAnterior: "EM ANDAMENTO",
+//         statusNovo: "CONCLUÍDO"
+//       }
+//     ]
 //   },
 //   {
 //     id: 3,
@@ -124,11 +145,11 @@ const statusMapping = (apiStatus: string): Status => {
 //     titulo: "Lixo acumulado",
 //     descricao: "Há lixo acumulado na esquina da minha rua",
 //     secretaria: "SAÚDE",
-//     dataAbertura: "2023-10-03T12:00:00Z",
+//     dataAbertura: "2023-10-03 12:00:00",
 //     status: "CONCLUÍDO",
 //     latitude: null,
 //     longitude: null,
-//     fotoAntesUrl: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
 //     fotoDepoisUrl: null,
 //     avaliacao: {
 //       id: 1,
@@ -136,7 +157,7 @@ const statusMapping = (apiStatus: string): Status => {
 //       usuarioId: 1,
 //       estrelas: 5,
 //       comentario: "Ótimo atendimento!",
-//       dataAvaliacao: "2023-10-04T13:00:00Z"
+//       dataAvaliacao: "2023-10-04 13:00:00"
 //     },
 //     historicos: [
       
@@ -154,6 +175,7 @@ export default function Dashboard() {
   const [novoChamadoDialogOpen, setNovoChamadoDialogOpen] = useState(false)
   const [selectedChamado, setSelectedChamado] = useState<ChamadoInterface | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogChamadoOpen, setDialogChamadoOpen] = useState(false)
 
   const fetchChamados = useCallback(async () => {
       if (!user?.id) return
@@ -294,17 +316,33 @@ export default function Dashboard() {
                                   </>
                                   
                                 )}
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-2 w-full text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]"
-                                    onClick={() => {
+                                <div className='flex flex-row items-center mt-4 gap-2'>
+                                  <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="mt-2 w-full text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]"
+                                      onClick={() => {
+                                          setSelectedChamado(chamado)
+                                          setDialogOpen(true)
+                                      }}
+                                  >
+                                      Abrir Chamado
+                                  </Button>
+                                  {
+                                    chamado.historicos.length > 0 && (
+                                      <Button
+                                      variant="outline"
+                                      className='mt-2 text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]'
+                                      onClick={() => {
                                         setSelectedChamado(chamado)
-                                        setDialogOpen(true)
-                                    }}
-                                >
-                                    Abrir Chamado
-                                </Button>
+                                        setDialogChamadoOpen(true)
+                                      }}
+                                  >
+                                    <History className="h-4 w-4 text-black" />
+                                  </Button>
+                                    )
+                                  } 
+                                </div>
                             </CardContent>
                         </Card>
                     )
@@ -334,6 +372,13 @@ export default function Dashboard() {
         open={novoChamadoDialogOpen}
         onOpenChange={setNovoChamadoDialogOpen}
         onSuccess={fetchChamados}
+      />
+
+      <HistoricoChamado
+        dialogOpen={dialogChamadoOpen}
+        setDialogOpen={setDialogChamadoOpen}
+        selectedChamado={selectedChamado}
+        isUser
       />
 
     </>

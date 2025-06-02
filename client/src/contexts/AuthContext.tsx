@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom"
 
 import axios, {AxiosResponse} from "axios";
 import { jwtDecode } from "jwt-decode";
+import toast from "react-hot-toast";
 
 type User = {
     id: number;
@@ -252,28 +253,37 @@ export function AuthProvider({children}: AuthProviderProps) {
 
     // Dentro do AuthContext
     async function signOut() {
+        toast.promise(
+            async() => {
+                destroyCookie(null, "vozcidada.accessToken");
+                destroyCookie(null, "vozcidada.refreshToken");
+                
+                // Limpa o estado do usuário e roles
+                setUser(null);
+                setAdmin(null);
+                setUserRoles(null);
+                setAuthStatus(null);
+                setIsGoogleUser(false);
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('isGoogleUser');
+                }
+                
+                // Remove a foto do localStorage
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('userProfilePicture');
+                }
+
+                // Redireciona para a página de login
+                navigate("/signin");
+            },
+            {
+                loading: "Saindo...",
+                success: "Desconectado com sucesso!",
+                error: "Erro ao desconectar. Tente novamente."
+            }
+        )
         // Remove os cookies de acesso
-        destroyCookie(null, "vozcidada.accessToken");
-        destroyCookie(null, "vozcidada.refreshToken");
         
-        // Limpa o estado do usuário e roles
-        setUser(null);
-        setAdmin(null);
-        setUserRoles(null);
-        setAuthStatus(null);
-        setIsGoogleUser(false);
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('isGoogleUser');
-        }
-        
-        // Remove a foto do localStorage
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('userProfilePicture');
-        }
-
-        // Redireciona para a página de login
-        navigate("/signin");
-
     }
 
     async function oAuthSignIn(googleData: any): Promise<{ needsRegistration: boolean }> {

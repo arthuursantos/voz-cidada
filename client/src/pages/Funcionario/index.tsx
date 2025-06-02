@@ -22,11 +22,129 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label.tsx"
 import api from "@/shared/axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import HistoricoChamado from "@/components/HistoricoChamado";
+
+// const chamadosInventados: ChamadoInterface[] = [
+//   {
+//     id: 1,
+//     usuarioId: 1,
+//     titulo: "Problema com a internet",
+//     descricao: "A internet está muito lenta.",
+//     secretaria: "URBANISMO",
+//     dataAbertura: "2023-10-01 10:00:00",
+//     status: "EM ANDAMENTO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 1,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-01 11:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       },
+//       {
+//         id: 2,
+//         chamadoId: 1,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-02 12:00:00",
+//         observacao: "Técnico agendado para amanhã.",
+//         statusAnterior: "EM ANDAMENTO",
+//         statusNovo: "EM ANDAMENTO"
+//       }
+//     ]
+//   },
+//   {
+//     id: 2,
+//     usuarioId: 1,
+//     titulo: "Buraco na rua",
+//     descricao: "Há um buraco grande na rua principal.",
+//     secretaria: "INFRAESTRUTURA",
+//     dataAbertura: "2023-10-02 11:00:00",
+//     status: "CONCLUÍDO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: []
+//   },
+//   {
+//     id: 3,
+//     usuarioId: 1,
+//     titulo: "Lixo acumulado",
+//     descricao: "Há lixo acumulado na esquina da minha rua",
+//     secretaria: "SAÚDE",
+//     dataAbertura: "2023-10-03 12:00:00",
+//     status: "CONCLUÍDO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: {
+//       id: 1,
+//       chamadoId: 3,
+//       usuarioId: 1,
+//       estrelas: 5,
+//       comentario: "Ótimo atendimento!",
+//       dataAvaliacao: "2023-10-04 13:00:00"
+//     },
+//     historicos: [
+      
+//     ]
+//   },
+// ]
+
+export function formatDate(dateString: string) {
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(date)
+}
+
+export function getStatusBadge(status: string) {
+    switch (status) {
+        case "PENDENTE":
+            return (
+                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+                    <Clock className="w-3 h-3 mr-1" /> Pendente
+                </Badge>
+            )
+        case "EM ANDAMENTO":
+            return (
+                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                    <Clock className="w-3 h-3 mr-1" /> Em andamento
+                </Badge>
+            )
+        case "CONCLUÍDO":
+            return (
+                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
+                    <CheckCircle className="w-3 h-3 mr-1" /> Concluído
+                </Badge>
+            )
+        default:
+            return (
+                <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+                    <AlertTriangle className="w-3 h-3 mr-1" /> {status}
+                </Badge>
+            )
+    }
+}
 
 export default function FuncionarioDashboard() {
     const { userRoles, admin, loading } = useContext(AuthContext)
 
-    const [chamados, setChamados] = useState<ChamadoInterface[]>([])
+    const [chamados, setChamados] = useState<ChamadoInterface[]>([])//
 
     const [filteredChamados, setFilteredChamados] = useState<ChamadoInterface[]>([])//
     const [activeFilter, setActiveFilter] = useState("todos") //
@@ -162,47 +280,7 @@ export default function FuncionarioDashboard() {
 
         fetchChamados()
     }, [userRoles, loading, admin, page.number])
-
-    function getStatusBadge(status: string) {
-        switch (status) {
-            case "PENDENTE":
-                return (
-                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
-                        <Clock className="w-3 h-3 mr-1" /> Pendente
-                    </Badge>
-                )
-            case "EM ANDAMENTO":
-                return (
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-                        <Clock className="w-3 h-3 mr-1" /> Em andamento
-                    </Badge>
-                )
-            case "CONCLUÍDO":
-                return (
-                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
-                        <CheckCircle className="w-3 h-3 mr-1" /> Concluído
-                    </Badge>
-                )
-            default:
-                return (
-                    <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
-                        <AlertTriangle className="w-3 h-3 mr-1" /> {status}
-                    </Badge>
-                )
-        }
-    }
-
-    function formatDate(dateString: string) {
-        if (!dateString) return ""
-        const date = new Date(dateString)
-        return new Intl.DateTimeFormat("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        }).format(date)
-    }
+    
 
     const handleRowClick = (chamado: ChamadoInterface) => {
         setSelectedChamado(chamado);
@@ -623,65 +701,12 @@ export default function FuncionarioDashboard() {
                                 </Card>
                             </div>
 
-                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                            <DialogContent className="sm:max-w-[600px]">
-                            <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                <span>Histórico do Chamado:</span>
-                                <span className="truncate max-w-[300px]">{selectedChamado?.titulo}</span>
-                                </DialogTitle>
-                            </DialogHeader>
-                            
-                            <div className="space-y-4">
-                                <div className="flex flex-wrap items-center gap-2">
-                                {selectedChamado && getStatusBadge(selectedChamado.status)}
-                                <div className="text-sm text-gray-500">
-                                    Aberto em: {selectedChamado && formatDate(selectedChamado.dataAbertura)}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                    Solicitante: {selectedChamado && userNames[selectedChamado.id]}
-                                </div>
-                                </div>
-
-                                <ScrollArea className="h-[300px] pr-4">
-                                <div className="space-y-4">
-                                    {selectedChamado?.historicos?.length ? (
-                                    selectedChamado.historicos.map((item, index) => {
-                                        const [date, time] = item.dataModificacao.split(" ");
-                                        return (
-                                        <div key={index} className="border-l-2 border-gray-200 pl-4 pb-4 relative">
-                                            <div className="absolute w-3 h-3 bg-cyan-600 rounded-full -left-[7px] top-0"></div>
-                                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-1">
-                                            <div className="flex items-center gap-1">
-                                                <Calendar className="h-3 w-3" />
-                                                {date}
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Clock className="h-3 w-3" />
-                                                {time}
-                                                <span className="text-gray-400"> (modificado)</span>
-                                            </div>
-                                            </div>
-                                            <p className="font-medium">{item.observacao}</p>
-                                            <p className="text-sm text-gray-500 mb-2">
-                                                Status Anterior: {getStatusBadge(item.statusAnterior)}
-                                            </p>
-                                            <p className="text-sm text-gray-500">
-                                                Status Modificado: {getStatusBadge(item.statusNovo)}
-                                            </p>
-                                        </div>
-                                        );
-                                    })
-                                    ) : (
-                                    <div className="text-center text-gray-500 py-4">
-                                        Nenhum histórico registrado para este chamado
-                                    </div>
-                                    )}
-                                </div>
-                                </ScrollArea>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                        <HistoricoChamado
+                            dialogOpen={dialogOpen}
+                            setDialogOpen={setDialogOpen}
+                            selectedChamado={selectedChamado}
+                            userNames={userNames[selectedChamado?.id || 0] || ""}
+                        />
                 </div>
             </div>
         </div>

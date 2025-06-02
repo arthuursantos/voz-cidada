@@ -124,9 +124,15 @@ export default function GetChamadoDialog({ chamado, open, onOpenChange, atualiza
                             {(status === "EM ANDAMENTO" || status === "CONCLUÍDO")  && (
                                 <div className="mt-6">
                                     <h3 className="text-sm font-bold font-montserrat mb-2">Devolutiva do servidor público:</h3>
-                                    <Textarea className="bg-muted font-lato" readOnly>
-                                        {chamado.historicos[chamado.historicos.length - 1].observacao}
-                                    </Textarea>
+                                    {
+                                        chamado.historicos[chamado.historicos.length - 1].observacao.trim().length > 0 ? (
+                                            <Textarea className="bg-muted font-lato" readOnly value={ chamado.historicos[chamado.historicos.length - 1].observacao}/>
+                                        ):
+                                        (
+                                            <p className="text-sm text-muted-foreground">Nenhuma devolutiva registrada.</p>
+                                        )
+                                    }
+                                          
                                 </div>
                             )}
 
