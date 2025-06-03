@@ -259,6 +259,9 @@ export default function CreateChamadoDialog({
       if (values.foto instanceof File) {
         formData.append("fotoAntesFile", values.foto);
       }
+      else {
+        formData.append("fotoAntesFile", new Blob([], { type: "application/octet-stream" }));
+      }
 
       await api.post("/api/chamado/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },

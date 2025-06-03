@@ -34,6 +34,7 @@ export default function AdminDashboard() {
     const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
     const [chamados, setChamados] = useState<ChamadoInterface[]>([]);
     const [editingChamado, setEditingChamado] = useState<ChamadoInterface | null>(null);
+    const [isloading, setIsLoading] = useState(false);
 
     const getFuncionarios = async () => {
         try {
@@ -402,6 +403,7 @@ export default function AdminDashboard() {
                                             id="employee-name"
                                             placeholder="123.456.789-00"
                                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
                                         />
                                         {errors.cpf && <span className="text-red-500 text-sm">{errors.cpf.message}</span>}
                                     </div>
@@ -414,6 +416,7 @@ export default function AdminDashboard() {
                                             id="employee-role"
                                             placeholder="Cargo"
                                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
                                         />
                                         {errors.cargo && <span className="text-red-500 text-sm">{errors.cargo.message}</span>}
                                     </div>
@@ -428,6 +431,7 @@ export default function AdminDashboard() {
                                             id="employee-sector"
                                             defaultValue=""
                                             className="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
                                         >
                                             <option value="" disabled>
                                                 Selecione o setor
@@ -449,6 +453,7 @@ export default function AdminDashboard() {
                                         type="email"
                                         placeholder="email@prefeitura.gov.br"
                                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        disabled={isloading}
                                     />
                                     {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
                                 </div>
@@ -463,6 +468,7 @@ export default function AdminDashboard() {
                                             type="password"
                                             placeholder="Senha"
                                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
                                         />
                                         {errors.senha && <span className="text-red-500 text-sm">{errors.senha.message}</span>}
                                     </div>
@@ -481,6 +487,8 @@ export default function AdminDashboard() {
                                 <button
                                     className="inline-flex items-center justify-center rounded-md bg-[#1e88e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#1976d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                                     type="submit"
+                                    disabled={isloading}
+                                    onLoad={() => setIsLoading(true)}
                                 >
                                     Salvar
                                 </button>

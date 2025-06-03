@@ -29,8 +29,17 @@ export default function SignUp() {
                     return word[0].toLocaleUpperCase().concat(word.substring(1))
                 }).join(' ')
             }),
-        birthDate: z.string()
-            .nonempty("A data de nascimento é obrigatória."),
+            birthDate: z.string()
+            .nonempty("A data de nascimento é obrigatória.")
+            .refine((dateStr) => {
+              const birth = new Date(dateStr);
+              const today = new Date();
+              const age = today.getFullYear() - birth.getFullYear();
+              const isBirthdayPassed = today.getMonth() > birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+              return age > 18 || (age === 18 && isBirthdayPassed);
+            }, {
+              message: "Você precisa ter mais de 18 anos.",
+            }),          
         cep: z.string()
             .nonempty("O CEP é obrigatório.")
             .regex(/^\d{5}-?\d{3}$/, "Formato de CEP inválido. Use 00000-000 ou 00000000.")
@@ -68,7 +77,36 @@ export default function SignUp() {
         setStep((prev) => prev - 1)
     }
 
+    function validateCPF(cpf: string) {
+        cpf = cpf.replace(/[^\d]+/g, '');
+        if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+        
+        let sum = 0;
+        for (let i = 0; i < 9; i++) sum += +cpf[i] * (10 - i);
+        let rev = 11 - (sum % 11);
+        if (rev === 10 || rev === 11) rev = 0;
+        if (rev !== +cpf[9]) return false;
+        
+        sum = 0;
+        for (let i = 0; i < 10; i++) sum += +cpf[i] * (11 - i);
+        rev = 11 - (sum % 11);
+        if (rev === 10 || rev === 11) rev = 0;
+        return rev === +cpf[10];
+    }
+
     const handleSignUp: SubmitHandler<SignUpData> = async (data) => {
+        const cepResponse = await fetch(`https://viacep.com.br/ws/${data.cep}/json/`);
+        const cepData = await cepResponse.json();
+        if (cepData.erro) {
+            toast.error("CEP inválido ou não encontrado.");
+            return;
+        }
+
+        const isValidCpf = validateCPF(data.cpf);
+        if (!isValidCpf) {
+            toast.error("CPF inválido.");
+            return;
+        }
         await toast.promise(
             async () => {
                 await signUp(data);

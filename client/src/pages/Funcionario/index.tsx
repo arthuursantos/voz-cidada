@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label.tsx"
 import api from "@/shared/axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import HistoricoChamado from "@/components/HistoricoChamado";
+import toast from "react-hot-toast";
 
 // const chamadosInventados: ChamadoInterface[] = [
 //   {
@@ -168,6 +169,7 @@ export default function FuncionarioDashboard() {
     })
     const [dialogOpen, setDialogOpen] = useState(false);
     const [userNames, setUserNames] = useState<Record<number, string>>({});
+    const [isloading, setIsLoading] = useState(false)
 
 
     async function handleOpenImageDialog(filename: string) {
@@ -182,37 +184,49 @@ export default function FuncionarioDashboard() {
     }
 
     async function handleUpdateChamado(formData: any) {
-        try {
-            if (!selectedChamado) return
-
-            const historicoData: HistoricoInterface = {
-                chamadoId: selectedChamado.id,
-                funcionarioId: admin?.id,
-                dataModificacao: new Date().toISOString().slice(0, 19).replace("T", " "),
-                statusAnterior: selectedChamado.status,
-                statusNovo: formData.statusNovo,
-                observacao: formData.observacao,
+        await toast.promise(
+            async () => {
+                try {
+                    if (!selectedChamado) return
+        
+                    const historicoData: HistoricoInterface = {
+                        chamadoId: selectedChamado.id,
+                        funcionarioId: admin?.id,
+                        dataModificacao: new Date().toISOString().slice(0, 19).replace("T", " "),
+                        statusAnterior: selectedChamado.status,
+                        statusNovo: formData.statusNovo,
+                        observacao: formData.observacao,
+                    }
+        
+                    await chamadoService.update({ ...selectedChamado, status: formData.statusNovo })
+                    await historicoService.create(historicoData)
+        
+                    if (userRoles?.includes("ROLE_ADMIN") && admin?.secretaria) {
+                        const {
+                            data: {
+                                _embedded: { chamadoDTOList },
+                            },
+                        } = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
+                        setChamados(chamadoDTOList)
+                        applyFilter(chamadoDTOList)//
+                    }
+        
+                    setSelectedChamado((prev) => (prev ? { ...prev, status: formData.statusNovo } : null))
+                    setIsOpen(false)
+                    updateChamadoForm.reset()
+                } catch (error) {
+                    console.error("Erro ao atualizar chamado:", error)
+                }finally{
+                    setIsLoading(false)
+                }
+            },
+            {
+                loading: "Atualizando chamado...",
+                success: "Chamado atualizado com sucesso!",
+                error: "Erro ao atualizar chamado.",
             }
-
-            await chamadoService.update({ ...selectedChamado, status: formData.statusNovo })
-            await historicoService.create(historicoData)
-
-            if (userRoles?.includes("ROLE_ADMIN") && admin?.secretaria) {
-                const {
-                    data: {
-                        _embedded: { chamadoDTOList },
-                    },
-                } = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
-                setChamados(chamadoDTOList)
-                applyFilter(chamadoDTOList)//
-            }
-
-            setSelectedChamado((prev) => (prev ? { ...prev, status: formData.statusNovo } : null))
-            setIsOpen(false)
-            updateChamadoForm.reset()
-        } catch (error) {
-            console.error("Erro ao atualizar chamado:", error)
-        }
+        )
+        
     }
     //
     function applyFilter(chamadosList: ChamadoInterface[]) {
@@ -651,6 +665,7 @@ export default function FuncionarioDashboard() {
                                                                     <Select
                                                                         onValueChange={(value: string) => updateChamadoForm.setValue("statusNovo", value)}
                                                                         defaultValue={updateChamadoForm.getValues("statusNovo")}
+                                                                        disabled={isloading}
                                                                     >
                                                                         <SelectTrigger>
                                                                             <SelectValue placeholder="Selecione um status" />
@@ -670,6 +685,7 @@ export default function FuncionarioDashboard() {
                                                                         placeholder="Descreva as ações tomadas ou informações adicionais"
                                                                         {...updateChamadoForm.register("observacao")}
                                                                         rows={4}
+                                                                        disabled={isloading}
                                                                     />
                                                                 </div>
 
@@ -677,7 +693,7 @@ export default function FuncionarioDashboard() {
                                                                     <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                                                                         Cancelar
                                                                     </Button>
-                                                                    <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
+                                                                    <Button type="submit" disabled={isloading} className="bg-teal-600 hover:bg-teal-700" onLoad={() => setIsLoading(true)}>
                                                                         Salvar Alterações
                                                                     </Button>
                                                                 </div>
