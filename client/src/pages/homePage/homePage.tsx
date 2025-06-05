@@ -160,9 +160,76 @@ const statusMapping = (apiStatus: string): Status => {
 //       dataAvaliacao: "2023-10-04 13:00:00"
 //     },
 //     historicos: [
-      
+//       {
+//         id: 1,
+//         chamadoId: 3,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-03 13:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       },
+//       {
+//         id: 2,
+//         chamadoId: 3,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-04 14:00:00",
+//         observacao: "Lixo removido.",
+//         statusAnterior: "EM ANDAMENTO",
+//         statusNovo: "CONCLUÍDO"
+//       }
 //     ]
 //   },
+//   {
+//     id: 4,
+//     usuarioId: 1,
+//     titulo: "Falta de iluminação pública",
+//     descricao: "A iluminação da praça está apagada há dias.",
+//     secretaria: "URBANISMO",
+//     dataAbertura: "2023-10-04 13:00:00",
+//     status: "EM ANDAMENTO",
+//     latitude: 1,
+//     longitude: 1,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 4,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-04 14:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       }
+//     ]
+//   },
+//   {
+//     id: 5,
+//     usuarioId: 1,
+//     titulo: "Problema com o transporte público",
+//     descricao: "O ônibus está sempre atrasado.",
+//     secretaria: "TRANSPORTE",
+//     dataAbertura: "2023-10-05 14:00:00",
+//     status: "EM ANDAMENTO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 5,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-05 15:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       }
+//     ]
+//   }
 // ]
 
 export default function Dashboard() {
@@ -176,6 +243,8 @@ export default function Dashboard() {
   const [selectedChamado, setSelectedChamado] = useState<ChamadoInterface | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogChamadoOpen, setDialogChamadoOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   const fetchChamados = useCallback(async () => {
       if (!user?.id) return
@@ -201,7 +270,7 @@ export default function Dashboard() {
   }, [fetchChamados])
 
   const filteredChamados = chamados.filter((chamado) =>
-    statusFilter.includes(statusMapping(chamado.status))
+    statusFilter.includes(statusMapping(chamado.status)) && chamado.titulo.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const toggleStatusFilter = (status: Status) => {
@@ -210,7 +279,9 @@ export default function Dashboard() {
     } else {
         setStatusFilter([...statusFilter, status])
     }
-}
+  }
+
+  const visibleChamados = showAll ? filteredChamados : filteredChamados.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white">
@@ -235,6 +306,8 @@ export default function Dashboard() {
             type="text"
             placeholder="Pesquisar ocorrências..."
             className="w-full pl-10 font-lato pr-4 py-2 border rounded-lg"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="mt-4">
@@ -275,78 +348,93 @@ export default function Dashboard() {
             {/* List Cards */}
             <h1 className='text-center text-2xl font-montserrat text-[--cor-primaria]'>SEUS CHAMADOS</h1>
             <div className="max-w-7xl mx-auto font-lato p-4 space-y-3">
-              {
-                filteredChamados.length === 0 ? (
-                    <div className="flex items-center justify-center min-h-[300px]">
-                        <p className="text-gray-500">Nenhum chamado encontrado.</p>
-                    </div>
-                )
-              : 
-              filteredChamados.map((chamado) => {
-                    const status = statusMapping(chamado.status)
-                    return (
+            {filteredChamados.length === 0 ? (
+                <div className="flex items-center justify-center min-h-[300px]">
+                  <p className="text-gray-500">Nenhum chamado encontrado.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {visibleChamados.map((chamado) => {
+                      const status = statusMapping(chamado.status);
+                      return (
                         <Card key={chamado.id} className="hover:shadow-md font-lato transition-shadow">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-md font-medium">{chamado.titulo}</CardTitle>
-                                <FileText className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex justify-between items-center mb-2">
-                                    <p className="text-sm text-muted-foreground">
-                                        Criado em {formatDate(chamado.dataAbertura)}
-                                    </p>
-                                    <Badge className={`${STATUS_COLORS[status]} text-white`}>
-                                        {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
-                                    </Badge>
+                          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                            <CardTitle className="text-md font-medium">{chamado.titulo}</CardTitle>
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="text-sm text-muted-foreground">
+                                Criado em {formatDate(chamado.dataAbertura)}
+                              </p>
+                              <Badge className={`${STATUS_COLORS[status]} text-white`}>
+                                {chamado.status.charAt(0).toUpperCase() + chamado.status.slice(1)}
+                              </Badge>
+                            </div>
+                            {chamado.status === "CONCLUÍDO" && !chamado.avaliacao && (
+                              <p className="text-sm text-[--cor-primaria2]">
+                                Chamado concluído, deixe sua avaliação!
+                              </p>
+                            )}
+                            {chamado.status === "CONCLUÍDO" && chamado.avaliacao && (
+                              <>
+                                <p>Avaliado com:</p>
+                                <div className="flex flex-row">
+                                  <Rating value={chamado.avaliacao.estrelas} readOnly />
+                                  <span className="ml-2 text-sm text-muted-foreground">
+                                    {chamado.avaliacao.estrelas} Estrelas
+                                  </span>
                                 </div>
-                                {chamado.status === "CONCLUÍDO" && !chamado.avaliacao && (
-                                  <p className="text-sm text-[--cor-primaria2]">
-                                    Chamado concluído, deixe sua avaliação!
-                                  </p>
-                                )}
-                                {chamado.status === "CONCLUÍDO" && chamado.avaliacao && (
-                                  <>
-                                  <p>Avaliado com:</p>
-                                  <div className='flex flex-row'>
-                                    <Rating value={chamado.avaliacao.estrelas} readOnly />
-                                    <span className="ml-2 text-sm text-muted-foreground">
-                                            {chamado.avaliacao.estrelas} Estrelas
-                                    </span>
-                                  </div>
-                                  </>
-                                  
-                                )}
-                                <div className='flex flex-row items-center mt-4 gap-2'>
-                                  <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="mt-2 w-full text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]"
-                                      onClick={() => {
-                                          setSelectedChamado(chamado)
-                                          setDialogOpen(true)
-                                      }}
-                                  >
-                                      Abrir Chamado
-                                  </Button>
-                                  {
-                                    chamado.historicos.length > 0 && (
-                                      <Button
-                                      variant="outline"
-                                      className='mt-2 text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]'
-                                      onClick={() => {
-                                        setSelectedChamado(chamado)
-                                        setDialogChamadoOpen(true)
-                                      }}
-                                  >
-                                    <History className="h-4 w-4 text-black" />
-                                  </Button>
-                                    )
-                                  } 
-                                </div>
-                            </CardContent>
+                              </>
+                            )}
+                            <div className='flex flex-row items-center mt-4 gap-2'>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 w-full text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]"
+                                onClick={() => {
+                                  setSelectedChamado(chamado)
+                                  setDialogOpen(true)
+                                }}
+                              >
+                                Abrir Chamado
+                              </Button>
+                              {chamado.historicos.length > 0 && (
+                                <Button
+                                  variant="outline"
+                                  className='mt-2 text-[--cor-primaria2] border-teal hover:bg-teal hover:text-[--cor-primaria]'
+                                  onClick={() => {
+                                    setSelectedChamado(chamado)
+                                    setDialogChamadoOpen(true)
+                                  }}
+                                >
+                                  <History className="h-4 w-4 text-black" />
+                                </Button>
+                              )} 
+                            </div>
+                          </CardContent>
                         </Card>
-                    )
-                })}
+                      );
+                    })}
+                  </div>
+
+                  {filteredChamados.length > 3 && (
+                    <div className="flex justify-center pt-6">
+                      <button
+                        onClick={() => setShowAll(!showAll)}
+                        className="flex items-center gap-2 bg-white border font-lato px-4 py-2 rounded shadow hover:shadow-md"
+                      >
+                        {showAll ? "Ver menos" : "Ver mais"}
+                        <span className={`transition-transform ${showAll ? "rotate-180" : "rotate-0"}`}>
+                          ▼
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
             </div> 
           </>
         )

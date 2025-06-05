@@ -258,15 +258,18 @@ export default function CreateChamadoDialog({
 
       if (values.foto instanceof File) {
         formData.append("fotoAntesFile", values.foto);
-      }
-      else {
-        formData.append("fotoAntesFile", new Blob([], { type: "application/octet-stream" }));
+        await api.post("/api/chamado/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Chamado criado com sucesso!");
+        handleDialogClose(false);
+        onSuccess?.();
+        return;
       }
 
-      await api.post("/api/chamado/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      await api.post("/api/chamado", formData, {
+        headers: { "Content-Type": "application/json" },
       });
-
       toast.success("Chamado criado com sucesso!");
       handleDialogClose(false);
       onSuccess?.();

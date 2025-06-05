@@ -25,81 +25,89 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import HistoricoChamado from "@/components/HistoricoChamado";
 import toast from "react-hot-toast";
 
-// const chamadosInventados: ChamadoInterface[] = [
-//   {
-//     id: 1,
-//     usuarioId: 1,
-//     titulo: "Problema com a internet",
-//     descricao: "A internet está muito lenta.",
-//     secretaria: "URBANISMO",
-//     dataAbertura: "2023-10-01 10:00:00",
-//     status: "EM ANDAMENTO",
-//     latitude: null,
-//     longitude: null,
-//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-//     fotoDepoisUrl: null,
-//     avaliacao: null,
-//     historicos: [
-//       {
-//         id: 1,
-//         chamadoId: 1,
-//         funcionarioId: 1,
-//         dataModificacao: "2023-10-01 11:00:00",
-//         observacao: "Chamado aberto.",
-//         statusAnterior: "PENDENTE",
-//         statusNovo: "EM ANDAMENTO"
-//       },
-//       {
-//         id: 2,
-//         chamadoId: 1,
-//         funcionarioId: 1,
-//         dataModificacao: "2023-10-02 12:00:00",
-//         observacao: "Técnico agendado para amanhã.",
-//         statusAnterior: "EM ANDAMENTO",
-//         statusNovo: "EM ANDAMENTO"
-//       }
-//     ]
-//   },
-//   {
-//     id: 2,
-//     usuarioId: 1,
-//     titulo: "Buraco na rua",
-//     descricao: "Há um buraco grande na rua principal.",
-//     secretaria: "INFRAESTRUTURA",
-//     dataAbertura: "2023-10-02 11:00:00",
-//     status: "CONCLUÍDO",
-//     latitude: null,
-//     longitude: null,
-//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-//     fotoDepoisUrl: null,
-//     avaliacao: null,
-//     historicos: []
-//   },
-//   {
-//     id: 3,
-//     usuarioId: 1,
-//     titulo: "Lixo acumulado",
-//     descricao: "Há lixo acumulado na esquina da minha rua",
-//     secretaria: "SAÚDE",
-//     dataAbertura: "2023-10-03 12:00:00",
-//     status: "CONCLUÍDO",
-//     latitude: null,
-//     longitude: null,
-//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-//     fotoDepoisUrl: null,
-//     avaliacao: {
-//       id: 1,
-//       chamadoId: 3,
-//       usuarioId: 1,
-//       estrelas: 5,
-//       comentario: "Ótimo atendimento!",
-//       dataAvaliacao: "2023-10-04 13:00:00"
-//     },
-//     historicos: [
-      
-//     ]
-//   },
-// ]
+const chamadosInventados: ChamadoInterface[] = [
+  {
+    id: 1,
+    usuarioId: 1,
+    titulo: "Problema com a internet",
+    descricao: "A internet está muito lenta.",
+    secretaria: "URBANISMO",
+    dataAbertura: "2023-10-01 10:00:00",
+    status: "EM ANDAMENTO",
+    latitude: null,
+    longitude: null,
+    fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+    fotoDepoisUrl: null,
+    avaliacao: null,
+    historicos: [
+      {
+        id: 1,
+        chamadoId: 1,
+        funcionarioId: 1,
+        dataModificacao: "2023-10-01 11:00:00",
+        observacao: "Chamado aberto.",
+        statusAnterior: "PENDENTE",
+        statusNovo: "EM ANDAMENTO"
+      },
+      {
+        id: 2,
+        chamadoId: 1,
+        funcionarioId: 1,
+        dataModificacao: "2023-10-02 12:00:00",
+        observacao: "Técnico agendado para amanhã.",
+        statusAnterior: "EM ANDAMENTO",
+        statusNovo: "EM ANDAMENTO"
+      }
+    ]
+  },
+  {
+    id: 2,
+    usuarioId: 1,
+    titulo: "Buraco na rua",
+    descricao: "Há um buraco grande na rua principal.",
+    secretaria: "INFRAESTRUTURA",
+    dataAbertura: "2023-10-02 11:00:00",
+    status: "CONCLUÍDO",
+    latitude: null,
+    longitude: null,
+    fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+    fotoDepoisUrl: null,
+    avaliacao: null,
+    historicos: []
+  },
+  {
+    id: 3,
+    usuarioId: 1,
+    titulo: "Lixo acumulado",
+    descricao: "Há lixo acumulado na esquina da minha rua",
+    secretaria: "SAÚDE",
+    dataAbertura: "2023-10-03 12:00:00",
+    status: "CONCLUÍDO",
+    latitude: null,
+    longitude: null,
+    fotoAntesUrl: null,
+    fotoDepoisUrl: null,
+    avaliacao: {
+      id: 1,
+      chamadoId: 3,
+      usuarioId: 1,
+      estrelas: 5,
+      comentario: "Ótimo atendimento!",
+      dataAvaliacao: "2023-10-04 13:00:00"
+    },
+    historicos: [
+        {
+            id: 1,
+            chamadoId: 3,
+            funcionarioId: 1,
+            dataModificacao: "2023-10-03 13:00:00",
+            observacao: "Chamado concluído.",
+            statusAnterior: "EM ANDAMENTO",
+            statusNovo: "CONCLUÍDO"
+        }
+    ]
+  },
+]
 
 export function formatDate(dateString: string) {
     if (!dateString) return ""
@@ -145,7 +153,7 @@ export function getStatusBadge(status: string) {
 export default function FuncionarioDashboard() {
     const { userRoles, admin, loading } = useContext(AuthContext)
 
-    const [chamados, setChamados] = useState<ChamadoInterface[]>([])//
+    const [chamados, setChamados] = useState<ChamadoInterface[]>([...chamadosInventados])//
 
     const [filteredChamados, setFilteredChamados] = useState<ChamadoInterface[]>([])//
     const [activeFilter, setActiveFilter] = useState("todos") //
@@ -393,42 +401,40 @@ export default function FuncionarioDashboard() {
                                                                         {chamado.secretaria || "Não atribuído"}
                                                                     </Badge>
                                                                 </TableCell>
-                                                                <TableCell className="hidden md:table-cell">
-                                                                    {chamado.fotoAntesUrl && (
-                                                                        <Dialog>
-                                                                            <DialogTrigger asChild>
-                                                                                <Button
-                                                                                    variant="ghost"
-                                                                                    size="icon"
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation()
-                                                                                        handleOpenImageDialog(chamado.fotoAntesUrl ? chamado.fotoAntesUrl.split("/").pop() || "" : "")
-                                                                                    }}
-                                                                                >
-                                                                                    <ImageIcon className="h-4 w-4" />
-                                                                                </Button>
-                                                                            </DialogTrigger>
-                                                                            <DialogContent>
-                                                                                <DialogHeader>
-                                                                                    <DialogTitle>Foto do chamado</DialogTitle>
-                                                                                    <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
-                                                                                </DialogHeader>
-                                                                                {imageAntesUrl ? (
-                                                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-                                                                                        <img
-                                                                                            src={imageAntesUrl || "/placeholder.svg"}
-                                                                                            alt="Foto do chamado"
-                                                                                            className="object-cover w-full h-full"
-                                                                                        />
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                                                                                        <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
-                                                                                    </div>
-                                                                                )}
-                                                                            </DialogContent>
-                                                                        </Dialog>
-                                                                    )}
+                                                                <TableCell className="hidden md:table-cell">  
+                                                                    <Dialog>
+                                                                        <DialogTrigger asChild>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation()
+                                                                                    handleOpenImageDialog(chamado.fotoAntesUrl ? chamado.fotoAntesUrl.split("/").pop() || "" : "")
+                                                                                }}
+                                                                            >
+                                                                                <ImageIcon className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </DialogTrigger>
+                                                                        <DialogContent>
+                                                                            <DialogHeader>
+                                                                                <DialogTitle>Foto do chamado</DialogTitle>
+                                                                                <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
+                                                                            </DialogHeader>
+                                                                            {imageAntesUrl === null || !imageAntesUrl ? (
+                                                                                <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                                                                                    <img
+                                                                                        src={imageAntesUrl || "/placeholder.svg"}
+                                                                                        alt="Foto do chamado"
+                                                                                        className="object-cover w-full h-full"
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+                                                                                    <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
+                                                                                </div>
+                                                                            )}
+                                                                        </DialogContent>
+                                                                    </Dialog>                                                                      
                                                                 </TableCell>
                                                                 <TableCell className="hidden md:table-cell">
                                                                     <Button
@@ -533,7 +539,7 @@ export default function FuncionarioDashboard() {
                                                     <p className="text-sm">{formatDate(selectedChamado.dataAbertura)}</p>
                                                 </div>
 
-                                                {selectedChamado.fotoAntesUrl && (
+                                                {selectedChamado.fotoAntesUrl ? (
                                                     <div className="space-y-2">
                                                         <p className="text-sm font-medium text-gray-500">Imagem</p>
                                                         <Dialog>
@@ -569,7 +575,16 @@ export default function FuncionarioDashboard() {
                                                                     )}
                                                                 </DialogContent>
                                                         </Dialog>
-                                                        <p className="text-sm font-medium text-gray-500 mt-2">Histórico</p>
+                                                        
+                                                    </div>
+                                                ): (
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm font-medium text-gray-500">Imagem</p>
+                                                        <p className="text-sm text-gray-500">Nenhuma imagem enviada</p>
+                                                    </div>
+                                                )}
+
+                                                <p className="text-sm font-medium text-gray-500 mt-2">Histórico</p>
                                                         <Dialog>
                                                             <div>
                                                                 <DialogTrigger asChild>
@@ -604,7 +619,7 @@ export default function FuncionarioDashboard() {
                                                                     </div>
                                                                     <ScrollArea className="h-[300px] pr-4">
                                                                     <div className="space-y-4">
-                                                                        {selectedChamado?.historicos?.length ? (
+                                                                        {selectedChamado?.historicos?.length > 0 ? (
                                                                         selectedChamado.historicos.map((item, index) => {
                                                                             const [date, time] = item.dataModificacao.split(" ");
                                                                             return (
@@ -639,11 +654,9 @@ export default function FuncionarioDashboard() {
                                                                     </div>
                                                                     </ScrollArea>
                                                                 </div>
-                                                                                                                                                                                    </DialogContent>
+                                                                                                                                                                                                                                    </DialogContent>
                                                             </div>
                                                         </Dialog>
-                                                    </div>
-                                                )}
 
                                                 <div className="pt-4 space-y-4">
                                                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
