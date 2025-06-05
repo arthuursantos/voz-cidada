@@ -8,7 +8,7 @@ type ListChamadosParams = {
 };
 
 type ListChamadosByUserIdParams = ListChamadosParams & {
-    userId: number;
+    userId?: number;
 };
 
 type ListChamadosBySecretariaParams = ListChamadosParams & {

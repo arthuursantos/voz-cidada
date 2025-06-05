@@ -9,6 +9,7 @@ export interface ChamadoInterface {
     fotoAntesUrl: string;
     fotoDepoisUrl: string;
     historicos: HistoricoInterface[];
+    avaliacao: AvaliacaoInterface;
 }
 
 export interface HistoricoInterface {
@@ -19,4 +20,18 @@ export interface HistoricoInterface {
     statusAnterior: string;
     statusNovo: string;
     observacao: string;
+}
+
+export interface AvaliacaoInterface {
+    id?: number;
+    chamadoId: number;
+    usuarioId?: number;
+    estrelas: number;
+    comentario?: string | null;
+    dataAvaliacao: string;
+}
+
+export interface PageInfoInterface {
+    totalElements: number,
+    totalPages: number,
 }
