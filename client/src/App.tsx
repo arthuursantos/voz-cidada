@@ -8,7 +8,6 @@ import AdminDashboard from "./pages/Admin/index.tsx";
 import Dashboard from "./pages/homePage/homePage.tsx";
 import AbrirChamado from "./pages/abrirChamado/index.tsx"; // Nova importação
 import Profile from "./pages/Profile/index.tsx";
-import Chamados from "./pages/Chamados/index.tsx";
 import SignIn from "./pages/SignIn/index.tsx";
 import SignUp from "./pages/SignUp/index.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -156,14 +155,6 @@ const App = () => {
                             element={
                                 <PrivateRoute>
                                     <Contact />
-                                </PrivateRoute>
-                            }
-                        />
-                        <Route
-                            path="/chamados"
-                            element={
-                                <PrivateRoute>
-                                    <Chamados />
                                 </PrivateRoute>
                             }
                         />

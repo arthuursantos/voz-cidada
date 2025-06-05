@@ -28,8 +28,13 @@ export interface HistoricoInterface {
 export interface AvaliacaoInterface {
     id?: number;
     chamadoId: number;
-    usuarioId: number;
     estrelas: number;
     comentario?: string | null;
     dataAvaliacao: string;
+    usuarioId?: number;
+}
+
+export interface PageInfoInterface {
+    totalElements: number,
+    totalPages: number,
 }

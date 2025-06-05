@@ -1,20 +1,21 @@
 interface ProgressBarProps {
-    currentStep: number,
+    currentStep: number
     totalSteps: number
 }
 
 export default function ProgressBar({currentStep, totalSteps}: ProgressBarProps) {
-    const progress = (currentStep/totalSteps)*100
+    const progress = (currentStep / totalSteps) * 100
+
     return (
-        <div className="w-full">
-            <div className="h-2 w-full rounded-full bg-[#504136]/20">
-                <div
-                    className="h-full rounded-full bg-[--cor-primaria2] transition-all duration-300 ease-in-out"
-                    style={{width: `${progress}%`}}
-                />
+        <div className="w-full space-y-2">
+            <div className="flex justify-between text-sm text-muted-foreground">
+                <span>
+                  Etapa {currentStep} de {totalSteps}
+                </span>
+                <span>{Math.round(progress)}%</span>
             </div>
-            <div className="mt-2 text-sm text-[#504136]/70">
-                Etapa {currentStep} de {totalSteps}
+            <div className="h-2 w-full rounded-full bg-gray-100">
+                <div className="h-full rounded-full transition-all bg-secondary duration-300 ease-in-out" style={{width: `${progress}%`}}/>
             </div>
         </div>
     )
