@@ -29,8 +29,8 @@ import { Icon } from "leaflet";
 import uploadService from "@/shared/services/uploadService";
 import chamadoService from "@/shared/services/chamadoService";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+export const MAX_FILE_SIZE = 5 * 1024 * 1024;
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const detailsFormSchema = z.object({
   titulo: z.string().min(1, "O título é obrigatório").refine((val) => val.trim().length > 0, {
@@ -248,14 +248,12 @@ export default function CreateChamadoDialog({
     try {
       setIsSubmitting(true);
       const imageFormData = new FormData();
-      console.log("Valores do formulário:", values);
       if (values.fotoAntesFile instanceof File) {
-        console.log("if com foto");
-        console.log("Adicionando foto ao FormData:", values.fotoAntesFile, values.fotoAntesFile.name);
+
         imageFormData.append("image", values.fotoAntesFile, values.fotoAntesFile.name);
-        console.log("Foto adicionada ao FormData:", imageFormData);
+
         const { data: fotoAntesUrl } = await uploadService.saveImage(imageFormData);
-        console.log("URL da foto antes:", fotoAntesUrl);
+
         chamadoService.create({
           usuarioId: user.id,
           titulo: values.titulo,

@@ -1,8 +1,8 @@
 "use client"
 import Header from "@/components/header";
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState, useRef } from "react"
 import { useForm } from "react-hook-form"
-import { ImageIcon, ClipboardList, CheckCircle, Clock, AlertTriangle, Calendar, History } from "lucide-react"
+import { ImageIcon, ClipboardList, CheckCircle, Clock, AlertTriangle, Calendar, History, Upload, X } from "lucide-react"
 //import authService from "@/shared/services/authService.ts"
 import chamadoService from "@/shared/services/chamadoService.ts"
 import uploadService from "@/shared/services/uploadService.ts"
@@ -24,6 +24,7 @@ import api from "@/shared/axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import HistoricoChamado from "@/components/HistoricoChamado";
 import toast from "react-hot-toast";
+import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "../Chamados/components/CreateChamadoDialog";
 
 const chamadosInventados: ChamadoInterface[] = [
   {
@@ -173,11 +174,14 @@ export default function FuncionarioDashboard() {
         defaultValues: {
             statusNovo: "",
             observacao: "",
+            fotoDepoisUrl: null as File | null, 
         },
     })
     const [dialogOpen, setDialogOpen] = useState(false);
     const [userNames, setUserNames] = useState<Record<number, string>>({});
     const [isloading, setIsLoading] = useState(false)
+    const [fotoDepoisPreview, setFotoDepoisPreview] = useState<string | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
 
     async function handleOpenImageDialog(filename: string) {
@@ -196,7 +200,17 @@ export default function FuncionarioDashboard() {
             async () => {
                 try {
                     if (!selectedChamado) return
-        
+    
+                    let fotoDepoisUrl = null
+                    
+                    // Se houver uma nova imagem, faça o upload
+                    if (formData.fotoDepoisUrl instanceof File) {
+                        const imageFormData = new FormData()
+                        imageFormData.append("image", formData.fotoDepoisUrl, formData.fotoDepoisUrl.name)
+                        const { data: uploadedUrl } = await uploadService.saveImage(imageFormData)
+                        fotoDepoisUrl = uploadedUrl
+                    }
+    
                     const historicoData: HistoricoInterface = {
                         chamadoId: selectedChamado.id,
                         funcionarioId: admin?.id,
@@ -205,10 +219,15 @@ export default function FuncionarioDashboard() {
                         statusNovo: formData.statusNovo,
                         observacao: formData.observacao,
                     }
-        
-                    await chamadoService.update({ ...selectedChamado, status: formData.statusNovo })
+    
+                    await chamadoService.update({ 
+                        ...selectedChamado, 
+                        status: formData.statusNovo,
+                        fotoDepoisUrl: fotoDepoisUrl || selectedChamado.fotoDepoisUrl // Mantém a existente se não houver nova
+                    })
+                    
                     await historicoService.create(historicoData)
-        
+    
                     if (userRoles?.includes("ROLE_ADMIN") && admin?.secretaria) {
                         const {
                             data: {
@@ -216,15 +235,20 @@ export default function FuncionarioDashboard() {
                             },
                         } = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
                         setChamados(chamadoDTOList)
-                        applyFilter(chamadoDTOList)//
+                        applyFilter(chamadoDTOList)
                     }
-        
-                    setSelectedChamado((prev) => (prev ? { ...prev, status: formData.statusNovo } : null))
+    
+                    setSelectedChamado((prev) => (prev ? { 
+                        ...prev, 
+                        status: formData.statusNovo,
+                        fotoDepoisUrl: fotoDepoisUrl || prev.fotoDepoisUrl 
+                    } : null))
                     setIsOpen(false)
                     updateChamadoForm.reset()
+                    setFotoDepoisPreview(null)
                 } catch (error) {
                     console.error("Erro ao atualizar chamado:", error)
-                }finally{
+                } finally {
                     setIsLoading(false)
                 }
             },
@@ -234,7 +258,6 @@ export default function FuncionarioDashboard() {
                 error: "Erro ao atualizar chamado.",
             }
         )
-        
     }
     //
     function applyFilter(chamadosList: ChamadoInterface[]) {
@@ -308,6 +331,32 @@ export default function FuncionarioDashboard() {
         setSelectedChamado(chamado);
         setDialogOpen(true);
     };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+    
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error("Arquivo deve ter no máximo 5MB")
+            return
+        }
+    
+        if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+            toast.error("Apenas JPG, PNG e WebP são aceitos")
+            return
+        }
+    
+        updateChamadoForm.setValue("fotoDepoisUrl", file)
+        const reader = new FileReader()
+        reader.onload = (event) => setFotoDepoisPreview(event.target?.result as string)
+        reader.readAsDataURL(file)
+    }
+
+    const handleRemoveFoto = () => {
+        updateChamadoForm.setValue("fotoDepoisUrl", null)
+        setFotoDepoisPreview(null)
+        if (fileInputRef.current) fileInputRef.current.value = ""
+    }
 
     if (loading || loadingChamados) {
         return (
@@ -661,13 +710,13 @@ export default function FuncionarioDashboard() {
                                                 <div className="pt-4 space-y-4">
                                                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                                         <DialogTrigger asChild>
-                                                            <Button className="w-full bg-teal-600 hover:bg-teal-700">
+                                                            <Button className="w-full bg-[--cor-primaria2] hover:bg-[--cor-primaria21]">
                                                                 Alterar situação do chamado
                                                             </Button>
                                                         </DialogTrigger>
                                                         <DialogContent>
                                                             <DialogHeader>
-                                                                <DialogTitle>Alterar situação do chamado</DialogTitle>
+                                                                <DialogTitle className="text-[--cor-primaria]">Alterar situação do chamado</DialogTitle>
                                                                 <DialogDescription>
                                                                     Altere o status e adicione observações para informar o usuário sobre o andamento.
                                                                 </DialogDescription>
@@ -702,11 +751,55 @@ export default function FuncionarioDashboard() {
                                                                     />
                                                                 </div>
 
+                                                                <div className="flex flex-col space-y-2">
+                                                                    <Label htmlFor="fotoDepois">Foto do Chamado (opcional)</Label>
+                                                                    
+                                                                    {fotoDepoisPreview || selectedChamado?.fotoDepoisUrl ? (
+                                                                        <div className="relative">
+                                                                            <img
+                                                                                src={fotoDepoisPreview || selectedChamado?.fotoDepoisUrl || ""}
+                                                                                alt="Foto do chamado resolvido"
+                                                                                className="w-full h-48 object-cover rounded-md border"
+                                                                            />
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="destructive"
+                                                                                size="icon"
+                                                                                className="absolute top-2 right-2"
+                                                                                onClick={handleRemoveFoto}
+                                                                            >
+                                                                                <X className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex flex-col sm:flex-row gap-2">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                className="flex-1 text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-white hover:bg-[--cor-primaria2] hover:text-white"
+                                                                                onClick={() => fileInputRef.current?.click()}
+                                                                            >
+                                                                                <Upload className="mr-2 h-4 w-4" />
+                                                                                Selecionar arquivo
+                                                                            </Button>
+                                                                            
+                                                                            <input
+                                                                                {...updateChamadoForm.register("fotoDepoisUrl")}
+                                                                                type="file"
+                                                                                ref={fileInputRef}
+                                                                                onChange={handleFileChange}
+                                                                                accept="image/*"
+                                                                                className="hidden"
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
                                                                 <div className="flex justify-end gap-2">
-                                                                    <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                                                                    <Button type="button" variant="outline" className="text-[--cor-error] bg-white border-[--cor-error] hover:border-white hover:bg-[--cor-error] hover:text-white" onClick={() => setIsOpen(false)}>
                                                                         Cancelar
                                                                     </Button>
-                                                                    <Button type="submit" disabled={isloading} className="bg-teal-600 hover:bg-teal-700" onLoad={() => setIsLoading(true)}>
+                                                                    <Button type="submit" disabled={isloading} className="text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-none hover:bg-[--cor-primaria2] hover:text-white" onLoad={() => setIsLoading(true)}>
                                                                         Salvar Alterações
                                                                     </Button>
                                                                 </div>
