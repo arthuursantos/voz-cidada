@@ -1,5 +1,7 @@
 HELP.md
-logs/
+*.log
+*.gz
+&.tmp
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
