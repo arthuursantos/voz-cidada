@@ -15,13 +15,12 @@ export interface ChamadoInterface {
     historicos: HistoricoInterface[];
 }
 export interface ChamadoCreateInterface {
-    usuarioId?: number;
+    usuarioId: number;
     titulo: string;
-    descricao?: string;
-    secretaria?: string;
-    latitude?: number | null;
-    longitude?: number | null;
-    dataAbertura?: string;
+    descricao: string;
+    status: Status | string;
+    latitude: number | null;
+    longitude: number | null;
     fotoAntesUrl?: string | null;
 }
 

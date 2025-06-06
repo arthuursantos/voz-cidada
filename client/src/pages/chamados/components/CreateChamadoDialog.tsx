@@ -1,9 +1,8 @@
 import { useState, useRef, useContext, useEffect } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import api from "@/shared/axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import ProgressBar from "@/components/ProgressStepsBar";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,9 +23,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
-import { ArrowLeft, Camera, Upload, X, MapPin } from "lucide-react";
+import { ArrowLeft, Upload, X, MapPin } from "lucide-react";
 import L from "leaflet";
 import { Icon } from "leaflet";
+import uploadService from "@/shared/services/uploadService";
+import chamadoService from "@/shared/services/chamadoService";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -46,7 +47,7 @@ const locationFormSchema = z.object({
 });
 
 const photoFormSchema = z.object({
-  foto: z
+  fotoAntesFile: z
     .union([
       z.instanceof(File)
         .refine((file) => file.size <= MAX_FILE_SIZE, "Arquivo deve ter no máximo 5MB")
@@ -99,7 +100,7 @@ export default function CreateChamadoDialog({
       descricao: "",
       latitude: undefined,
       longitude: undefined,
-      foto: null
+      fotoAntesFile: null
     },
   });
 
@@ -170,14 +171,14 @@ export default function CreateChamadoDialog({
       return;
     }
     
-    form.setValue("foto", file);
+    form.setValue("fotoAntesFile", file);
     const reader = new FileReader();
     reader.onload = (event) => setFotoPreview(event.target?.result as string);
     reader.readAsDataURL(file);
   };
 
   const handleRemoveFoto = () => {
-    form.setValue("foto", null);
+    form.setValue("fotoAntesFile", null);
     setFotoPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -236,7 +237,7 @@ export default function CreateChamadoDialog({
     );
   };
 
-  const onSubmit: SubmitHandler<ChamadoFormValues> = async (values) => {
+  const onSubmit = async (values: ChamadoFormValues) => {
     if (step < 2) return;
   
     if (!user) {
@@ -246,28 +247,42 @@ export default function CreateChamadoDialog({
   
     try {
       setIsSubmitting(true);
-      const formData = new FormData();
-  
-      formData.append("titulo", values.titulo);
-      formData.append("descricao", values.descricao);
-      formData.append("usuarioId", user.id.toString());
-      formData.append("status", "PENDENTE");
-      formData.append("latitude", values.latitude?.toString() ?? "");
-      formData.append("longitude", values.longitude?.toString() ?? "");
-  
-      if (values.foto instanceof File) {
-        formData.append("fotoAntesFile", values.foto);
+      const imageFormData = new FormData();
+      console.log("Valores do formulário:", values);
+      if (values.fotoAntesFile instanceof File) {
+        console.log("if com foto");
+        console.log("Adicionando foto ao FormData:", values.fotoAntesFile, values.fotoAntesFile.name);
+        imageFormData.append("image", values.fotoAntesFile, values.fotoAntesFile.name);
+        console.log("Foto adicionada ao FormData:", imageFormData);
+        const { data: fotoAntesUrl } = await uploadService.saveImage(imageFormData);
+        console.log("URL da foto antes:", fotoAntesUrl);
+        chamadoService.create({
+          usuarioId: user.id,
+          titulo: values.titulo,
+          descricao: values.descricao,
+          latitude: values.latitude,
+          longitude: values.longitude,
+          status: "PENDENTE",
+          fotoAntesUrl: fotoAntesUrl,
+        })
+        console.log("Chamado criado com foto:", { usuarioId: user.id, titulo: values.titulo, descricao: values.descricao, latitude: values.latitude, longitude: values.longitude, status: "PENDENTE", foto: fotoAntesUrl });
+
+      }else {
+        console.log("else sem foto");
+        chamadoService.create({
+          usuarioId: user.id,
+          titulo: values.titulo,
+          descricao: values.descricao,
+          latitude: values.latitude,
+          longitude: values.longitude,
+          status: "PENDENTE",
+        });
+        console.log("Chamado criado sem foto:", { usuarioId: user.id, titulo: values.titulo, descricao: values.descricao, latitude: values.latitude, longitude: values.longitude, status: "PENDENTE" });
       }
-  
-      if (values.foto) {
-        await api.post("/api/upload", formData);
-      } else {
-        await api.post("/api/chamado", formData); 
-      }
-  
+      onSuccess?.();
       toast.success("Chamado criado com sucesso!");
       handleDialogClose(false);
-      onSuccess?.();
+      
     } catch (error) {
       console.error("Erro ao criar chamado:", error);
       toast.error("Não foi possível criar o chamado. Tente novamente.");
@@ -406,7 +421,7 @@ export default function CreateChamadoDialog({
               {step === 2 && (
                 <FormField
                   control={form.control}
-                  name="foto"
+                  name="fotoAntesFile"
                   render={() => (
                     <FormItem>
                       <FormLabel>Foto do Problema (Opcional)</FormLabel>
@@ -438,21 +453,13 @@ export default function CreateChamadoDialog({
                             <Upload className="mr-2 h-4 w-4" />
                             Selecionar arquivo
                           </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="flex-1 text-[--cor-primaria] bg-white border-[--cor-primaria] hover:border-white hover:bg-[--cor-primaria2] hover:text-white"
-                            onClick={() => fileInputRef.current?.click()}
-                          >
-                            <Camera className="mr-2 h-4 w-4" />
-                            Tirar foto
-                          </Button>
+                          
                           <input
+                            {...form.register("fotoAntesFile")}
                             type="file"
                             ref={fileInputRef}
                             onChange={handleFileChange}
                             accept="image/*"
-                            capture="environment"
                             className="hidden"
                           />
                         </div>
