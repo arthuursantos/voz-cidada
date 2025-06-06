@@ -1,5 +1,5 @@
 import api from "@/shared/axios.ts";
-import {ChamadoInterface} from "@/shared/types.ts";
+import {ChamadoCreateInterface, ChamadoInterface} from "@/shared/types.ts";
 
 type ListChamadosParams = {
     page?: number;
@@ -25,7 +25,7 @@ const chamadoService = {
         return api.get('/api/chamado/status');
     },
 
-    create: (data: ChamadoInterface) => {
+    create: (data: ChamadoCreateInterface) => {
         return api.post('/api/chamado', data);
     },
 

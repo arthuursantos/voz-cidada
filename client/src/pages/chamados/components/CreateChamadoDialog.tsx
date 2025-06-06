@@ -236,40 +236,35 @@ export default function CreateChamadoDialog({
     );
   };
 
-  const onSubmit: SubmitHandler<ChamadoFormValues> = async (values) => { 
-    if (step < 2) {
-      return;
-    }
+  const onSubmit: SubmitHandler<ChamadoFormValues> = async (values) => {
+    if (step < 2) return;
+  
     if (!user) {
       toast.error("Usuário não autenticado");
       return;
     }
-
+  
     try {
       setIsSubmitting(true);
       const formData = new FormData();
-
+  
       formData.append("titulo", values.titulo);
       formData.append("descricao", values.descricao);
       formData.append("usuarioId", user.id.toString());
       formData.append("status", "PENDENTE");
       formData.append("latitude", values.latitude?.toString() ?? "");
       formData.append("longitude", values.longitude?.toString() ?? "");
-
+  
       if (values.foto instanceof File) {
         formData.append("fotoAntesFile", values.foto);
-        await api.post("/api/chamado/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("Chamado criado com sucesso!");
-        handleDialogClose(false);
-        onSuccess?.();
-        return;
       }
-
-      await api.post("/api/chamado", formData, {
-        headers: { "Content-Type": "application/json" },
-      });
+  
+      if (values.foto) {
+        await api.post("/api/upload", formData);
+      } else {
+        await api.post("/api/chamado", formData); 
+      }
+  
       toast.success("Chamado criado com sucesso!");
       handleDialogClose(false);
       onSuccess?.();
@@ -280,6 +275,7 @@ export default function CreateChamadoDialog({
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>

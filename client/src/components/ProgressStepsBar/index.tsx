@@ -15,7 +15,7 @@ export default function ProgressBar({currentStep, totalSteps}: ProgressBarProps)
                 <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-2 w-full rounded-full bg-gray-100">
-                <div className="h-full rounded-full transition-all bg-secondary duration-300 ease-in-out" style={{width: `${progress}%`}}/>
+                <div className="h-full rounded-full transition-all bg-[--cor-primaria2] duration-300 ease-in-out" style={{width: `${progress}%`}}/>
             </div>
         </div>
     )
