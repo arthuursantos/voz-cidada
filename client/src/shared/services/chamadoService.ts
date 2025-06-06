@@ -50,6 +50,11 @@ const chamadoService = {
         const { secretaria, ...queryParams } = params;
         return api.get(`/api/chamado/secretaria/${secretaria}`, { params: queryParams });
     },
+
+    countBySecretaria: (secretaria: string) => {
+        return api.get(`/api/chamado/count/${secretaria}`);
+    },
+
 };
 
 export default chamadoService;

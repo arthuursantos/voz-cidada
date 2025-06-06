@@ -13,14 +13,6 @@ const uploadService = {
         });
     },
 
-    createWithImage: (data: FormData) => {
-        return api.post('/api/upload/chamado', data, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        });
-    },
-
     saveImage: (data: FormData): Promise<UploadResponse> => {
         return api.post('/api/upload/file', data, {
             headers: {
