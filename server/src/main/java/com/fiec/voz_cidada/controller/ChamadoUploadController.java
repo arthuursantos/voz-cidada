@@ -1,11 +1,9 @@
 package com.fiec.voz_cidada.controller;
 
-import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.service.ChamadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,7 +18,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/chamado/upload")
+@RequestMapping("/api/upload")
 public class ChamadoUploadController {
 
     @Autowired
@@ -47,37 +44,21 @@ public class ChamadoUploadController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<EntityModel<ChamadoDTO>> createWithImage(ChamadoDTO dto) {
-        service.checkAccess(dto.getUsuarioId());
-        String fotoAntesUrl = saveImage(dto.getFotoAntesFile());
-        dto.setFotoAntesUrl(fotoAntesUrl);
-        EntityModel<ChamadoDTO> entityModel = service.create(dto);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(entityModel.getContent().getId())
-                .toUri();
-
-        return ResponseEntity.created(location).body(entityModel);
-    }
-
-
-
-    private String saveImage(MultipartFile file) {
+    @PostMapping("/file")
+    public String saveImage(MultipartFile image) {
         try {
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String filename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
             Path filePath = uploadPath.resolve(filename);
 
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-            return baseUrl + "/api/chamado/upload/" + filename;
+            return baseUrl + "/api/upload/" + filename;
         } catch (IOException e) {
             throw new RuntimeException("Falha ao salvar imagem: " + e.getMessage(), e);
         }

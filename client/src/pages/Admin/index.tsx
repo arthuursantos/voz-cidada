@@ -1,11 +1,9 @@
-"use client"
-
 import { useContext, useEffect, useState } from "react"
 import { jwtDecode } from "jwt-decode"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { ImageIcon, ClipboardList, UserPlus, ArrowRight, CheckCircle, Clock, AlertTriangle } from "lucide-react"
+import { ImageIcon, ClipboardList, UserPlus, ArrowRight, CheckCircle, Clock, AlertTriangle, Blocks } from "lucide-react"
 
 import authService from "@/shared/services/authService.ts"
 import chamadoService from "@/shared/services/chamadoService.ts"
@@ -13,7 +11,7 @@ import funcionarioService from "@/pages/Admin/funcionarioService.ts"
 import uploadService from "@/shared/services/uploadService.ts"
 import historicoService from "@/pages/Admin/historicoService.ts"
 import { AuthContext, type JWTClaims } from "@/contexts/AuthContext.tsx"
-import type { ChamadoInterface, HistoricoInterface } from "@/shared/types.ts"
+import type { ChamadoInterface, HistoricoInterface, PageInfoInterface } from "@/shared/types.ts"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,16 +38,16 @@ export default function AdminDashboard() {
     const { userRoles, admin, loading } = useContext(AuthContext)
 
     const [chamados, setChamados] = useState<ChamadoInterface[]>([])
-    const [page, setPage] = useState({
-        totalElements: 0,
+    const [currentPage, setCurrentPage] = useState(0)
+    const [pageable, setPageable] = useState<PageInfoInterface>({
         totalPages: 0,
-        number: 0,
+        totalElements: 0,
     })
-    const [imageAntesUrl, setImageAntesUrl] = useState<string | null>(null)
-
+    const [imagemUrl, setImagemUrl] = useState<string | null>(null)
     const [isOpen, setIsOpen] = useState(false)
     const [loadingChamados, setLoadingChamados] = useState(true)
     const [selectedChamado, setSelectedChamado] = useState<ChamadoInterface | null>(null)
+    const [countStatus, setCountStatus] = useState(null)
 
     const createAdminSchema = z.object({
         cpf: z
@@ -66,10 +64,15 @@ export default function AdminDashboard() {
         email: z.string().email("Email inválido").nonempty("O email é obrigatório."),
         password: z.string().min(6, "A senha precisa ter no minímo 6 caracteres."),
     })
+    type createAdminFields = z.infer<typeof createAdminSchema>
 
-    type CreateAdminData = z.infer<typeof createAdminSchema>
+    const createHistoricoSchema = z.object({
+        statusNovo: z.string().nonempty("O status é obrigatório."),
+        observacao: z.string(),
+    })
+    type createHistoricoFields = z.infer<typeof createHistoricoSchema>
 
-    const form = useForm<CreateAdminData>({
+    const form = useForm<createAdminFields>({
         resolver: zodResolver(createAdminSchema),
         defaultValues: {
             cpf: "",
@@ -80,14 +83,15 @@ export default function AdminDashboard() {
         },
     })
 
-    const updateChamadoForm = useForm({
+    const updateChamadoForm = useForm<createHistoricoFields>({
+        resolver: zodResolver(createHistoricoSchema),
         defaultValues: {
             statusNovo: "",
             observacao: "",
         },
     })
 
-    async function onSubmit(data: CreateAdminData) {
+    async function onSubmit(data: createAdminFields) {
         try {
             await authService.registerAdmin({ login: data.email, password: data.password })
             const {
@@ -127,10 +131,10 @@ export default function AdminDashboard() {
         try {
             const response = await uploadService.getImage(filename)
             const url = URL.createObjectURL(response.data)
-            setImageAntesUrl(url)
+            setImagemUrl(url)
         } catch (error) {
             console.error("Erro ao carregar imagem:", error)
-            setImageAntesUrl(null)
+            setImagemUrl(null)
         }
     }
 
@@ -147,7 +151,11 @@ export default function AdminDashboard() {
                 observacao: formData.observacao,
             }
 
-            await chamadoService.update({ ...selectedChamado, status: formData.statusNovo })
+            const imageFormData = new FormData()
+            imageFormData.append("image", formData.fotoAtualFile[0])
+            const { data: fotoAtualUrl } = await uploadService.saveImage(imageFormData)
+
+            await chamadoService.update({ ...selectedChamado, status: formData.statusNovo, fotoDepoisUrl: fotoAtualUrl })
             await historicoService.create(historicoData)
 
             if (userRoles?.includes("ROLE_OWNER")) {
@@ -178,19 +186,19 @@ export default function AdminDashboard() {
         async function fetchChamados() {
             try {
                 if (userRoles?.includes("ROLE_OWNER") && !loading) {
-                    const response = await chamadoService.findAll({ page: page.number })
+                    const response = await chamadoService.findAll({ page: currentPage })
                     const {
                         _embedded: { chamadoDTOList },
                         page: pageData,
                     } = response.data
                     setChamados(chamadoDTOList)
-                    setPage({
+                    setPageable({
                         totalElements: pageData.totalElements,
                         totalPages: pageData.totalPages,
-                        number: pageData.number,
                     })
                     return
                 }
+
                 if (userRoles?.includes("ROLE_ADMIN") && !loading && admin?.secretaria) {
                     const response = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
                     const {
@@ -198,10 +206,9 @@ export default function AdminDashboard() {
                         page: pageData,
                     } = response.data
                     setChamados(chamadoDTOList)
-                    setPage({
+                    setPageable({
                         totalElements: pageData.totalElements,
                         totalPages: pageData.totalPages,
-                        number: pageData.number,
                     })
                 }
             } catch (error) {
@@ -211,8 +218,19 @@ export default function AdminDashboard() {
             }
         }
 
+        async function countBySecretaria() {
+            const { data: response } = await chamadoService.countBySecretaria(admin?.secretaria)
+            setCountStatus(
+                response.map((item) => ({
+                    status: item[0],
+                    count: item[1],
+                })),
+            )
+        }
+
+        countBySecretaria()
         fetchChamados()
-    }, [userRoles, loading, admin, page.number])
+    }, [userRoles, loading, admin, currentPage])
 
     function getStatusBadge(status: string) {
         switch (status) {
@@ -285,6 +303,31 @@ export default function AdminDashboard() {
                         {userRoles?.includes("ROLE_OWNER") && <TabsTrigger value="admins">Gerenciar Administradores</TabsTrigger>}
                     </TabsList>
 
+                    {countStatus.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            {countStatus.map((item) => (
+                                <Card key={item.status} className="bg-gradient-to-br from-white to-gray-50">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-medium text-gray-600">{item.status}</p>
+                                                <p className="text-2xl font-bold text-gray-900">{item.count}</p>
+                                            </div>
+                                            <div className="p-3 rounded-full bg-teal-100">
+                                                {item.status === "PENDENTE" && <Clock className="h-6 w-6 text-teal-600" />}
+                                                {item.status === "EM ANDAMENTO" && <Blocks className="h-6 w-6 text-teal-600" />}
+                                                {item.status === "CONCLUÍDO" && <CheckCircle className="h-6 w-6 text-teal-600" />}
+                                                {!["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"].includes(item.status) && (
+                                                    <AlertTriangle className="h-6 w-6 text-teal-600" />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+
                     <TabsContent value="chamados" className="space-y-6">
                         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                             <Card className="lg:col-span-3">
@@ -293,7 +336,7 @@ export default function AdminDashboard() {
                                     <CardDescription>Selecione um chamado para ver detalhes</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="rounded-md border overflow-auto h-[500px]">
+                                    <div className="rounded-md border overflow-auto h-[600px] min-h-[600px]">
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
@@ -301,13 +344,12 @@ export default function AdminDashboard() {
                                                     <TableHead className="hidden md:table-cell">Data</TableHead>
                                                     <TableHead>Status</TableHead>
                                                     <TableHead className="hidden md:table-cell">Secretaria</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Imagem</TableHead>
                                                 </TableRow>
                                             </TableHeader>
-                                            <TableBody>
+                                            <TableBody className="divide-y divide-gray-200">
                                                 {chamados.length === 0 ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={5} className="text-center py-6 text-gray-500">
+                                                    <TableRow className="h-20">
+                                                        <TableCell colSpan={5} className="text-center py-6 text-gray-500 align-middle">
                                                             Nenhum chamado encontrado
                                                         </TableCell>
                                                     </TableRow>
@@ -318,7 +360,7 @@ export default function AdminDashboard() {
                                                             onClick={() => setSelectedChamado(chamado)}
                                                             className={`cursor-pointer hover:bg-gray-50 ${selectedChamado?.id === chamado.id ? "bg-gray-50" : ""}`}
                                                         >
-                                                            <TableCell className="font-medium">
+                                                            <TableCell className="font-medium align-top py-4">
                                                                 <div className="flex flex-col">
                                                                     <span className="truncate max-w-[200px]">{chamado.titulo}</span>
                                                                     <span className="text-xs text-gray-500 md:hidden">
@@ -326,49 +368,14 @@ export default function AdminDashboard() {
                                   </span>
                                                                 </div>
                                                             </TableCell>
-                                                            <TableCell className="hidden md:table-cell">{formatDate(chamado.dataAbertura)}</TableCell>
-                                                            <TableCell>{getStatusBadge(chamado.status)}</TableCell>
-                                                            <TableCell className="hidden md:table-cell">
+                                                            <TableCell className="hidden md:table-cell align-top py-4">
+                                                                {formatDate(chamado.dataAbertura)}
+                                                            </TableCell>
+                                                            <TableCell className="align-top py-4">{getStatusBadge(chamado.status)}</TableCell>
+                                                            <TableCell className="hidden md:table-cell align-top py-4">
                                                                 <Badge variant="outline" className="bg-gray-100">
                                                                     {chamado.secretaria || "Não atribuído"}
                                                                 </Badge>
-                                                            </TableCell>
-                                                            <TableCell className="hidden md:table-cell">
-                                                                {chamado.fotoAntesUrl && (
-                                                                    <Dialog>
-                                                                        <DialogTrigger asChild>
-                                                                            <Button
-                                                                                variant="ghost"
-                                                                                size="icon"
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation()
-                                                                                    handleOpenImageDialog(chamado.fotoAntesUrl.split("/").pop() || "")
-                                                                                }}
-                                                                            >
-                                                                                <ImageIcon className="h-4 w-4" />
-                                                                            </Button>
-                                                                        </DialogTrigger>
-                                                                        <DialogContent>
-                                                                            <DialogHeader>
-                                                                                <DialogTitle>Foto do chamado</DialogTitle>
-                                                                                <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
-                                                                            </DialogHeader>
-                                                                            {imageAntesUrl ? (
-                                                                                <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-                                                                                    <img
-                                                                                        src={imageAntesUrl || "/placeholder.svg"}
-                                                                                        alt="Foto do chamado"
-                                                                                        className="object-cover w-full h-full"
-                                                                                    />
-                                                                                </div>
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                                                                                    <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
-                                                                                </div>
-                                                                            )}
-                                                                        </DialogContent>
-                                                                    </Dialog>
-                                                                )}
                                                             </TableCell>
                                                         </TableRow>
                                                     ))
@@ -380,8 +387,8 @@ export default function AdminDashboard() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            disabled={page.number === 0}
-                                            onClick={() => setPage({ ...page, number: page.number - 1 })}
+                                            disabled={currentPage === 0}
+                                            onClick={() => setCurrentPage(currentPage - 1)}
                                             className="flex items-center gap-1"
                                         >
                                             <svg
@@ -401,13 +408,13 @@ export default function AdminDashboard() {
                                             Anterior
                                         </Button>
                                         <span className="text-sm text-gray-500">
-                      Página {page.number + 1} de {page.totalPages}
+                      Página {currentPage + 1} de {pageable.totalPages}
                     </span>
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            disabled={page.number + 1 >= page.totalPages}
-                                            onClick={() => setPage({ ...page, number: page.number + 1 })}
+                                            disabled={currentPage + 1 >= pageable.totalPages}
+                                            onClick={() => setCurrentPage(currentPage + 1)}
                                             className="flex items-center gap-1"
                                         >
                                             Próxima
@@ -439,7 +446,7 @@ export default function AdminDashboard() {
                                 </CardHeader>
                                 <CardContent>
                                     {selectedChamado ? (
-                                        <div className="space-y-4">
+                                        <div className="space-y-4 h-[600px] overflow-y-auto pr-2">
                                             <div className="space-y-2">
                                                 <h3 className="font-semibold text-lg">{selectedChamado.titulo}</h3>
                                                 <div className="flex flex-wrap gap-2">
@@ -447,6 +454,80 @@ export default function AdminDashboard() {
                                                     <Badge variant="outline" className="bg-gray-100">
                                                         {selectedChamado.secretaria || "Não atribuído"}
                                                     </Badge>
+                                                    {selectedChamado.fotoAntesUrl && (
+                                                        <div className="space-y-2">
+                                                            <Dialog>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="w-full flex items-center justify-center gap-2"
+                                                                        onClick={() =>
+                                                                            handleOpenImageDialog(selectedChamado.fotoAntesUrl.split("/").pop() || "")
+                                                                        }
+                                                                    >
+                                                                        <ImageIcon className="h-4 w-4" />
+                                                                        <span>Antes</span>
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>Foto do chamado</DialogTitle>
+                                                                        <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
+                                                                    </DialogHeader>
+                                                                    {imagemUrl ? (
+                                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                                                                            <img
+                                                                                src={imagemUrl || "/placeholder.svg"}
+                                                                                alt="Foto do chamado"
+                                                                                className="object-cover w-full h-full"
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+                                                                            <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
+                                                                        </div>
+                                                                    )}
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                        </div>
+                                                    )}
+                                                    {selectedChamado.fotoDepoisUrl && (
+                                                        <div className="space-y-2">
+                                                            <Dialog>
+                                                                <DialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="w-full flex items-center justify-center gap-2"
+                                                                        onClick={() =>
+                                                                            handleOpenImageDialog(selectedChamado?.fotoDepoisUrl.split("/").pop() || "")
+                                                                        }
+                                                                    >
+                                                                        <ImageIcon className="h-4 w-4" />
+                                                                        <span>Agora</span>
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>Foto atual do problema</DialogTitle>
+                                                                        <DialogDescription>Imagem enviada por nossa equipe</DialogDescription>
+                                                                    </DialogHeader>
+                                                                    {imagemUrl ? (
+                                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                                                                            <img
+                                                                                src={imagemUrl || "/placeholder.svg"}
+                                                                                alt="Foto do chamado"
+                                                                                className="object-cover w-full h-full"
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+                                                                            <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
+                                                                        </div>
+                                                                    )}
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -462,46 +543,95 @@ export default function AdminDashboard() {
                                                 <p className="text-sm">{formatDate(selectedChamado.dataAbertura)}</p>
                                             </div>
 
-                                            {selectedChamado.fotoAntesUrl && (
-                                                <div className="space-y-2">
-                                                    <p className="text-sm font-medium text-gray-500">Imagem</p>
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <Button
-                                                                variant="outline"
-                                                                className="w-full flex items-center justify-center gap-2"
-                                                                onClick={() =>
-                                                                    handleOpenImageDialog(selectedChamado.fotoAntesUrl.split("/").pop() || "")
-                                                                }
-                                                            >
-                                                                <ImageIcon className="h-4 w-4" />
-                                                                <span>Visualizar imagem</span>
-                                                            </Button>
-                                                        </DialogTrigger>
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>Foto do chamado</DialogTitle>
-                                                                <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
-                                                            </DialogHeader>
-                                                            {imageAntesUrl ? (
-                                                                <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-                                                                    <img
-                                                                        src={imageAntesUrl || "/placeholder.svg"}
-                                                                        alt="Foto do chamado"
-                                                                        className="object-cover w-full h-full"
-                                                                    />
+                                            {selectedChamado.historicos.length > 0 && (
+                                                <div className="space-y-3">
+                                                    <p className="text-sm font-medium text-gray-500">Atualizações</p>
+                                                    <div className="space-y-3">
+                                                        {selectedChamado.historicos.map((historico, index) => (
+                                                            <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <p className="text-xs font-medium text-gray-700">
+                                                                        {formatDate(historico.dataModificacao)}
+                                                                    </p>
+                                                                    <Badge variant="outline" className="text-xs">
+                                                                        Funcionário #{historico.funcionarioId}
+                                                                    </Badge>
                                                                 </div>
-                                                            ) : (
-                                                                <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                                                                    <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100">
+                                                                        {historico.statusAnterior}
+                                                                    </Badge>
+                                                                    <ArrowRight className="h-3 w-3 text-gray-400" />
+                                                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-100">
+                                                                        {historico.statusNovo}
+                                                                    </Badge>
                                                                 </div>
-                                                            )}
-                                                        </DialogContent>
-                                                    </Dialog>
+                                                                {historico.observacao && (
+                                                                    <p className="text-sm text-gray-600 mt-1">{historico.observacao}</p>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {selectedChamado.avaliacao && (
+                                                <div className="space-y-3">
+                                                    <p className="text-sm font-medium text-gray-500">Avaliação do usuário</p>
+                                                    <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
+                                                        <div className="flex items-center gap-1 mb-2">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <svg
+                                                                    key={i}
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    width="16"
+                                                                    height="16"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill={i < selectedChamado.avaliacao.estrelas ? "#f59e0b" : "none"}
+                                                                    stroke="#f59e0b"
+                                                                    strokeWidth="2"
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    className="lucide lucide-star"
+                                                                >
+                                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                                                </svg>
+                                                            ))}
+                                                            <span className="text-sm font-medium text-amber-700 ml-1">
+                                {selectedChamado.avaliacao.estrelas}/5
+                              </span>
+                                                        </div>
+                                                        {selectedChamado.avaliacao.comentario && (
+                                                            <p className="text-sm text-amber-700 italic">"{selectedChamado.avaliacao.comentario}"</p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
 
                                             <div className="pt-4 space-y-4">
+                                                {userRoles?.includes("ROLE_OWNER") && (
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm font-medium text-gray-500">Encaminhar para</p>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                className="flex-1"
+                                                                onClick={() => handleSetSecretaria(selectedChamado, "OBRAS")}
+                                                            >
+                                                                Obras
+                                                                <ArrowRight className="ml-2 h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                className="flex-1"
+                                                                onClick={() => handleSetSecretaria(selectedChamado, "URBANISMO")}
+                                                            >
+                                                                Urbanismo
+                                                                <ArrowRight className="ml-2 h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                                     <DialogTrigger asChild>
                                                         <Button className="w-full bg-teal-600 hover:bg-teal-700">
@@ -543,6 +673,11 @@ export default function AdminDashboard() {
                                                                 />
                                                             </div>
 
+                                                            <div className="space-y-2">
+                                                                <Label htmlFor="observacao">Foto atual da situação</Label>
+                                                                <Input type="file" {...updateChamadoForm.register("fotoAtualFile")} />
+                                                            </div>
+
                                                             <div className="flex justify-end gap-2">
                                                                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                                                                     Cancelar
@@ -554,30 +689,6 @@ export default function AdminDashboard() {
                                                         </form>
                                                     </DialogContent>
                                                 </Dialog>
-
-                                                {userRoles?.includes("ROLE_OWNER") && (
-                                                    <div className="space-y-2">
-                                                        <p className="text-sm font-medium text-gray-500">Encaminhar para</p>
-                                                        <div className="flex gap-2">
-                                                            <Button
-                                                                variant="outline"
-                                                                className="flex-1"
-                                                                onClick={() => handleSetSecretaria(selectedChamado, "OBRAS")}
-                                                            >
-                                                                Obras
-                                                                <ArrowRight className="ml-2 h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="outline"
-                                                                className="flex-1"
-                                                                onClick={() => handleSetSecretaria(selectedChamado, "URBANISMO")}
-                                                            >
-                                                                Urbanismo
-                                                                <ArrowRight className="ml-2 h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
                                     ) : (

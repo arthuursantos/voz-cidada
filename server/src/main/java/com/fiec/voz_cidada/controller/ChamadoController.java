@@ -2,6 +2,7 @@ package com.fiec.voz_cidada.controller;
 
 import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.domain.chamado.Chamado;
+import com.fiec.voz_cidada.domain.chamado.Secretaria;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.service.ChamadoService;
@@ -54,6 +55,11 @@ public class ChamadoController {
     @GetMapping("/secretaria/{secretaria}")
     public ResponseEntity<PagedModel<EntityModel<ChamadoDTO>>> findBySecretaria(@PathVariable String secretaria, @PageableDefault(size = 10) Pageable pageable) {
         return service.findBySecretaria(secretaria, pageable);
+    }
+
+    @GetMapping("/count/{secretaria}")
+    public ResponseEntity<List<?>> countBySecretaria(@PathVariable Secretaria secretaria) {
+        return service.countBySecretaria(secretaria);
     }
 
     @PutMapping
