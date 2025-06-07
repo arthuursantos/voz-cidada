@@ -459,7 +459,7 @@ export default function Dashboard() {
       <CreateChamadoDialog
         open={novoChamadoDialogOpen}
         onOpenChange={setNovoChamadoDialogOpen}
-        onSuccess={fetchChamados}
+        onSuccess={async() => await fetchChamados()}
       />
 
       <HistoricoChamado

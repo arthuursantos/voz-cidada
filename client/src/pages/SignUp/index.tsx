@@ -97,7 +97,7 @@ export default function SignUp() {
     const handleSignUp: SubmitHandler<SignUpData> = async (data) => {
         const cepResponse = await fetch(`https://viacep.com.br/ws/${data.cep}/json/`);
         const cepData = await cepResponse.json();
-        if (cepData.erro) {
+        if (!cepData || cepData.erro) {
             toast.error("CEP inválido ou não encontrado.");
             return;
         }

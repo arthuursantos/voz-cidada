@@ -67,7 +67,7 @@ type ChamadoFormValues = z.infer<typeof chamadoFormSchema>;
 interface CreateChamadoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
+  onSuccess: () => Promise<void>;
 }
 
 const customIcon = new Icon({
@@ -248,37 +248,30 @@ export default function CreateChamadoDialog({
     try {
       setIsSubmitting(true);
       const imageFormData = new FormData();
+      let fotoAntesUrl = null;
+  
       if (values.fotoAntesFile instanceof File) {
-
         imageFormData.append("image", values.fotoAntesFile, values.fotoAntesFile.name);
-
-        const { data: fotoAntesUrl } = await uploadService.saveImage(imageFormData);
-
-        chamadoService.create({
-          usuarioId: user.id,
-          titulo: values.titulo,
-          descricao: values.descricao,
-          latitude: values.latitude,
-          longitude: values.longitude,
-          status: "PENDENTE",
-          fotoAntesUrl: fotoAntesUrl,
-        })
-        console.log("Chamado criado com foto:", { usuarioId: user.id, titulo: values.titulo, descricao: values.descricao, latitude: values.latitude, longitude: values.longitude, status: "PENDENTE", foto: fotoAntesUrl });
-
-      }else {
-        console.log("else sem foto");
-        chamadoService.create({
-          usuarioId: user.id,
-          titulo: values.titulo,
-          descricao: values.descricao,
-          latitude: values.latitude,
-          longitude: values.longitude,
-          status: "PENDENTE",
-        });
-        console.log("Chamado criado sem foto:", { usuarioId: user.id, titulo: values.titulo, descricao: values.descricao, latitude: values.latitude, longitude: values.longitude, status: "PENDENTE" });
+        const { data } = await uploadService.saveImage(imageFormData);
+        fotoAntesUrl = data;
       }
-      onSuccess?.();
+  
+      await chamadoService.create({
+        usuarioId: user.id,
+        titulo: values.titulo,
+        descricao: values.descricao,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        status: "PENDENTE",
+        fotoAntesUrl: fotoAntesUrl,
+      });
+  
       toast.success("Chamado criado com sucesso!");
+      
+      // Aguardar a conclusão da atualização antes de fechar
+      await onSuccess();
+      
+      // Fechar o dialog somente após tudo estar completo
       handleDialogClose(false);
       
     } catch (error) {

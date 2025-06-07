@@ -244,6 +244,7 @@ export default function FuncionarioDashboard() {
                         fotoDepoisUrl: fotoDepoisUrl || prev.fotoDepoisUrl 
                     } : null))
                     setIsOpen(false)
+                    fetchChamados()
                     updateChamadoForm.reset()
                     setFotoDepoisPreview(null)
                 } catch (error) {
@@ -279,50 +280,50 @@ export default function FuncionarioDashboard() {
     }, [activeFilter, chamados])
 
 
-    //
-    useEffect(() => {
-        async function fetchChamados() {
-            try {
+    async function fetchChamados() {
+        try {
 
-                if (userRoles?.includes("ROLE_ADMIN") && !loading && admin?.secretaria) {
-                    const response = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
-                    const {
-                        _embedded: { chamadoDTOList },
-                        page: pageData,
-                    } = response.data
-                    setChamados(chamadoDTOList)
-                    setFilteredChamados(chamadoDTOList)
-                    setPage({
-                        totalElements: pageData.totalElements,
-                        totalPages: pageData.totalPages,
-                        number: pageData.number,
-                    })
-                }
-
-                if (!admin?.secretaria) return;
-                        const response = await chamadoService.findBySecretaria({ secretaria: admin?.secretaria });
-                        const chamadosData = response.data._embedded?.chamadoDTOList || [];
-                        setChamados(chamadosData);
-                        
-                        // Prefetch user names
-                        const names: Record<number, string> = {};
-                        await Promise.all(chamadosData.map(async (chamado: ChamadoInterface) => {
-                          try {
-                            const userResponse = await api.get(`/api/usuario/${chamado.usuarioId}`);
-                            names[chamado.id] = userResponse.data.nome;
-                          } catch (error) {
-                            console.error("Erro ao buscar usuário:", error);
-                            names[chamado.id] = "Usuário não encontrado";
-                          }
-                        }));
-                        setUserNames(names);
-            } catch (error) {
-                console.error("Erro ao buscar chamados:", error)
-            } finally {
-                setLoadingChamados(false)
+            if (userRoles?.includes("ROLE_ADMIN") && !loading && admin?.secretaria) {
+                const response = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
+                const {
+                    _embedded: { chamadoDTOList },
+                    page: pageData,
+                } = response.data
+                setChamados(chamadoDTOList)
+                setFilteredChamados(chamadoDTOList)
+                setPage({
+                    totalElements: pageData.totalElements,
+                    totalPages: pageData.totalPages,
+                    number: pageData.number,
+                })
             }
-        }
 
+            if (!admin?.secretaria) return;
+                    const response = await chamadoService.findBySecretaria({ secretaria: admin?.secretaria });
+                    const chamadosData = response.data._embedded?.chamadoDTOList || [];
+                    setChamados(chamadosData);
+                    
+                    // Prefetch user names
+                    const names: Record<number, string> = {};
+                    await Promise.all(chamadosData.map(async (chamado: ChamadoInterface) => {
+                      try {
+                        const userResponse = await api.get(`/api/usuario/${chamado.usuarioId}`);
+                        names[chamado.id] = userResponse.data.nome;
+                      } catch (error) {
+                        console.error("Erro ao buscar usuário:", error);
+                        names[chamado.id] = "Usuário não encontrado";
+                      }
+                    }));
+                    setUserNames(names);
+        } catch (error) {
+            console.error("Erro ao buscar chamados:", error)
+        } finally {
+            setLoadingChamados(false)
+        }
+    }
+
+    //
+    useEffect(() => {       
         fetchChamados()
     }, [userRoles, loading, admin, page.number])
     

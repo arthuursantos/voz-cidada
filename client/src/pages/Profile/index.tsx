@@ -11,6 +11,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import BlocoConfirmacao from './Components/BlocoDeConfirmacao.tsx'
 import { Link } from 'react-router'
+import toast from 'react-hot-toast'
 
 const Profile = () => {
   const { isGoogleUser, user, getCepApi, updateUser } = useContext(AuthContext)
@@ -95,10 +96,20 @@ const Profile = () => {
   };
 
   const handleUpdateUser: SubmitHandler<updateUserData> = async (data) => {
-    console.log(data)
-    await updateUser(data)
-    setConfirmation(false) // Fechar o pop-up após a confirmação
-    setHasChanges(true)
+    toast.promise(
+      async() => {
+        console.log(data)
+        await updateUser(data)
+        setConfirmation(false) // Fechar o pop-up após a confirmação
+        setHasChanges(true)
+      },
+      {
+        loading: 'Atualizando endereço...',
+        success: 'Endereço atualizado com sucesso!',
+        error: 'Erro ao atualizar o endereço. Tente novamente.'
+      }
+    )
+    
   }
 
   const resetForm = () => {
