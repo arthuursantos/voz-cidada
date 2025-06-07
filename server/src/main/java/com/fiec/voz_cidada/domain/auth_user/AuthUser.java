@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,6 +30,7 @@ public class AuthUser implements UserDetails {
 
     private String login;
     private String password;
+    private String fcmToken;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
