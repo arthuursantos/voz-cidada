@@ -8,6 +8,7 @@ import {useContext} from "react";
 import {z} from 'zod';
 import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface FormField {
     id: string;
@@ -85,20 +86,22 @@ export default function OAuthSignUp() {
     const { register, handleSubmit, formState: { errors } } = useForm<ProfileData>({
         resolver: zodResolver(SignUpSchema)
     });
-    const { oAuthSignUp } = useContext(AuthContext)
+    const { oAuthSignUp } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     const handleSignUp = async (data: ProfileData) => {
         await toast.promise(
             async () => {
                 await oAuthSignUp(data);
+                navigate("/dashboard", { replace: true });
             },
             {
                 loading: "Salvando...",
                 success: "Salvo!",
                 error: "Algo deu errado."
             },
-        )
-    }
+        );
+    };
 
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-center">
@@ -167,7 +170,7 @@ export default function OAuthSignUp() {
                             </div>
 
                             <div className="flex items-center justify-end space-x-4">
-                                <Button type="submit" className="bg-[#689689] hover:bg-[#689689]/90 text-white px-8">
+                                <Button type="submit" className="bg-[--cor-primaria2] hover:bg-[--cor-primaria] text-white px-8">
                                     Continuar
                                 </Button>
                             </div>

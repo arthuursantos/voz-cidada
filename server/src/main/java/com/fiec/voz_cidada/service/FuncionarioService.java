@@ -2,18 +2,12 @@ package com.fiec.voz_cidada.service;
 
 import com.fiec.voz_cidada.controller.FuncionarioController;
 import com.fiec.voz_cidada.domain.auth_user.AuthUser;
-import com.fiec.voz_cidada.domain.chamado.ChamadoDTO;
 import com.fiec.voz_cidada.domain.funcionario.FuncionarioDTO;
 import com.fiec.voz_cidada.domain.funcionario.Funcionario;
-import com.fiec.voz_cidada.domain.usuario.Usuario;
-import com.fiec.voz_cidada.domain.usuario.UsuarioDTO;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.exceptions.UnauthorizedException;
 import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.FuncionarioRepository;
-import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -26,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-@Slf4j
 @Service
 public class FuncionarioService extends GenericService<Funcionario, FuncionarioDTO, Long> {
 
@@ -46,12 +39,7 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
         Funcionario entity = convertToEntity(dto);
         entity.setAuthUser(authUser);
         entity.setDataCadastro(LocalDateTime.now());
-
         FuncionarioDTO savedDto = convertToDto(repository.save(entity));
-        StackTraceElement currentMethod = Thread.currentThread().getStackTrace()[1];
-        String logMsg = "Perfil de administrador criado. ID " + savedDto.getId();
-        log.info("{} > {} > {}", currentMethod.getClassName(), currentMethod.getMethodName(), logMsg);
-
         return EntityModel.of(savedDto, generateLinks(savedDto));
     }
 
@@ -71,13 +59,16 @@ public class FuncionarioService extends GenericService<Funcionario, FuncionarioD
             return EntityModel.of(dto, generateLinks(dto));
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado: " + e.getMessage());
+            throw new ResourceNotFoundException("Nenhum usuário autenticado encontrado." + e.getMessage());
         }
     }
 
     public void delete(Long id) {
         checkAccess(id);
-        repository.deleteById(id);
+        Funcionario entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Funcionário não encontrado."));
+        authRepository.deleteById(entity.getAuthUser().getId());
+        repository.delete(entity);
     }
 
     @Override

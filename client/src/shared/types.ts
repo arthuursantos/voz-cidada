@@ -1,15 +1,27 @@
 export type Status = "CONCLUÍDO" | "EM ANDAMENTO" | "PENDENTE"
 export interface ChamadoInterface {
     id: number;
+    usuarioId?: number;
     titulo: string;
-    descricao: string;
-    secretaria: string;
+    descricao?: string;
+    secretaria?: string;
     dataAbertura: string;
     status: Status | string;
-    fotoAntesUrl: string;
-    fotoDepoisUrl: string;
+    latitude?: number | null
+    longitude?: number | null
+    fotoAntesUrl?: string | null;
+    fotoDepoisUrl?: string | null;
+    avaliacao?: AvaliacaoInterface | null;
     historicos: HistoricoInterface[];
-    avaliacao: AvaliacaoInterface;
+}
+export interface ChamadoCreateInterface {
+    usuarioId: number;
+    titulo: string;
+    descricao: string;
+    status: Status | string;
+    latitude: number | null;
+    longitude: number | null;
+    fotoAntesUrl?: string | null;
 }
 
 export interface HistoricoInterface {
@@ -25,10 +37,10 @@ export interface HistoricoInterface {
 export interface AvaliacaoInterface {
     id?: number;
     chamadoId: number;
-    usuarioId?: number;
     estrelas: number;
     comentario?: string | null;
     dataAvaliacao: string;
+    usuarioId?: number;
 }
 
 export interface PageInfoInterface {

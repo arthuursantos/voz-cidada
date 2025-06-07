@@ -49,7 +49,4 @@ public class Chamado implements Serializable {
     private String fotoDepoisUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
-
-
-
 }

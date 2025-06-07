@@ -46,6 +46,7 @@ public class AuthService implements UserDetailsService {
             var auth = authManager.authenticate(credentials);
             return ResponseEntity.ok(tokenService.createAuthTokens((AuthUser) auth.getPrincipal()));
         } catch (Exception e) {
+            log.error("AuthService - login - ", e);
             throw new InvalidAuthenticationException("Seu login ou senha estão incorretos!");
         }
     }
@@ -74,6 +75,7 @@ public class AuthService implements UserDetailsService {
             LoginResponseDTO tokens = tokenService.createAuthTokens(user);
             return ResponseEntity.ok(tokens);
         } catch (Exception e) {
+            log.error("AuthService - loginWithGoogle - ", e);
             throw new InvalidAuthenticationException("Não foi possível se autenticar com a conta Google.");
         }
     }

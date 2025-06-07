@@ -1,817 +1,591 @@
-import { useContext, useEffect, useState } from "react"
-import { jwtDecode } from "jwt-decode"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { ImageIcon, ClipboardList, UserPlus, ArrowRight, CheckCircle, Clock, AlertTriangle, Blocks } from "lucide-react"
+"use client"
+import { SVGProps, useState, useEffect, useContext } from "react"
+import { ChevronDown, Plus, Search, Trash } from "lucide-react"
+import Header from "@/components/header";
+import { JSX } from "react/jsx-runtime";
+import { AuthContext, JWTClaims } from "@/contexts/AuthContext";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import authService from "@/shared/services/authServices";
+import { jwtDecode } from "jwt-decode";
+import api from "@/shared/axios";
+import funcionarioService from "./funcionarioServices.ts";
+import chamadoService from "./chamadoService.ts";
+import { ChamadoInterface } from "./types.ts";
+import FuncionarioDashboard from "../Funcionario/index.tsx";
+import toast from "react-hot-toast";
 
-import authService from "@/shared/services/authService.ts"
-import chamadoService from "@/shared/services/chamadoService.ts"
-import funcionarioService from "@/pages/Admin/funcionarioService.ts"
-import uploadService from "@/shared/services/uploadService.ts"
-import historicoService from "@/pages/Admin/historicoService.ts"
-import { AuthContext, type JWTClaims } from "@/contexts/AuthContext.tsx"
-import type { ChamadoInterface, HistoricoInterface, PageInfoInterface } from "@/shared/types.ts"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Label } from "@/components/ui/label.tsx"
+// Define the structure of a Funcionario object
+interface Funcionario {
+    id: number;
+    cpf: string;
+    cargo: string;
+    secretaria: string;
+    email?: string;
+}
 
 export default function AdminDashboard() {
-    const { userRoles, admin, loading } = useContext(AuthContext)
+    const { userRoles } = useContext(AuthContext);
+    
+    const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
+    const [showEditChamado, setShowEditChamado] = useState(false);
+    const [activeTab, setActiveTab] = useState("sectors");
+    const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+    const [chamados, setChamados] = useState<ChamadoInterface[]>([]);
+    const [editingChamado, setEditingChamado] = useState<ChamadoInterface | null>(null);
+    const [isloading, setIsLoading] = useState(false);
 
-    const [chamados, setChamados] = useState<ChamadoInterface[]>([])
-    const [currentPage, setCurrentPage] = useState(0)
-    const [pageable, setPageable] = useState<PageInfoInterface>({
-        totalPages: 0,
-        totalElements: 0,
-    })
-    const [imagemUrl, setImagemUrl] = useState<string | null>(null)
-    const [isOpen, setIsOpen] = useState(false)
-    const [loadingChamados, setLoadingChamados] = useState(true)
-    const [selectedChamado, setSelectedChamado] = useState<ChamadoInterface | null>(null)
-    const [countStatus, setCountStatus] = useState(null)
-
-    const createAdminSchema = z.object({
-        cpf: z
-            .string()
-            .nonempty("O CPF é obrigatório.")
-            .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "Formato de CPF inválido. Use 000.000.000-00 ou 00000000000.")
-            .transform((cpf) => {
-                return cpf.replace(/[^0-9]/g, "")
-            }),
-        cargo: z.string().nonempty("O cargo é obrigatório."),
-        secretaria: z.enum(["OBRAS", "URBANISMO"], {
-            errorMap: () => ({ message: 'Secretaria deve ser "OBRAS" ou "URBANISMO"' }),
-        }),
-        email: z.string().email("Email inválido").nonempty("O email é obrigatório."),
-        password: z.string().min(6, "A senha precisa ter no minímo 6 caracteres."),
-    })
-    type createAdminFields = z.infer<typeof createAdminSchema>
-
-    const createHistoricoSchema = z.object({
-        statusNovo: z.string().nonempty("O status é obrigatório."),
-        observacao: z.string(),
-    })
-    type createHistoricoFields = z.infer<typeof createHistoricoSchema>
-
-    const form = useForm<createAdminFields>({
-        resolver: zodResolver(createAdminSchema),
-        defaultValues: {
-            cpf: "",
-            cargo: "",
-            secretaria: undefined,
-            email: "",
-            password: "",
-        },
-    })
-
-    const updateChamadoForm = useForm<createHistoricoFields>({
-        resolver: zodResolver(createHistoricoSchema),
-        defaultValues: {
-            statusNovo: "",
-            observacao: "",
-        },
-    })
-
-    async function onSubmit(data: createAdminFields) {
+    const getFuncionarios = async () => {
         try {
-            await authService.registerAdmin({ login: data.email, password: data.password })
-            const {
-                data: { accessToken },
-            }: any = await authService.login({ login: data.email, password: data.password })
-            const jwt = jwtDecode<JWTClaims>(accessToken)
-            await funcionarioService.createAdminProfile({
-                authId: jwt.sub,
-                cpf: data.cpf,
-                cargo: data.cargo,
-                secretaria: data.secretaria,
+            const response = await api.get<{ _embedded: { funcionarioDTOList: Funcionario[] } }>('/api/funcionario');
+            console.log("Funcionários:", response.data._embedded.funcionarioDTOList);
+            setFuncionarios(Array.isArray(response.data._embedded.funcionarioDTOList) ? response.data._embedded.funcionarioDTOList : []);
+        } catch (error) {
+            console.error("Erro ao Buscar Usuários:", error);
+            setFuncionarios([]);
+        }
+    }
+
+    const getChamados = async () => {
+        try {
+            const response = await chamadoService.getAllChamados(0, 10, "id,desc");
+            console.log("Chamados:", response.data._embedded.chamadoDTOList);
+            const chamadosSecretariaNull = response.data._embedded.chamadoDTOList.filter((chamado: ChamadoInterface) => {
+                return chamado.secretaria === null;
             })
-            form.reset()
+            setChamados(Array.isArray(chamadosSecretariaNull) ? chamadosSecretariaNull : []);
         } catch (error) {
-            console.error("Erro ao criar administrador:", error)
-        }
-    }
-
-    async function handleSetSecretaria(data: ChamadoInterface, secretaria: string) {
-        try {
-            const updatedChamado = { ...data, secretaria }
-            await chamadoService.update(updatedChamado)
-            if (userRoles?.includes("ROLE_OWNER")) {
-                const {
-                    data: {
-                        _embedded: { chamadoDTOList },
-                    },
-                } = await chamadoService.findAll()
-                setChamados(chamadoDTOList)
-            }
-        } catch (error) {
-            console.error("Erro ao atualizar secretaria:", error)
-        }
-    }
-
-    async function handleOpenImageDialog(filename: string) {
-        try {
-            const response = await uploadService.getImage(filename)
-            const url = URL.createObjectURL(response.data)
-            setImagemUrl(url)
-        } catch (error) {
-            console.error("Erro ao carregar imagem:", error)
-            setImagemUrl(null)
-        }
-    }
-
-    async function handleUpdateChamado(formData: any) {
-        try {
-            if (!selectedChamado) return
-
-            const historicoData: HistoricoInterface = {
-                chamadoId: selectedChamado.id,
-                funcionarioId: admin?.id,
-                dataModificacao: new Date().toISOString().slice(0, 19).replace("T", " "),
-                statusAnterior: selectedChamado.status,
-                statusNovo: formData.statusNovo,
-                observacao: formData.observacao,
-            }
-
-            const imageFormData = new FormData()
-            imageFormData.append("image", formData.fotoAtualFile[0])
-            const { data: fotoAtualUrl } = await uploadService.saveImage(imageFormData)
-
-            await chamadoService.update({ ...selectedChamado, status: formData.statusNovo, fotoDepoisUrl: fotoAtualUrl })
-            await historicoService.create(historicoData)
-
-            if (userRoles?.includes("ROLE_OWNER")) {
-                const {
-                    data: {
-                        _embedded: { chamadoDTOList },
-                    },
-                } = await chamadoService.findAll()
-                setChamados(chamadoDTOList)
-            } else if (userRoles?.includes("ROLE_ADMIN") && admin?.secretaria) {
-                const {
-                    data: {
-                        _embedded: { chamadoDTOList },
-                    },
-                } = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
-                setChamados(chamadoDTOList)
-            }
-
-            setSelectedChamado((prev) => (prev ? { ...prev, status: formData.statusNovo } : null))
-            setIsOpen(false)
-            updateChamadoForm.reset()
-        } catch (error) {
-            console.error("Erro ao atualizar chamado:", error)
+            console.error("Erro ao Buscar Chamados:", error);
         }
     }
 
     useEffect(() => {
-        async function fetchChamados() {
-            try {
-                if (userRoles?.includes("ROLE_OWNER") && !loading) {
-                    const response = await chamadoService.findAll({ page: currentPage })
-                    const {
-                        _embedded: { chamadoDTOList },
-                        page: pageData,
-                    } = response.data
-                    setChamados(chamadoDTOList)
-                    setPageable({
-                        totalElements: pageData.totalElements,
-                        totalPages: pageData.totalPages,
-                    })
-                    return
-                }
+        const fetchFuncionarios = async () => {
+           getFuncionarios();
+        };
+        fetchFuncionarios();
+    }, []);
 
-                if (userRoles?.includes("ROLE_ADMIN") && !loading && admin?.secretaria) {
-                    const response = await chamadoService.findBySecretaria({ secretaria: admin.secretaria })
-                    const {
-                        _embedded: { chamadoDTOList },
-                        page: pageData,
-                    } = response.data
-                    setChamados(chamadoDTOList)
-                    setPageable({
-                        totalElements: pageData.totalElements,
-                        totalPages: pageData.totalPages,
-                    })
-                }
-            } catch (error) {
-                console.error("Erro ao buscar chamados:", error)
-            } finally {
-                setLoadingChamados(false)
-            }
-        }
+    useEffect(() => {
+        const fetchChamados = async () => {
+            getChamados();
+        };
+        fetchChamados();
+    }, []);
 
-        async function countBySecretaria() {
-            const { data: response } = await chamadoService.countBySecretaria(admin?.secretaria)
-            setCountStatus(
-                response.map((item) => ({
-                    status: item[0],
-                    count: item[1],
-                })),
-            )
-        }
+    const createFuncionarioSchema = z.object({
+        cpf: z.string()
+            .nonempty("O CPF é obrigatório.")
+            .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "Formato de CPF inválido. Use 000.000.000-00 ou 00000000000.")
+            .transform(cpf => {
+                return cpf.replace(/[^0-9]/g, "");
+            }),
+        cargo: z.string().nonempty("O cargo é obrigatório."),
+        secretaria: z.enum(["OBRAS", "URBANISMO"], {
+            errorMap: () => ({ message: "Selecione uma secretaria válido." })
+        }),
+        email: z.string()
+            .nonempty("O email é obrigatório.")
+            .email("Formato de email inválido."),
+        senha: z.string()
+            .nonempty("A senha é obrigatória.")
+            .min(6, "A senha deve ter pelo menos 6 caracteres."),
+    });
 
-        countBySecretaria()
-        fetchChamados()
-    }, [userRoles, loading, admin, currentPage])
+    type FuncionarioData = z.infer<typeof createFuncionarioSchema>;
 
-    function getStatusBadge(status: string) {
-        switch (status) {
-            case "PENDENTE":
-                return (
-                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
-                        <Clock className="w-3 h-3 mr-1" /> Pendente
-                    </Badge>
-                )
-            case "EM ANDAMENTO":
-                return (
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-                        <Clock className="w-3 h-3 mr-1" /> Em andamento
-                    </Badge>
-                )
-            case "CONCLUÍDO":
-                return (
-                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
-                        <CheckCircle className="w-3 h-3 mr-1" /> Concluído
-                    </Badge>
-                )
-            default:
-                return (
-                    <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
-                        <AlertTriangle className="w-3 h-3 mr-1" /> {status}
-                    </Badge>
-                )
+    const { register, handleSubmit, reset, formState: {errors} } = useForm<FuncionarioData>({
+        resolver: zodResolver(createFuncionarioSchema)
+    });
+
+    const editChamadoSchema = z.object({
+        secretaria: z.enum(["OBRAS", "URBANISMO"], {
+            errorMap: () => ({ message: "Selecione uma secretaria válida." })
+        }).optional(),
+    });
+
+    type ChamadoData = z.infer<typeof editChamadoSchema>;
+
+    const { 
+        register: registerChamado, 
+        handleSubmit: handleSubmitChamado, 
+        reset: resetChamado,
+        formState: { errors: errorsChamado },
+        setValue
+    } = useForm<ChamadoData>({
+        resolver: zodResolver(editChamadoSchema)
+    });
+
+    async function handleSubmitFuncionario(data: FuncionarioData) {
+        await authService.registerAdmin({ login: data.email, password: data.senha });
+        const { data: { accessToken } }: any = await authService.login({ login: data.email, password: data.senha });
+        const jwt = jwtDecode<JWTClaims>(accessToken);
+        await funcionarioService.createAdminProfile({ authId: jwt.sub, cpf: data.cpf, cargo: data.cargo, secretaria: data.secretaria });
+        await getFuncionarios();
+        setShowNewEmployeeDialog(false);
+        reset({
+            cpf: "",
+            cargo: "",
+            secretaria: undefined,
+            email: "",
+            senha: ""
+        });
+    }
+
+    async function handleSubmitChamadoEdit(data: ChamadoData) {
+        if (!editingChamado) return;
+        
+        try {
+            const updatedChamado = {
+                ...editingChamado,
+                secretaria: data.secretaria || editingChamado.secretaria,
+            };
+
+            console.log("Chamado atualizado:", updatedChamado);
+            
+            await chamadoService.updateChamado(updatedChamado);
+            console.log("Chamado atualizado com sucesso:", data);
+            await getChamados();
+            setShowEditChamado(false);
+            setEditingChamado(null);
+        } catch (error) {
+            console.error("Erro ao atualizar chamado:", error);
         }
     }
 
-    function formatDate(dateString: string) {
-        if (!dateString) return ""
-        const date = new Date(dateString)
-        return new Intl.DateTimeFormat("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        }).format(date)
+    async function handleDeleteFuncionario(id: number): Promise<void> {    
+            await toast.promise(
+                async () => {
+                    await funcionarioService.deleteById(id)
+                        .catch(error => {
+                            console.error("Erro ao excluir funcionário:", error);
+                        });
+                    await getFuncionarios();
+                },
+                {
+                    loading: "Excluindo funcionário...",
+                    success: "Funcionário excluído com sucesso!",
+                    error: (error) => `Erro ao excluir funcionário: ${error.message || "Erro desconhecido"}`
+                }
+            );
     }
 
-    if (loading || loadingChamados) {
-        return (
-            <div className="container mx-auto p-6">
-                <div className="space-y-6">
-                    <Skeleton className="h-12 w-[250px]" />
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Skeleton className="h-[200px] rounded-lg" />
-                        <Skeleton className="h-[200px] rounded-lg" />
-                        <Skeleton className="h-[200px] rounded-lg" />
+    function handleEditChamado(chamado: ChamadoInterface): void {
+        setEditingChamado(chamado);
+        if (chamado.secretaria) {
+            setValue("secretaria", chamado.secretaria as "OBRAS" | "URBANISMO");
+        }
+        setShowEditChamado(true);
+    }
+
+    let funcionarioFiltered = funcionarios.filter((f) => f.secretaria === "OBRAS" || f.secretaria === "URBANISMO");
+
+    if (userRoles?.includes("ROLE_OWNER")) return (
+        <div className="flex min-h-screen flex-col">
+            {/* Header */}
+            <Header />
+
+            <main className="flex-1 p-4 md:p-6 bg-slate-50">
+                <div className="max-w-7xl mx-auto">
+                    <div className="relative mb-6">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                            className="w-full pl-10 py-2 pr-4 rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1e88e5] focus:border-transparent"
+                            placeholder="Pesquisar setores ou funcionários..."
+                        />
                     </div>
-                    <Skeleton className="h-[400px] rounded-lg" />
+
+                    {/* Tabs */}
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
+                                <button
+                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "sectors" ? "bg-white text-gray-900 shadow-sm" : ""}`}
+                                    onClick={() => setActiveTab("sectors")}
+                                >
+                                    Setores
+                                </button>
+                                <button
+                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "employees" ? "bg-white text-gray-900 shadow-sm" : ""}`}
+                                    onClick={() => setActiveTab("employees")}
+                                >
+                                    Funcionários
+                                </button>
+                                <button
+                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "chamados" ? "bg-white text-gray-900 shadow-sm" : ""}`}
+                                    onClick={() => setActiveTab("chamados")}
+                                >
+                                    Chamados
+                                </button>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <button
+                                    className="inline-flex items-center justify-center rounded-md bg-[#1e88e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#1976d2] focus:outline-none focus:ring-2 focus:ring-[#1e88e5] focus:ring-offset-2"
+                                    onClick={() => setShowNewEmployeeDialog(true)}
+                                >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Novo Funcionário
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Sectors Tab Content */}
+                        <div className={activeTab === "sectors" ? "block space-y-4" : "hidden"}>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                {/* Sector Cards */}
+                                <div className="rounded-lg border bg-white shadow">
+                                    <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
+                                        <h3 className="text-lg font-medium">Obras Públicas</h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="text-sm text-gray-500 mb-2">
+                                            Responsável por manutenção de vias e obras públicas
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div>
+                                                Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "OBRAS").length}</span>
+                                            </div>
+                                            <div>
+                                            Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "OBRAS").length}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-lg border bg-white shadow">
+                                    <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
+                                        <h3 className="text-lg font-medium">Urbanismo</h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="text-sm text-gray-500 mb-2">Responsável pelo planejamento do espaço urbano</div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div>
+                                                Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "URBANISMO").length}</span>
+                                            </div>
+                                            <div>
+                                                Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "URBANISMO").length}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Employees Tab Content */}
+                        <div className={activeTab === "employees" ? "block" : "hidden"}>
+                            <div className="rounded-lg border bg-white shadow">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse">
+                                        <thead>
+                                            <tr className="border-b bg-gray-100">
+                                                <th className="p-4 text-left font-medium">ID</th>
+                                                <th className="p-4 text-left font-medium">CPF</th>
+                                                <th className="p-4 text-left font-medium">Cargo</th>
+                                                <th className="p-4 text-left font-medium">Secretaria</th>
+                                                <th className="p-4 text-right font-medium">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                            funcionarioFiltered.length === 0 ? (
+                                                <tr className="border-b hover:bg-gray-50">
+                                                    <td colSpan={5} className="p-4 text-center text-gray-500">Nenhum funcionário encontrado.</td>
+                                                </tr>
+                                            ) :
+                                            
+                                            funcionarioFiltered.map((funcionario) => (
+                                            <tr key={funcionario.id} className="border-b hover:bg-gray-50">
+                                                <td className="p-4 font-medium">{funcionario.id}</td>
+                                                <td className="p-4">{funcionario.cpf}</td>
+                                                <td className="p-4">{funcionario.cargo}</td>
+                                                <td className="p-4">{funcionario.secretaria}</td>
+                                                <td className="p-4 text-right">
+                                                    <button onClick={() => toast.custom(
+                                                        (t) => (
+                                                            <div className={`bg-white p-4 rounded shadow-md ${t.visible ? "animate-enter" : "animate-leave"}`}>
+                                                                <p className="text-sm text-gray-700">Tem certeza que deseja excluir este funcionário?</p>
+                                                                <div className="mt-4 flex justify-end space-x-2">
+                                                                    <button 
+                                                                        onClick={async () => {
+                                                                            await handleDeleteFuncionario(funcionario.id);
+                                                                            toast.dismiss(t.id);
+                                                                        }} 
+                                                                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                                                    >
+                                                                        Sim
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => toast.dismiss(t.id)} 
+                                                                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                                                    >
+                                                                        Não
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )} className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center text-red-500">
+                                                        <Trash className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Chamados Tab content */}
+                        <div className={activeTab === "chamados" ? "block" : "hidden"}>
+                            <h1 className="font-montserrat font-bold text-center text-2xl text-[--cor-primaria]">CHAMADOS NÃO ATRIBUÍDOS:</h1>
+                            <div className="rounded-lg border font-lato bg-white shadow">
+                                {chamados.length === 0 ? (
+                                    <div className="p-4 text-center text-gray-500">Nenhum chamado atribuído.</div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full border-collapse">
+                                            <thead>
+                                                <tr className="border-b bg-gray-100">
+                                                    <th className="p-4 text-left font-medium">ID</th>
+                                                    <th className="p-4 text-left font-medium">Título</th>
+                                                    <th className="p-4 text-left font-medium">Descrição</th>
+                                                    <th className="p-4 text-left font-medium">Status</th>
+                                                    <th className="p-4 text-left font-medium">Secretaria</th>
+                                                    <th className="p-4 text-left font-medium">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {chamados.map((chamado: ChamadoInterface) => (
+                                                    <tr key={chamado.id} className="border-b hover:bg-gray-50">
+                                                        <td className="p-4 font-medium">{chamado.id}</td>
+                                                        <td className="p-4">{chamado.titulo}</td>
+                                                        <td className="p-4">{chamado.descricao}</td>
+                                                        <td className="p-4">{chamado.status}</td>
+                                                        <td className="p-4">{chamado.secretaria || "Não atribuído"}</td>
+                                                        <td className="p-4">
+                                                            <button 
+                                                                onClick={() => handleEditChamado(chamado)} 
+                                                                className="h-8 w-8 rounded-full hover:bg-gray-100 inline-flex items-center justify-center"
+                                                            >
+                                                                <Edit className="h-4 w-4" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        )
-    }
+            </main>
+
+            {/* Modal para Novo Funcionário */}
+            {showNewEmployeeDialog && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+                        <form onSubmit={handleSubmit(handleSubmitFuncionario)} className="flex flex-col p-6">
+                            <div className="flex flex-col space-y-1.5 pb-6 border-b">
+                                <h2 className="text-lg font-semibold leading-none tracking-tight">Cadastrar Novo Funcionário</h2>
+                            </div>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid gap-2">
+                                        <label htmlFor="employee-name" className="text-sm font-medium leading-none">
+                                            CPF
+                                        </label>
+                                        <input
+                                            {...register("cpf")}
+                                            id="employee-name"
+                                            placeholder="123.456.789-00"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
+                                        />
+                                        {errors.cpf && <span className="text-red-500 text-sm">{errors.cpf.message}</span>}
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <label htmlFor="employee-role" className="text-sm font-medium leading-none">
+                                            Cargo
+                                        </label>
+                                        <input
+                                            {...register("cargo")}
+                                            id="employee-role"
+                                            placeholder="Cargo"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
+                                        />
+                                        {errors.cargo && <span className="text-red-500 text-sm">{errors.cargo.message}</span>}
+                                    </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <label htmlFor="employee-sector" className="text-sm font-medium leading-none">
+                                        Setor
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            {...register("secretaria")}
+                                            id="employee-sector"
+                                            defaultValue=""
+                                            className="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
+                                        >
+                                            <option value="" disabled>
+                                                Selecione o setor
+                                            </option>
+                                            <option value="OBRAS">Obras Públicas</option>
+                                            <option value="URBANISMO">Urbanismo</option>
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none" />
+                                        {errors.secretaria && <span className="text-red-500 text-sm">{errors.secretaria.message}</span>}
+                                    </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <label htmlFor="employee-email" className="text-sm font-medium leading-none">
+                                        Email
+                                    </label>
+                                    <input
+                                        {...register("email")}
+                                        id="employee-email"
+                                        type="email"
+                                        placeholder="email@prefeitura.gov.br"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        disabled={isloading}
+                                    />
+                                    {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
+                                </div>
+                                <div>
+                                    <div className="grid gap-2">
+                                        <label htmlFor="employee-password" className="text-sm font-medium leading-none">
+                                            Senha
+                                        </label>
+                                        <input
+                                            {...register("senha")}
+                                            id="employee-password"
+                                            type="password"
+                                            placeholder="Senha"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            disabled={isloading}
+                                        />
+                                        {errors.senha && <span className="text-red-500 text-sm">{errors.senha.message}</span>}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-4">
+                                <button
+                                    className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                    onClick={() => {
+                                        setShowNewEmployeeDialog(false);
+                                        reset();
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center justify-center rounded-md bg-[#1e88e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#1976d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                    type="submit"
+                                    disabled={isloading}
+                                    onLoad={() => setIsLoading(true)}
+                                >
+                                    Salvar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal para Editar Chamado */}
+            {showEditChamado && editingChamado && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+                        <form onSubmit={handleSubmitChamado(handleSubmitChamadoEdit)} className="flex flex-col p-6">
+                            <div className="flex flex-col space-y-1.5 pb-6 border-b">
+                                <h2 className="text-lg font-semibold leading-none tracking-tight">Editar Chamado #{editingChamado.id}</h2>
+                            </div>
+                            <div className="grid gap-4 py-4">
+                                
+                                <div className="grid gap-2">
+                                    <label htmlFor="chamado-secretaria" className="text-sm font-medium leading-none">
+                                        Secretaria
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            {...registerChamado("secretaria")}
+                                            id="chamado-secretaria"
+                                            className="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            defaultValue={editingChamado.secretaria || ""}
+                                        >
+                                            <option value="" disabled>Selecione uma Secretaria</option>
+                                            <option value="OBRAS">Obras Públicas</option>
+                                            <option value="URBANISMO">Urbanismo</option>
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none" />
+                                        {errorsChamado.secretaria && <span className="text-red-500 text-sm">{errorsChamado.secretaria.message}</span>}
+                                    </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <label className="text-sm font-medium leading-none">
+                                        Detalhes
+                                    </label>
+                                    <div className="p-3 border rounded-md bg-gray-50">
+                                        <p className="text-sm"><strong>Título:</strong> {editingChamado.titulo}</p>
+                                        <p className="text-sm mt-1"><strong>Descrição:</strong> {editingChamado.descricao}</p>
+                                        <p className="text-sm mt-1"><strong>Data Abertura:</strong> {new Date(editingChamado.dataAbertura).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-4">
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                    onClick={() => {
+                                        setShowEditChamado(false);
+                                        setEditingChamado(null);
+                                        resetChamado();
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="inline-flex items-center justify-center rounded-md bg-[#1e88e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#1976d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                >
+                                    Salvar Alterações
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 
     return (
-        <div className="container mx-auto p-4 md:p-6">
-            <div className="space-y-8">
-                <div className="flex flex-col space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Voz Cidadã</h1>
-                    <p className="text-gray-500">Gerencie chamados e administradores do sistema</p>
-                </div>
+        <FuncionarioDashboard />
+    )
+}
 
-                <Tabs defaultValue="chamados" className="w-full">
-                    <TabsList className="mb-6">
-                        <TabsTrigger value="chamados">Chamados</TabsTrigger>
-                        {userRoles?.includes("ROLE_OWNER") && <TabsTrigger value="admins">Gerenciar Administradores</TabsTrigger>}
-                    </TabsList>
-
-                    {countStatus.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            {countStatus.map((item) => (
-                                <Card key={item.status} className="bg-gradient-to-br from-white to-gray-50">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="space-y-1">
-                                                <p className="text-sm font-medium text-gray-600">{item.status}</p>
-                                                <p className="text-2xl font-bold text-gray-900">{item.count}</p>
-                                            </div>
-                                            <div className="p-3 rounded-full bg-teal-100">
-                                                {item.status === "PENDENTE" && <Clock className="h-6 w-6 text-teal-600" />}
-                                                {item.status === "EM ANDAMENTO" && <Blocks className="h-6 w-6 text-teal-600" />}
-                                                {item.status === "CONCLUÍDO" && <CheckCircle className="h-6 w-6 text-teal-600" />}
-                                                {!["PENDENTE", "EM ANDAMENTO", "CONCLUÍDO"].includes(item.status) && (
-                                                    <AlertTriangle className="h-6 w-6 text-teal-600" />
-                                                )}
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
-
-                    <TabsContent value="chamados" className="space-y-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                            <Card className="lg:col-span-3">
-                                <CardHeader>
-                                    <CardTitle>Lista de Chamados</CardTitle>
-                                    <CardDescription>Selecione um chamado para ver detalhes</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="rounded-md border overflow-auto h-[600px] min-h-[600px]">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Título</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Data</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Secretaria</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody className="divide-y divide-gray-200">
-                                                {chamados.length === 0 ? (
-                                                    <TableRow className="h-20">
-                                                        <TableCell colSpan={5} className="text-center py-6 text-gray-500 align-middle">
-                                                            Nenhum chamado encontrado
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : (
-                                                    chamados.map((chamado) => (
-                                                        <TableRow
-                                                            key={chamado.id}
-                                                            onClick={() => setSelectedChamado(chamado)}
-                                                            className={`cursor-pointer hover:bg-gray-50 ${selectedChamado?.id === chamado.id ? "bg-gray-50" : ""}`}
-                                                        >
-                                                            <TableCell className="font-medium align-top py-4">
-                                                                <div className="flex flex-col">
-                                                                    <span className="truncate max-w-[200px]">{chamado.titulo}</span>
-                                                                    <span className="text-xs text-gray-500 md:hidden">
-                                    {formatDate(chamado.dataAbertura)}
-                                  </span>
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell className="hidden md:table-cell align-top py-4">
-                                                                {formatDate(chamado.dataAbertura)}
-                                                            </TableCell>
-                                                            <TableCell className="align-top py-4">{getStatusBadge(chamado.status)}</TableCell>
-                                                            <TableCell className="hidden md:table-cell align-top py-4">
-                                                                <Badge variant="outline" className="bg-gray-100">
-                                                                    {chamado.secretaria || "Não atribuído"}
-                                                                </Badge>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                    <div className="flex justify-between items-center mt-4">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={currentPage === 0}
-                                            onClick={() => setCurrentPage(currentPage - 1)}
-                                            className="flex items-center gap-1"
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="16"
-                                                height="16"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="lucide lucide-chevron-left"
-                                            >
-                                                <path d="m15 18-6-6 6-6" />
-                                            </svg>
-                                            Anterior
-                                        </Button>
-                                        <span className="text-sm text-gray-500">
-                      Página {currentPage + 1} de {pageable.totalPages}
-                    </span>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={currentPage + 1 >= pageable.totalPages}
-                                            onClick={() => setCurrentPage(currentPage + 1)}
-                                            className="flex items-center gap-1"
-                                        >
-                                            Próxima
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="16"
-                                                height="16"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="lucide lucide-chevron-right"
-                                            >
-                                                <path d="m9 18 6-6-6-6" />
-                                            </svg>
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="lg:col-span-2">
-                                <CardHeader>
-                                    <CardTitle>Detalhes do Chamado</CardTitle>
-                                    <CardDescription>
-                                        {selectedChamado ? `Chamado #${selectedChamado.id}` : "Selecione um chamado para ver detalhes"}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    {selectedChamado ? (
-                                        <div className="space-y-4 h-[600px] overflow-y-auto pr-2">
-                                            <div className="space-y-2">
-                                                <h3 className="font-semibold text-lg">{selectedChamado.titulo}</h3>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {getStatusBadge(selectedChamado.status)}
-                                                    <Badge variant="outline" className="bg-gray-100">
-                                                        {selectedChamado.secretaria || "Não atribuído"}
-                                                    </Badge>
-                                                    {selectedChamado.fotoAntesUrl && (
-                                                        <div className="space-y-2">
-                                                            <Dialog>
-                                                                <DialogTrigger asChild>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        className="w-full flex items-center justify-center gap-2"
-                                                                        onClick={() =>
-                                                                            handleOpenImageDialog(selectedChamado.fotoAntesUrl.split("/").pop() || "")
-                                                                        }
-                                                                    >
-                                                                        <ImageIcon className="h-4 w-4" />
-                                                                        <span>Antes</span>
-                                                                    </Button>
-                                                                </DialogTrigger>
-                                                                <DialogContent>
-                                                                    <DialogHeader>
-                                                                        <DialogTitle>Foto do chamado</DialogTitle>
-                                                                        <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
-                                                                    </DialogHeader>
-                                                                    {imagemUrl ? (
-                                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-                                                                            <img
-                                                                                src={imagemUrl || "/placeholder.svg"}
-                                                                                alt="Foto do chamado"
-                                                                                className="object-cover w-full h-full"
-                                                                            />
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                                                                            <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
-                                                                        </div>
-                                                                    )}
-                                                                </DialogContent>
-                                                            </Dialog>
-                                                        </div>
-                                                    )}
-                                                    {selectedChamado.fotoDepoisUrl && (
-                                                        <div className="space-y-2">
-                                                            <Dialog>
-                                                                <DialogTrigger asChild>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        className="w-full flex items-center justify-center gap-2"
-                                                                        onClick={() =>
-                                                                            handleOpenImageDialog(selectedChamado?.fotoDepoisUrl.split("/").pop() || "")
-                                                                        }
-                                                                    >
-                                                                        <ImageIcon className="h-4 w-4" />
-                                                                        <span>Agora</span>
-                                                                    </Button>
-                                                                </DialogTrigger>
-                                                                <DialogContent>
-                                                                    <DialogHeader>
-                                                                        <DialogTitle>Foto atual do problema</DialogTitle>
-                                                                        <DialogDescription>Imagem enviada por nossa equipe</DialogDescription>
-                                                                    </DialogHeader>
-                                                                    {imagemUrl ? (
-                                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-                                                                            <img
-                                                                                src={imagemUrl || "/placeholder.svg"}
-                                                                                alt="Foto do chamado"
-                                                                                className="object-cover w-full h-full"
-                                                                            />
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                                                                            <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
-                                                                        </div>
-                                                                    )}
-                                                                </DialogContent>
-                                                            </Dialog>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <Separator />
-
-                                            <div className="space-y-2">
-                                                <p className="text-sm font-medium text-gray-500">Descrição</p>
-                                                <p className="text-sm">{selectedChamado.descricao}</p>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <p className="text-sm font-medium text-gray-500">Data de Abertura</p>
-                                                <p className="text-sm">{formatDate(selectedChamado.dataAbertura)}</p>
-                                            </div>
-
-                                            {selectedChamado.historicos.length > 0 && (
-                                                <div className="space-y-3">
-                                                    <p className="text-sm font-medium text-gray-500">Atualizações</p>
-                                                    <div className="space-y-3">
-                                                        {selectedChamado.historicos.map((historico, index) => (
-                                                            <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                                                <div className="flex items-center justify-between mb-1">
-                                                                    <p className="text-xs font-medium text-gray-700">
-                                                                        {formatDate(historico.dataModificacao)}
-                                                                    </p>
-                                                                    <Badge variant="outline" className="text-xs">
-                                                                        Funcionário #{historico.funcionarioId}
-                                                                    </Badge>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100">
-                                                                        {historico.statusAnterior}
-                                                                    </Badge>
-                                                                    <ArrowRight className="h-3 w-3 text-gray-400" />
-                                                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-100">
-                                                                        {historico.statusNovo}
-                                                                    </Badge>
-                                                                </div>
-                                                                {historico.observacao && (
-                                                                    <p className="text-sm text-gray-600 mt-1">{historico.observacao}</p>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {selectedChamado.avaliacao && (
-                                                <div className="space-y-3">
-                                                    <p className="text-sm font-medium text-gray-500">Avaliação do usuário</p>
-                                                    <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-                                                        <div className="flex items-center gap-1 mb-2">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <svg
-                                                                    key={i}
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    width="16"
-                                                                    height="16"
-                                                                    viewBox="0 0 24 24"
-                                                                    fill={i < selectedChamado.avaliacao.estrelas ? "#f59e0b" : "none"}
-                                                                    stroke="#f59e0b"
-                                                                    strokeWidth="2"
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    className="lucide lucide-star"
-                                                                >
-                                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                                                </svg>
-                                                            ))}
-                                                            <span className="text-sm font-medium text-amber-700 ml-1">
-                                {selectedChamado.avaliacao.estrelas}/5
-                              </span>
-                                                        </div>
-                                                        {selectedChamado.avaliacao.comentario && (
-                                                            <p className="text-sm text-amber-700 italic">"{selectedChamado.avaliacao.comentario}"</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <div className="pt-4 space-y-4">
-                                                {userRoles?.includes("ROLE_OWNER") && (
-                                                    <div className="space-y-2">
-                                                        <p className="text-sm font-medium text-gray-500">Encaminhar para</p>
-                                                        <div className="flex gap-2">
-                                                            <Button
-                                                                variant="outline"
-                                                                className="flex-1"
-                                                                onClick={() => handleSetSecretaria(selectedChamado, "OBRAS")}
-                                                            >
-                                                                Obras
-                                                                <ArrowRight className="ml-2 h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="outline"
-                                                                className="flex-1"
-                                                                onClick={() => handleSetSecretaria(selectedChamado, "URBANISMO")}
-                                                            >
-                                                                Urbanismo
-                                                                <ArrowRight className="ml-2 h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                                                    <DialogTrigger asChild>
-                                                        <Button className="w-full bg-teal-600 hover:bg-teal-700">
-                                                            Alterar situação do chamado
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>Alterar situação do chamado</DialogTitle>
-                                                            <DialogDescription>
-                                                                Altere o status e adicione observações para informar o usuário sobre o andamento.
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <form onSubmit={updateChamadoForm.handleSubmit(handleUpdateChamado)} className="space-y-4">
-                                                            <div className="space-y-2">
-                                                                <Label htmlFor="statusNovo">Novo Status</Label>
-                                                                <Select
-                                                                    onValueChange={(value) => updateChamadoForm.setValue("statusNovo", value)}
-                                                                    defaultValue={updateChamadoForm.getValues("statusNovo")}
-                                                                >
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Selecione um status" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="PENDENTE">Pendente</SelectItem>
-                                                                        <SelectItem value="EM ANDAMENTO">Em andamento</SelectItem>
-                                                                        <SelectItem value="CONCLUÍDO">Concluído</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
-
-                                                            <div className="space-y-2">
-                                                                <Label htmlFor="observacao">Observação</Label>
-                                                                <Textarea
-                                                                    id="observacao"
-                                                                    placeholder="Descreva as ações tomadas ou informações adicionais"
-                                                                    {...updateChamadoForm.register("observacao")}
-                                                                    rows={4}
-                                                                />
-                                                            </div>
-
-                                                            <div className="space-y-2">
-                                                                <Label htmlFor="observacao">Foto atual da situação</Label>
-                                                                <Input type="file" {...updateChamadoForm.register("fotoAtualFile")} />
-                                                            </div>
-
-                                                            <div className="flex justify-end gap-2">
-                                                                <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                                                                    Cancelar
-                                                                </Button>
-                                                                <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
-                                                                    Salvar Alterações
-                                                                </Button>
-                                                            </div>
-                                                        </form>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center h-64 text-center">
-                                            <ClipboardList className="h-12 w-12 text-gray-300 mb-4" />
-                                            <h3 className="text-lg font-medium text-gray-900">Nenhum chamado selecionado</h3>
-                                            <p className="text-sm text-gray-500 mt-1">
-                                                Clique em um chamado na tabela para ver seus detalhes
-                                            </p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-
-                    {userRoles?.includes("ROLE_OWNER") && (
-                        <TabsContent value="admins" className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <UserPlus className="h-5 w-5" />
-                                        Cadastrar novo administrador
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Preencha os campos abaixo para criar um novo administrador no sistema
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Form {...form}>
-                                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="cpf"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>CPF</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="000.000.000-00" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-
-                                                <FormField
-                                                    control={form.control}
-                                                    name="cargo"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Cargo</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="Cargo do administrador" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-
-                                                <FormField
-                                                    control={form.control}
-                                                    name="secretaria"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Secretaria</FormLabel>
-                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <FormControl>
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Selecione uma secretaria" />
-                                                                    </SelectTrigger>
-                                                                </FormControl>
-                                                                <SelectContent>
-                                                                    <SelectItem value="OBRAS">OBRAS</SelectItem>
-                                                                    <SelectItem value="URBANISMO">URBANISMO</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-
-                                                <FormField
-                                                    control={form.control}
-                                                    name="email"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Email</FormLabel>
-                                                            <FormControl>
-                                                                <Input type="email" placeholder="email@exemplo.com" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-
-                                                <FormField
-                                                    control={form.control}
-                                                    name="password"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Senha</FormLabel>
-                                                            <FormControl>
-                                                                <Input type="password" placeholder="******" {...field} />
-                                                            </FormControl>
-                                                            <FormDescription>Mínimo de 6 caracteres</FormDescription>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-
-                                            <Button type="submit" className="w-full md:w-auto bg-teal-600 hover:bg-teal-700">
-                                                Cadastrar Administrador
-                                            </Button>
-                                        </form>
-                                    </Form>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    )}
-                </Tabs>
-            </div>
-        </div>
+// Edit icon
+function Edit(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            <path d="m15 5 4 4" />
+        </svg>
     )
 }
