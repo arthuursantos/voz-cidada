@@ -25,27 +25,66 @@ interface Funcionario {
     email?: string;
 }
 
+const funcionariosInventados: Funcionario[] = [
+    {
+        id: 1,
+        cpf: "123.456.789-00",
+        cargo: "Engenheiro Civil",
+        secretaria: "OBRAS",
+        email: "example@example.com"
+    },
+    {
+        id: 2,
+        cpf: "987.654.321-00",
+        cargo: "Arquiteto",
+        secretaria: "URBANISMO",
+        email: "example2@example.com"
+    },
+    {
+        id: 3,
+        cpf: "111.222.333-44",
+        cargo: "Técnico de Obras",
+        secretaria: "OBRAS",
+        email: "example3@example.com"
+    },
+    {
+        id: 4,
+        cpf: "555.666.777-88",
+        cargo: "Planejador Urbano",
+        secretaria: "URBANISMO",
+        email: "example4@example.com"
+    },
+    {
+        id: 5,
+        cpf: "999.888.777-66",
+        cargo: "Coordenador de Projetos",
+        secretaria: "OBRAS",
+        email: "example5@example.com"
+    }  
+]
+
 export default function AdminDashboard() {
     const { userRoles } = useContext(AuthContext);
     
     const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
     const [showEditChamado, setShowEditChamado] = useState(false);
-    const [activeTab, setActiveTab] = useState("sectors");
-    const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+    const [activeTab, setActiveTab] = useState("menu");
+    const [funcionarios, setFuncionarios] = useState<Funcionario[]>([...funcionariosInventados]); // Inicializa com dados inventados
     const [chamados, setChamados] = useState<ChamadoInterface[]>([]);
     const [editingChamado, setEditingChamado] = useState<ChamadoInterface | null>(null);
     const [isloading, setIsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
-    const getFuncionarios = async () => {
-        try {
-            const response = await api.get<{ _embedded: { funcionarioDTOList: Funcionario[] } }>('/api/funcionario');
-            console.log("Funcionários:", response.data._embedded.funcionarioDTOList);
-            setFuncionarios(Array.isArray(response.data._embedded.funcionarioDTOList) ? response.data._embedded.funcionarioDTOList : []);
-        } catch (error) {
-            console.error("Erro ao Buscar Usuários:", error);
-            setFuncionarios([]);
-        }
-    }
+    // const getFuncionarios = async () => {
+    //     try {
+    //         const response = await api.get<{ _embedded: { funcionarioDTOList: Funcionario[] } }>('/api/funcionario');
+    //         console.log("Funcionários:", response.data._embedded.funcionarioDTOList);
+    //         setFuncionarios(Array.isArray(response.data._embedded.funcionarioDTOList) ? response.data._embedded.funcionarioDTOList : []);
+    //     } catch (error) {
+    //         console.error("Erro ao Buscar Usuários:", error);
+    //         setFuncionarios([]);
+    //     }
+    // }
 
     const getChamados = async () => {
         try {
@@ -181,18 +220,28 @@ export default function AdminDashboard() {
 
     let funcionarioFiltered = funcionarios.filter((f) => f.secretaria === "OBRAS" || f.secretaria === "URBANISMO");
 
-    if (userRoles?.includes("ROLE_OWNER")) return (
+    if (searchTerm) {
+        funcionarioFiltered = funcionarioFiltered.filter((f) => 
+            f.cpf.includes(searchTerm) || 
+            f.cargo.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            f.secretaria.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    /*if (userRoles?.includes("ROLE_OWNER"))*/ return (
         <div className="flex min-h-screen flex-col">
             {/* Header */}
             <Header />
 
             <main className="flex-1 p-4 md:p-6 bg-slate-50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="relative mb-6">
+                    <div className={`relative mb-6 ${activeTab === "employees" ? "" : "hidden"}`}>
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             className="w-full pl-10 py-2 pr-4 rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1e88e5] focus:border-transparent"
                             placeholder="Pesquisar setores ou funcionários..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
@@ -202,7 +251,7 @@ export default function AdminDashboard() {
                             <div className="inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
                                 <button
                                     className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "sectors" ? "bg-white text-gray-900 shadow-sm" : ""}`}
-                                    onClick={() => setActiveTab("sectors")}
+                                    onClick={() => setActiveTab("menu")}
                                 >
                                     Setores
                                 </button>
@@ -220,7 +269,7 @@ export default function AdminDashboard() {
                                 </button>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className={`flex gap-2 ${activeTab === "employees" ? "" : "hidden"}`}>
                                 <button
                                     className="inline-flex items-center justify-center rounded-md bg-[#1e88e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#1976d2] focus:outline-none focus:ring-2 focus:ring-[#1e88e5] focus:ring-offset-2"
                                     onClick={() => setShowNewEmployeeDialog(true)}
@@ -232,9 +281,26 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Sectors Tab Content */}
-                        <div className={activeTab === "sectors" ? "block space-y-4" : "hidden"}>
+                        <div className={activeTab === "menu" ? "block space-y-4" : "hidden"}>
                             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {/* Sector Cards */}
+                                {/* menu Cards */}
+
+                                <div className="rounded-lg border bg-white shadow">
+                                    <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
+                                        <h3 className="text-lg font-medium">Dashboard</h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="text-sm text-gray-500 mb-2">
+                                            Veja aqui as estatísticas gerais do sistema
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div>
+                                                Chamados sem atribuição: <span className="font-medium">{chamados.length}</span>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="rounded-lg border bg-white shadow">
                                     <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
                                         <h3 className="text-lg font-medium">Obras Públicas</h3>
@@ -248,7 +314,7 @@ export default function AdminDashboard() {
                                                 Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "OBRAS").length}</span>
                                             </div>
                                             <div>
-                                            Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "OBRAS").length}</span>
+                                            Chamados Total: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "OBRAS").length}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -265,7 +331,7 @@ export default function AdminDashboard() {
                                                 Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "URBANISMO").length}</span>
                                             </div>
                                             <div>
-                                                Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "URBANISMO").length}</span>
+                                            Chamados Total: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "URBANISMO").length}</span>
                                             </div>
                                         </div>
                                     </div>
