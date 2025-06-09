@@ -75,16 +75,16 @@ export default function AdminDashboard() {
     const [isloading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // const getFuncionarios = async () => {
-    //     try {
-    //         const response = await api.get<{ _embedded: { funcionarioDTOList: Funcionario[] } }>('/api/funcionario');
-    //         console.log("Funcionários:", response.data._embedded.funcionarioDTOList);
-    //         setFuncionarios(Array.isArray(response.data._embedded.funcionarioDTOList) ? response.data._embedded.funcionarioDTOList : []);
-    //     } catch (error) {
-    //         console.error("Erro ao Buscar Usuários:", error);
-    //         setFuncionarios([]);
-    //     }
-    // }
+    const getFuncionarios = async () => {
+        try {
+            const response = await api.get<{ _embedded: { funcionarioDTOList: Funcionario[] } }>('/api/funcionario');
+            console.log("Funcionários:", response.data._embedded.funcionarioDTOList);
+            setFuncionarios(Array.isArray(response.data._embedded.funcionarioDTOList) ? response.data._embedded.funcionarioDTOList : []);
+        } catch (error) {
+            console.error("Erro ao Buscar Usuários:", error);
+            setFuncionarios([]);
+        }
+    }
 
     const getChamados = async () => {
         try {

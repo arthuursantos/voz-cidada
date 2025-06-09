@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom"
 import axios, {AxiosResponse} from "axios";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
+import {initializeFirebaseMessaging} from "@/shared/firebaseMessaging.ts";
 
 type User = {
     id: number;
@@ -131,10 +132,10 @@ export function AuthProvider({children}: AuthProviderProps) {
 
     useEffect(() => {
         const {"vozcidada.accessToken": accessToken} = parseCookies();
+        initializeFirebaseMessaging(accessToken)
         if (accessToken) {
             setToken(accessToken);     // linha adicionada
             try {
-
                 const decoded = jwtDecode<JWTClaims>(accessToken);
                 setUserRoles(decoded.roles);
                 setAuthStatus(decoded.auth_status)
