@@ -3,7 +3,7 @@ import api from "@/shared/axios.ts";
 const notificationService = {
 
     setToken: (fcmToken: string) => {
-        return api.post('/notification/setToken', fcmToken);
+        return api.post('api/notification/setToken', fcmToken);
     },
 
     sendToUser: (data: {
@@ -11,7 +11,7 @@ const notificationService = {
         body: string;
         token: string;
     }) => {
-        return api.post('/notification/sendToUser', data);
+        return api.post('api/notification/sendToUser', data);
     },
 
 };

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/notification")
+@RequestMapping("/api/notification")
 public class NotificationController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class NotificationController {
         service.setToken(user, fcmToken);
     }
 
-    @PostMapping("/sendToUser")
+        @PostMapping("/sendToUser")
     public String sendToUser(@RequestBody NotificationMessage dto) throws FirebaseMessagingException {
         return service.sendNotificationToUser(dto);
     }

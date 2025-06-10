@@ -18,7 +18,7 @@ public class NotificationService {
     AuthRepository repository;
 
     public void setToken(AuthUser user, String fcmToken) {
-        user.setFcmToken(fcmToken);
+        user.setFcmToken(fcmToken.replaceAll("\"", ""));
         repository.save(user);
     }
     
@@ -30,10 +30,15 @@ public class NotificationService {
                 .setTitle(dto.getTitle())
                 .setBody(dto.getMessage())
                 .build();
+
+        System.out.println(user.getFcmToken());
         Message message = Message.builder()
                 .setToken(user.getFcmToken())
                 .setNotification(notification)
+                .putData("title", dto.getTitle())
+                .putData("message", dto.getMessage())
                 .build();
+
         return FirebaseMessaging.getInstance().send(message);
     }
     
