@@ -10,7 +10,7 @@ const About = () => {
             <div className="flex flex-col md:flex-row min-h-screen">
                 <div className="relative w-full md:mr-6 h-40 md:h-auto md:w-1/2 rounded-b-[50%] md:rounded-none">
                     <img
-                        src="./images/predios2.png"
+                        src="/images/predios2.png"
                         alt="Voz Cidadão"
                         className="w-full h-full object-cover object-[center_90%] md:object-center rounded-b-[50%] md:rounded-none"
                     />

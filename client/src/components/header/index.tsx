@@ -17,7 +17,7 @@ function Header() {
                 {/* Logo/Title - Mobile */}
                 <div className=" md:hidden flex items-center">
                     <Link to="/" className="text-lg font-bold flex items-center">
-                        <img src="./images/favicon.png" className='w-6' />
+                        <img src="/images/favicon.png" className='w-6' />
                         <span className="ml-2">Voz Cidadã</span>
                     </Link>
                 </div>

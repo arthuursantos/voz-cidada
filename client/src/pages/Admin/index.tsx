@@ -11,10 +11,10 @@ import authService from "@/shared/services/authServices";
 import { jwtDecode } from "jwt-decode";
 import api from "@/shared/axios";
 import funcionarioService from "./funcionarioServices.ts";
-import chamadoService from "./chamadoService.ts";
 import { ChamadoInterface } from "./types.ts";
 import FuncionarioDashboard from "../Funcionario/index.tsx";
 import toast from "react-hot-toast";
+import chamadoService from "@/shared/services/chamadoService.ts";
 
 // Define the structure of a Funcionario object
 interface Funcionario {
@@ -25,16 +25,25 @@ interface Funcionario {
     email?: string;
 }
 
+// const funcionariosInventados: Funcionario[] = [
+//     { id: 1, cpf: "123.456.789-00", cargo: "Engenheiro Civil", secretaria: "OBRAS", email: "eng.civil@exemplo.com" },
+//     { id: 2, cpf: "987.654.321-00", cargo: "Arquiteto", secretaria: "URBANISMO", email: "arquiteto@exemplo.com" },
+//     { id: 3, cpf: "456.789.123-00", cargo: "Técnico em Edificações", secretaria: "OBRAS", email: "tecnico.edificacoes@exemplo.com" },
+//     { id: 4, cpf: "321.654.987-00", cargo: "Engenheiro Ambiental", secretaria: "URBANISMO", email: "eng.ambiental@exemplo.com" },
+//     { id: 5, cpf: "654.321.789-00", cargo: "Gestor de Projetos", secretaria: "OBRAS", email: "gestor.projetos@exemplo.com" },
+// ];
+
 export default function AdminDashboard() {
     const { userRoles } = useContext(AuthContext);
     
     const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
     const [showEditChamado, setShowEditChamado] = useState(false);
-    const [activeTab, setActiveTab] = useState("sectors");
+    const [activeTab, setActiveTab] = useState("menu");
     const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
     const [chamados, setChamados] = useState<ChamadoInterface[]>([]);
     const [editingChamado, setEditingChamado] = useState<ChamadoInterface | null>(null);
     const [isloading, setIsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const getFuncionarios = async () => {
         try {
@@ -49,7 +58,7 @@ export default function AdminDashboard() {
 
     const getChamados = async () => {
         try {
-            const response = await chamadoService.getAllChamados(0, 10, "id,desc");
+            const response = await chamadoService.findAll({page: 0, size: 100, sort: "id,desc"});
             console.log("Chamados:", response.data._embedded.chamadoDTOList);
             const chamadosSecretariaNull = response.data._embedded.chamadoDTOList.filter((chamado: ChamadoInterface) => {
                 return chamado.secretaria === null;
@@ -59,6 +68,30 @@ export default function AdminDashboard() {
             console.error("Erro ao Buscar Chamados:", error);
         }
     }
+
+    const getCountChamadosObras = async () => {
+        try {
+            const response = await chamadoService.countBySecretaria("OBRAS");
+            console.log("Total de chamados em Obras:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Erro ao contar chamados em Obras:", error);
+            return 0;
+        }
+    }
+    getCountChamadosObras();
+
+    const getCountChamadosUrbanismo = async () => {
+        try {
+            const response = await chamadoService.countBySecretaria("URBANISMO");
+            console.log("Total de chamados em Urbanismo:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Erro ao contar chamados em Urbanismo:", error);
+            return 0;
+        }
+    }
+    getCountChamadosUrbanismo();
 
     useEffect(() => {
         const fetchFuncionarios = async () => {
@@ -144,7 +177,7 @@ export default function AdminDashboard() {
 
             console.log("Chamado atualizado:", updatedChamado);
             
-            await chamadoService.updateChamado(updatedChamado);
+            await chamadoService.update(updatedChamado);
             console.log("Chamado atualizado com sucesso:", data);
             await getChamados();
             setShowEditChamado(false);
@@ -181,18 +214,28 @@ export default function AdminDashboard() {
 
     let funcionarioFiltered = funcionarios.filter((f) => f.secretaria === "OBRAS" || f.secretaria === "URBANISMO");
 
-    if (userRoles?.includes("ROLE_OWNER")) return (
+    if (activeTab === "employees" && searchTerm) {
+        funcionarioFiltered = funcionarioFiltered.filter((f) => 
+            f.cpf.includes(searchTerm) || 
+            f.cargo.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            f.secretaria.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+     if (userRoles?.includes("ROLE_OWNER")) return (
         <div className="flex min-h-screen flex-col">
             {/* Header */}
             <Header />
 
             <main className="flex-1 p-4 md:p-6 bg-slate-50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="relative mb-6">
+                    <div className={`relative mb-6 ${activeTab === "employees" ? "" : "hidden"}`}>
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             className="w-full pl-10 py-2 pr-4 rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#1e88e5] focus:border-transparent"
-                            placeholder="Pesquisar setores ou funcionários..."
+                            placeholder="Pesquisar funcionários..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
@@ -201,10 +244,10 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between mb-4">
                             <div className="inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
                                 <button
-                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "sectors" ? "bg-white text-gray-900 shadow-sm" : ""}`}
-                                    onClick={() => setActiveTab("sectors")}
+                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "menu" ? "bg-white text-gray-900 shadow-sm" : ""}`}
+                                    onClick={() => setActiveTab("menu")}
                                 >
-                                    Setores
+                                    Menu
                                 </button>
                                 <button
                                     className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "employees" ? "bg-white text-gray-900 shadow-sm" : ""}`}
@@ -220,7 +263,7 @@ export default function AdminDashboard() {
                                 </button>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className={`flex gap-2 ${activeTab === "employees" ? "" : "hidden"}`}>
                                 <button
                                     className="inline-flex items-center justify-center rounded-md bg-[#1e88e5] px-4 py-2 text-sm font-medium text-white hover:bg-[#1976d2] focus:outline-none focus:ring-2 focus:ring-[#1e88e5] focus:ring-offset-2"
                                     onClick={() => setShowNewEmployeeDialog(true)}
@@ -231,9 +274,24 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* Sectors Tab Content */}
-                        <div className={activeTab === "sectors" ? "block space-y-4" : "hidden"}>
+                        {/* menu Tab Content */}
+                        <div className={activeTab === "menu" ? "block space-y-4" : "hidden"}>
                             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                <div className="rounded-lg border bg-white shadow">
+                                    <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
+                                        <h3 className="text-lg font-medium">Dashboard</h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="text-sm text-gray-500 mb-2">
+                                            Acesse o dashboard para ver estatísticas e informações gerais
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div>
+                                                Chamados sem atribuição: <span className="font-medium">{chamados.length}</span>
+                                            </div>                                          
+                                        </div>
+                                    </div>
+                                </div>
                                 {/* Sector Cards */}
                                 <div className="rounded-lg border bg-white shadow">
                                     <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
@@ -246,11 +304,9 @@ export default function AdminDashboard() {
                                         <div className="flex items-center justify-between text-sm">
                                             <div>
                                                 Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "OBRAS").length}</span>
-                                            </div>
-                                            <div>
-                                            Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "OBRAS").length}</span>
-                                            </div>
+                                            </div>                             
                                         </div>
+                                        
                                     </div>
                                 </div>
 
@@ -263,10 +319,7 @@ export default function AdminDashboard() {
                                         <div className="flex items-center justify-between text-sm">
                                             <div>
                                                 Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "URBANISMO").length}</span>
-                                            </div>
-                                            <div>
-                                                Chamados sem atribuição: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "URBANISMO").length}</span>
-                                            </div>
+                                            </div>       
                                         </div>
                                     </div>
                                 </div>

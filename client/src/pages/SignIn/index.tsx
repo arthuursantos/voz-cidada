@@ -73,7 +73,7 @@ export default function SignIn() {
 
             <div className="relative w-full h-40 md:h-auto md:w-1/2 bg-[#689689] rounded-b-[50%] md:rounded-none">
                 <img
-                    src="./images/predios.png"
+                    src="/images/predios.png"
                     alt="Login visual"
                     className="w-full h-full object-cover object-[center_90%] md:object-center rounded-b-[50%] md:rounded-none"
                 />
