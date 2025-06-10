@@ -470,17 +470,18 @@ export default function FuncionarioDashboard() {
                                                                                 <DialogTitle>Foto do chamado</DialogTitle>
                                                                                 <DialogDescription>Imagem enviada pelo cidadão</DialogDescription>
                                                                             </DialogHeader>
-                                                                            {imageAntesUrl === null || !imageAntesUrl ? (
+                                                                            {chamado.fotoAntesUrl === null || !chamado.fotoAntesUrl ? (
+                                                                                <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+                                                                                    <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
+                                                                                </div>
+                                                                                
+                                                                            ) : (
                                                                                 <div className="relative w-full aspect-video rounded-lg overflow-hidden">
                                                                                     <img
-                                                                                        src={imageAntesUrl || "/placeholder.svg"}
+                                                                                        src={chamado.fotoAntesUrl}
                                                                                         alt="Foto do chamado"
                                                                                         className="object-cover w-full h-full"
                                                                                     />
-                                                                                </div>
-                                                                            ) : (
-                                                                                <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                                                                                    <p className="text-gray-500">Não foi possível recuperar a imagem.</p>
                                                                                 </div>
                                                                             )}
                                                                         </DialogContent>

@@ -364,7 +364,6 @@ export function AuthProvider({children}: AuthProviderProps) {
             login: data.email,
             password: data.password,
             role: "USER",
-            AuthStatus: "SIGNUP",
         })
 
         console.log("registrando user");

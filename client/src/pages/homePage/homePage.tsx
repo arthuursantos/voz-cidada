@@ -70,172 +70,172 @@ const statusMapping = (apiStatus: string): Status => {
 //     fotoAntesUrl: string | null;
 //     fotoDepoisUrl: string | null;
 
-const chamadosInventados: ChamadoInterface[] = [
-  {
-    id: 1,
-    usuarioId: 1,
-    titulo: "Problema com a internet",
-    descricao: "A internet está muito lenta.",
-    secretaria: "URBANISMO",
-    dataAbertura: "2023-10-01 10:00:00",
-    status: "PENDENTE",
-    latitude: null,
-    longitude: null,
-    fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-    fotoDepoisUrl: null,
-    avaliacao: null,
-    historicos: [
-      {
-        id: 1,
-        chamadoId: 1,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-01 11:00:00",
-        observacao: "Chamado aberto.",
-        statusAnterior: "PENDENTE",
-        statusNovo: "EM ANDAMENTO"
-      },
-      {
-        id: 2,
-        chamadoId: 1,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-02 12:00:00",
-        observacao: "Técnico agendado para amanhã.",
-        statusAnterior: "EM ANDAMENTO",
-        statusNovo: "PENDENTE"
-      }
-    ]
-  },
-  {
-    id: 2,
-    usuarioId: 1,
-    titulo: "Buraco na rua",
-    descricao: "Há um buraco grande na rua principal.",
-    secretaria: "INFRAESTRUTURA",
-    dataAbertura: "2023-10-02 11:00:00",
-    status: "CONCLUÍDO",
-    latitude: null,
-    longitude: null,
-    fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-    fotoDepoisUrl: null,
-    avaliacao: null,
-    historicos: [
-      {
-        id: 1,
-        chamadoId: 2,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-02 12:00:00",
-        observacao: "Chamado aberto.",
-        statusAnterior: "PENDENTE",
-        statusNovo: "EM ANDAMENTO"
-      },
-      {
-        id: 2,
-        chamadoId: 2,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-03 13:00:00",
-        observacao: "Buraco consertado.",
-        statusAnterior: "EM ANDAMENTO",
-        statusNovo: "CONCLUÍDO"
-      }
-    ]
-  },
-  {
-    id: 3,
-    usuarioId: 1,
-    titulo: "Lixo acumulado",
-    descricao: "Há lixo acumulado na esquina da minha rua",
-    secretaria: "SAÚDE",
-    dataAbertura: "2023-10-03 12:00:00",
-    status: "CONCLUÍDO",
-    latitude: null,
-    longitude: null,
-    fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-    fotoDepoisUrl: null,
-    avaliacao: {
-      id: 1,
-      chamadoId: 3,
-      usuarioId: 1,
-      estrelas: 5,
-      comentario: "Ótimo atendimento!",
-      dataAvaliacao: "2023-10-04 13:00:00"
-    },
-    historicos: [
-      {
-        id: 1,
-        chamadoId: 3,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-03 13:00:00",
-        observacao: "Chamado aberto.",
-        statusAnterior: "PENDENTE",
-        statusNovo: "EM ANDAMENTO"
-      },
-      {
-        id: 2,
-        chamadoId: 3,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-04 14:00:00",
-        observacao: "Lixo removido.",
-        statusAnterior: "EM ANDAMENTO",
-        statusNovo: "CONCLUÍDO"
-      }
-    ]
-  },
-  {
-    id: 4,
-    usuarioId: 1,
-    titulo: "Falta de iluminação pública",
-    descricao: "A iluminação da praça está apagada há dias.",
-    secretaria: "URBANISMO",
-    dataAbertura: "2023-10-04 13:00:00",
-    status: "EM ANDAMENTO",
-    latitude: 1,
-    longitude: 1,
-    fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-    fotoDepoisUrl: null,
-    avaliacao: null,
-    historicos: [
-      {
-        id: 1,
-        chamadoId: 4,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-04 14:00:00",
-        observacao: "Chamado aberto.",
-        statusAnterior: "PENDENTE",
-        statusNovo: "EM ANDAMENTO"
-      }
-    ]
-  },
-  {
-    id: 5,
-    usuarioId: 1,
-    titulo: "Problema com o transporte público",
-    descricao: "O ônibus está sempre atrasado.",
-    secretaria: "TRANSPORTE",
-    dataAbertura: "2023-10-05 14:00:00",
-    status: "EM ANDAMENTO",
-    latitude: null,
-    longitude: null,
-    fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
-    fotoDepoisUrl: null,
-    avaliacao: null,
-    historicos: [
-      {
-        id: 1,
-        chamadoId: 5,
-        funcionarioId: 1,
-        dataModificacao: "2023-10-05 15:00:00",
-        observacao: "Chamado aberto.",
-        statusAnterior: "PENDENTE",
-        statusNovo: "EM ANDAMENTO"
-      }
-    ]
-  }
-]
+// const chamadosInventados: ChamadoInterface[] = [
+//   {
+//     id: 1,
+//     usuarioId: 1,
+//     titulo: "Problema com a internet",
+//     descricao: "A internet está muito lenta.",
+//     secretaria: "URBANISMO",
+//     dataAbertura: "2023-10-01 10:00:00",
+//     status: "PENDENTE",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 1,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-01 11:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       },
+//       {
+//         id: 2,
+//         chamadoId: 1,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-02 12:00:00",
+//         observacao: "Técnico agendado para amanhã.",
+//         statusAnterior: "EM ANDAMENTO",
+//         statusNovo: "PENDENTE"
+//       }
+//     ]
+//   },
+//   {
+//     id: 2,
+//     usuarioId: 1,
+//     titulo: "Buraco na rua",
+//     descricao: "Há um buraco grande na rua principal.",
+//     secretaria: "INFRAESTRUTURA",
+//     dataAbertura: "2023-10-02 11:00:00",
+//     status: "CONCLUÍDO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 2,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-02 12:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       },
+//       {
+//         id: 2,
+//         chamadoId: 2,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-03 13:00:00",
+//         observacao: "Buraco consertado.",
+//         statusAnterior: "EM ANDAMENTO",
+//         statusNovo: "CONCLUÍDO"
+//       }
+//     ]
+//   },
+//   {
+//     id: 3,
+//     usuarioId: 1,
+//     titulo: "Lixo acumulado",
+//     descricao: "Há lixo acumulado na esquina da minha rua",
+//     secretaria: "SAÚDE",
+//     dataAbertura: "2023-10-03 12:00:00",
+//     status: "CONCLUÍDO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: {
+//       id: 1,
+//       chamadoId: 3,
+//       usuarioId: 1,
+//       estrelas: 5,
+//       comentario: "Ótimo atendimento!",
+//       dataAvaliacao: "2023-10-04 13:00:00"
+//     },
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 3,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-03 13:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       },
+//       {
+//         id: 2,
+//         chamadoId: 3,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-04 14:00:00",
+//         observacao: "Lixo removido.",
+//         statusAnterior: "EM ANDAMENTO",
+//         statusNovo: "CONCLUÍDO"
+//       }
+//     ]
+//   },
+//   {
+//     id: 4,
+//     usuarioId: 1,
+//     titulo: "Falta de iluminação pública",
+//     descricao: "A iluminação da praça está apagada há dias.",
+//     secretaria: "URBANISMO",
+//     dataAbertura: "2023-10-04 13:00:00",
+//     status: "EM ANDAMENTO",
+//     latitude: 1,
+//     longitude: 1,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 4,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-04 14:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       }
+//     ]
+//   },
+//   {
+//     id: 5,
+//     usuarioId: 1,
+//     titulo: "Problema com o transporte público",
+//     descricao: "O ônibus está sempre atrasado.",
+//     secretaria: "TRANSPORTE",
+//     dataAbertura: "2023-10-05 14:00:00",
+//     status: "EM ANDAMENTO",
+//     latitude: null,
+//     longitude: null,
+//     fotoAntesUrl: "https://t2.gstatic.com/images?q=tbn:ANd9GcTBLkUokRWxieS2uNcbZzQXKk8vXCHIF9JAhTcv2AXkfcIv5PhO",
+//     fotoDepoisUrl: null,
+//     avaliacao: null,
+//     historicos: [
+//       {
+//         id: 1,
+//         chamadoId: 5,
+//         funcionarioId: 1,
+//         dataModificacao: "2023-10-05 15:00:00",
+//         observacao: "Chamado aberto.",
+//         statusAnterior: "PENDENTE",
+//         statusNovo: "EM ANDAMENTO"
+//       }
+//     ]
+//   }
+// ]
 
 export default function Dashboard() {
 
   const { user } = useContext(AuthContext)
-  const [chamados, setChamados] = useState<ChamadoInterface[]>([...chamadosInventados])
+  const [chamados, setChamados] = useState<ChamadoInterface[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<Status[]>(["CONCLUÍDO", "EM ANDAMENTO", "PENDENTE"])
