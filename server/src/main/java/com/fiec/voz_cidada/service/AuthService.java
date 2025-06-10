@@ -50,6 +50,11 @@ public class AuthService implements UserDetailsService {
         }
     }
 
+    public AuthUser findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow();
+    }
+
     public ResponseEntity<?> loginWithGoogle(GoogleEmailDTO dto) {
         try {
             AuthUser user = (AuthUser) repository.findByLogin(dto.email());

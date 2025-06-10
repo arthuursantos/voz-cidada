@@ -303,7 +303,7 @@ export default function AdminDashboard() {
                         {userRoles?.includes("ROLE_OWNER") && <TabsTrigger value="admins">Gerenciar Administradores</TabsTrigger>}
                     </TabsList>
 
-                    {countStatus.length > 0 && (
+                    {countStatus && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                             {countStatus.map((item) => (
                                 <Card key={item.status} className="bg-gradient-to-br from-white to-gray-50">
