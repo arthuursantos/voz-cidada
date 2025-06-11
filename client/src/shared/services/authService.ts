@@ -34,13 +34,6 @@ const authService = {
         });
     },
 
-    refreshToken: (token: string) => {
-        return api.post('/auth/refresh', {}, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-    },
 };
 
 export default authService;

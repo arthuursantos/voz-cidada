@@ -1,5 +1,6 @@
 CREATE TABLE auth_user (
     id BIGSERIAL PRIMARY KEY NOT NULL,
+    fcm_token TEXT,
     login TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     role TEXT NOT NULL,

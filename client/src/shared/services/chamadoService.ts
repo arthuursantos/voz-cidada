@@ -21,10 +21,6 @@ const chamadoService = {
         return api.get('/api/chamado', { params });
     },
 
-    findAllStatus: () => {
-        return api.get('/api/chamado/status');
-    },
-
     create: (data: ChamadoInterface) => {
         return api.post('/api/chamado', data);
     },

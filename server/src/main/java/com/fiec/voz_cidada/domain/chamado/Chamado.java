@@ -1,5 +1,6 @@
 package com.fiec.voz_cidada.domain.chamado;
 
+import com.fiec.voz_cidada.domain.auth_user.AuthUser;
 import com.fiec.voz_cidada.domain.avaliacao.Avaliacao;
 import com.fiec.voz_cidada.domain.historico.HistoricoChamado;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
@@ -30,6 +31,10 @@ public class Chamado implements Serializable {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "auth_user_id")
+    private AuthUser authUser;
+
     @OneToMany(mappedBy = "chamado", orphanRemoval = true)
     @Fetch(FetchMode.JOIN)
     private List<HistoricoChamado> historicos;
@@ -41,7 +46,6 @@ public class Chamado implements Serializable {
     private Secretaria secretaria;
 
     private String titulo;
-
     private String descricao;
     private LocalDateTime dataAbertura;
     private String status;

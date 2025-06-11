@@ -21,13 +21,12 @@ public class ChamadoDTO extends RepresentationModel<ChamadoDTO> implements Seria
 
     private Long id;
     private Long usuarioId;
-    private String usuarioNome;
+    private Long authUserId;
     private String titulo;
     private String descricao;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataAbertura;
     private String status;
-    private MultipartFile fotoAntesFile;
     private String fotoAntesUrl;
     private String fotoDepoisUrl;
     private String secretaria;

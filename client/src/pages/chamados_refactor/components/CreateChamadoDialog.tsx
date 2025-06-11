@@ -17,10 +17,12 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import uploadService from "@/shared/services/uploadService.ts"
 import { useContext, useState } from "react"
-import { AuthContext } from "@/contexts/AuthContext.tsx"
+import {AuthContext, JWTClaims} from "@/contexts/AuthContext.tsx"
 import ProgressBar from "@/components/ProgressStepsBar";
 import { Plus, ArrowRight, ArrowLeft, Upload } from "lucide-react"
 import chamadoService from "@/shared/services/chamadoService.ts";
+import {jwtDecode} from "jwt-decode";
+import {parseCookies} from "nookies";
 
 export default function CreateChamadoDialog() {
     const { user } = useContext(AuthContext)
@@ -54,12 +56,15 @@ export default function CreateChamadoDialog() {
 
     async function onSubmit(data: CreateChamadoFields) {
 
+        const {"vozcidada.accessToken": token} = parseCookies();
+        const decoded = jwtDecode<JWTClaims>(token);
 
         const imageFormData = new FormData()
         imageFormData.append("image", data.fotoAntesFile[0])
         const { data: fotoAntesUrl } = await uploadService.saveImage(imageFormData)
         await chamadoService.create({
             usuarioId: user?.id,
+            authUserId: Number(decoded.sub),
             titulo: data.titulo,
             descricao: data.descricao,
             status: "PENDENTE",

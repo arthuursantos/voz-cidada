@@ -1,4 +1,4 @@
-import {ReactNode, useContext} from "react";
+import {ReactNode, useContext, useState} from "react";
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import SignIn from '@/pages/SignIn';
@@ -9,6 +9,7 @@ import Home from "@/pages/Home";
 import OAuthSignUp from "@/pages/OAuthSignUp";
 import {Toaster} from "react-hot-toast";
 import Chamados from "@/pages/chamados_refactor";
+import {myGetToken, onMessageListener} from "./firebase.ts"
 
 type RouteProps = {
     children: ReactNode;
@@ -69,6 +70,18 @@ const OAuthRoute = ({children}: { children: ReactNode }) => {
 }
 
 const App = () => {
+
+    const [isTokenFound, setTokenFound] = useState(false);
+    myGetToken(setTokenFound);
+
+    onMessageListener()
+        .then((payload) => {
+            console.log('Foreground message received:', payload);
+        })
+        .catch((err) => {
+            console.log('Error in onMessageListener:', err);
+        });
+
     return (
         <GoogleOAuthProvider clientId="518788781560-5kjacjm9okd3cnofcs2beq2e6nb7br12.apps.googleusercontent.com">
             <BrowserRouter>

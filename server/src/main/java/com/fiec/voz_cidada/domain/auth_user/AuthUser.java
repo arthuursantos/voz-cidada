@@ -1,5 +1,6 @@
 package com.fiec.voz_cidada.domain.auth_user;
 
+import com.fiec.voz_cidada.domain.chamado.Chamado;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-
 
 @Getter
 @NoArgsConstructor
@@ -29,8 +29,12 @@ public class AuthUser implements UserDetails {
     @OneToOne(mappedBy = "authUser", cascade = CascadeType.ALL)
     private Usuario profile;
 
+    @OneToMany
+    private List<Chamado> chamados;
+
     private String login;
     private String password;
+    private String fcmToken;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
@@ -51,6 +55,11 @@ public class AuthUser implements UserDetails {
 
     public void updateAuthStatus(String authStatus) {
         this.authStatus = AuthStatus.valueOf(authStatus.toUpperCase());
+    }
+
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 
     @Override
