@@ -27,7 +27,7 @@ const Contact = () => {
 
                         <div className="mt-4 space-y-4 C">
                             <p className="text-md text-gray-600 text-justify lg:text-base">
-                                Se você tiver alguma dúvida, sugestão ou reclamação, não hesite em nos contactar. A equipe do Voz Cidadão está pronta para ouvir sua opinião e ajudar no que for necessário para melhorar a nossa cidade.
+                                Se você tiver alguma dúvida, sugestão ou reclamação, não hesite em nos contactar. A equipe do Voz Cidadã está pronta para ouvir sua opinião e ajudar no que for necessário para melhorar a nossa cidade.
                             </p>
 
                             <p className="text-md text-gray-600 text-justify lg:text-base">
