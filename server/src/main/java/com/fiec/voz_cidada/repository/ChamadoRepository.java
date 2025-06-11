@@ -20,7 +20,8 @@ public interface ChamadoRepository extends GenericRepository<Chamado, Long> {
 
     @Query("SELECT c.status, COUNT(c) as total " +
             "FROM Chamado c " +
-            "WHERE c.secretaria = :secretaria " +
+            "WHERE c.secretaria = :secretaria OR " +
+            "(c.secretaria IS NULL AND :secretaria IS NULL) " +
             "GROUP BY c.status")
     List<Object[]> countByStatusForSecretaria(@Param("secretaria") Secretaria secretaria);
 

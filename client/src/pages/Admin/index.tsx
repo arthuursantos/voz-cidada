@@ -15,6 +15,7 @@ import { ChamadoInterface } from "./types.ts";
 import FuncionarioDashboard from "../Funcionario/index.tsx";
 import toast from "react-hot-toast";
 import chamadoService from "@/shared/services/chamadoService.ts";
+import SecretariaCard from "./components/secretariaCard.tsx";
 
 // Define the structure of a Funcionario object
 interface Funcionario {
@@ -74,6 +75,18 @@ export default function AdminDashboard() {
     const [editingChamado, setEditingChamado] = useState<ChamadoInterface | null>(null);
     const [isloading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [chamadosObras, setChamadosObras] = useState({
+        PENDENTE: 0,
+        EM_ANDAMENTO: 0,
+        CONCLUIDO: 0,
+        TOTAL: 0
+    });
+    const [chamadosUrbanismo, setChamadosUrbanismo] = useState({
+        PENDENTE: 0,
+        EM_ANDAMENTO: 0,
+        CONCLUIDO: 0,
+        TOTAL: 0
+    });
 
     const getFuncionarios = async () => {
         try {
@@ -99,29 +112,58 @@ export default function AdminDashboard() {
         }
     }
 
-    const getCountChamadosObras = async () => {
+    const getChamadosCountByStatus = async (secretaria: string) => {
         try {
-            const response = await chamadoService.countBySecretaria("OBRAS");
-            console.log("Total de chamados em Obras:", response.data);
-            return response.data;
+            const response = await chamadoService.countBySecretaria(secretaria);
+            // Inicializa com valores padrão 0
+            const counts = {
+                PENDENTE: 0,
+                EM_ANDAMENTO: 0,
+                CONCLUIDO: 0
+            };
+            
+            // Mapeia os dados da resposta
+            if (Array.isArray(response.data)) {
+                response.data.forEach(([status, count]) => {
+                    if (typeof status === 'string') {
+                        const normalizedStatus = status.toUpperCase().trim();
+                        if (normalizedStatus.includes('PENDENTE')) {
+                            counts.PENDENTE = Number(count) || 0;
+                        } else if (normalizedStatus.includes('EM ANDAMENTO') || normalizedStatus.includes('EM_ANDAMENTO')) {
+                            counts.EM_ANDAMENTO = Number(count) || 0;
+                        } else if (normalizedStatus.includes('CONCLUÍDO') || normalizedStatus.includes('CONCLUIDO')) {
+                            counts.CONCLUIDO = Number(count) || 0;
+                        }
+                    }
+                });
+            }
+            
+            return {
+                ...counts,
+                TOTAL: counts.PENDENTE + counts.EM_ANDAMENTO + counts.CONCLUIDO
+            };
         } catch (error) {
-            console.error("Erro ao contar chamados em Obras:", error);
-            return 0;
+            console.error(`Erro ao contar chamados em ${secretaria}:`, error);
+            return {
+                PENDENTE: 0,
+                EM_ANDAMENTO: 0,
+                CONCLUIDO: 0,
+                TOTAL: 0
+            };
         }
-    }
-    getCountChamadosObras();
+    };
 
-    const getCountChamadosUrbanismo = async () => {
-        try {
-            const response = await chamadoService.countBySecretaria("URBANISMO");
-            console.log("Total de chamados em Urbanismo:", response.data);
-            return response.data;
-        } catch (error) {
-            console.error("Erro ao contar chamados em Urbanismo:", error);
-            return 0;
-        }
-    }
-    getCountChamadosUrbanismo();
+    // Atualize o useEffect para buscar as contagens
+    useEffect(() => {
+        const fetchCounts = async () => {
+            const obrasData = await getChamadosCountByStatus("OBRAS");
+            setChamadosObras(obrasData);
+            
+            const urbanismoData = await getChamadosCountByStatus("URBANISMO");
+            setChamadosUrbanismo(urbanismoData);
+        };
+        fetchCounts();
+    }, []);
 
     useEffect(() => {
         const fetchFuncionarios = async () => {
@@ -321,46 +363,24 @@ export default function AdminDashboard() {
                                             <div>
                                                 Chamados sem atribuição: <span className="font-medium">{chamados.length}</span>
                                             </div>
-                                            
                                         </div>
                                     </div>
                                 </div>
-                                <div className="rounded-lg border bg-white shadow">
-                                    <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
-                                        <h3 className="text-lg font-medium">Obras Públicas</h3>
-                                    </div>
-                                    <div className="p-4">
-                                        <div className="text-sm text-gray-500 mb-2">
-                                            Responsável por manutenção de vias e obras públicas
-                                        </div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div>
-                                                Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "OBRAS").length}</span>
-                                            </div>
-                                            <div>
-                                            Chamados Total: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "OBRAS").length}</span>
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
+                                
+                                <SecretariaCard
+                                    title="Obras Públicas"
+                                    description="Gerencie os funcionários e chamados relacionados às obras públicas."
+                                    funcionariosCount={funcionarios.filter(f => f.secretaria === "OBRAS").length}
+                                    chamadosData={chamadosObras} // TODO: fetch and store real data in state, then pass here
+                                />
 
-                                <div className="rounded-lg border bg-white shadow">
-                                    <div className="p-4 pb-2 flex flex-row items-center justify-between border-b">
-                                        <h3 className="text-lg font-medium">Urbanismo</h3>
-                                    </div>
-                                    <div className="p-4">
-                                        <div className="text-sm text-gray-500 mb-2">Responsável pelo planejamento do espaço urbano</div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div>
-                                                Funcionários: <span className="font-medium">{funcionarios.filter((f) => f.secretaria === "URBANISMO").length}</span>
-                                            </div>
-                                            <div>
-                                            Chamados Total: <span className="font-medium">{chamados.filter(chamado => chamado.secretaria == "URBANISMO").length}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <SecretariaCard
+                                    title="Urbanismo"
+                                    description="Gerencie os funcionários e chamados relacionados ao urbanismo."
+                                    funcionariosCount={funcionarios.filter(f => f.secretaria === "URBANISMO").length}
+                                    chamadosData={chamadosUrbanismo} // TODO: fetch and store real data in state, then pass here
+                                />
+
                             </div>
                         </div>
 
