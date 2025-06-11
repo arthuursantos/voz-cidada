@@ -274,7 +274,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between mb-4">
                             <div className="inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
                                 <button
-                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "sectors" ? "bg-white text-gray-900 shadow-sm" : ""}`}
+                                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${activeTab === "menu" ? "bg-white text-gray-900 shadow-sm" : ""}`}
                                     onClick={() => setActiveTab("menu")}
                                 >
                                     Menu
@@ -479,7 +479,18 @@ export default function AdminDashboard() {
             {showNewEmployeeDialog && (
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
                     <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
-                        <form onSubmit={handleSubmit(handleSubmitFuncionario)} className="flex flex-col p-6">
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSubmit(handleSubmitFuncionario)
+                            }
+                        }
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSubmit(handleSubmitFuncionario)(e);
+                            }
+                        }}
+                         className="flex flex-col p-6">
                             <div className="flex flex-col space-y-1.5 pb-6 border-b">
                                 <h2 className="text-lg font-semibold leading-none tracking-tight">Cadastrar Novo Funcionário</h2>
                             </div>
