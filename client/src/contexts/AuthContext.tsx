@@ -97,7 +97,6 @@ export function AuthProvider({children}: AuthProviderProps) {
         const {"vozcidada.accessToken": accessToken} = parseCookies();
         if (accessToken) {
             try {
-
                 const decoded = jwtDecode<JWTClaims>(accessToken);
                 setUserRoles(decoded.roles);
                 setAuthStatus(decoded.auth_status)

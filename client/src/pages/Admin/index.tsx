@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label.tsx"
+import notificationService from "@/shared/services/notificationService.ts";
 
 export default function AdminDashboard() {
     const { userRoles, admin, loading } = useContext(AuthContext)
@@ -69,6 +70,7 @@ export default function AdminDashboard() {
     const createHistoricoSchema = z.object({
         statusNovo: z.string().nonempty("O status é obrigatório."),
         observacao: z.string(),
+        fotoAtualFile: z.any().optional()
     })
     type createHistoricoFields = z.infer<typeof createHistoricoSchema>
 
@@ -114,6 +116,11 @@ export default function AdminDashboard() {
         try {
             const updatedChamado = { ...data, secretaria }
             await chamadoService.update(updatedChamado)
+            await notificationService.sendToUser({
+                authUserId: updatedChamado.authUserId,
+                title: "A situação do seu chamado foi atualizada!",
+                message: "Seu chamado foi encaminhado para a secretaria de " + secretaria + "."
+            })
             if (userRoles?.includes("ROLE_OWNER")) {
                 const {
                     data: {
@@ -151,12 +158,21 @@ export default function AdminDashboard() {
                 observacao: formData.observacao,
             }
 
-            const imageFormData = new FormData()
-            imageFormData.append("image", formData.fotoAtualFile[0])
-            const { data: fotoAtualUrl } = await uploadService.saveImage(imageFormData)
+            let fotoAtualUrl: string | null = null;
+            if (formData.fotoAtualFile && formData.fotoAtualFile.length > 0) {
+                const imageFormData = new FormData();
+                imageFormData.append("image", formData.fotoAtualFile[0]);
+                const { data: uploadedUrl } = await uploadService.saveImage(imageFormData);
+                fotoAtualUrl = uploadedUrl;
+            }
 
             await chamadoService.update({ ...selectedChamado, status: formData.statusNovo, fotoDepoisUrl: fotoAtualUrl })
             await historicoService.create(historicoData)
+            await notificationService.sendToUser({
+                authUserId: selectedChamado.authUserId,
+                title: "A situação do seu chamado foi atualizada!",
+                message: "Seu chamado agora está " + historicoData.statusNovo + "."
+            })
 
             if (userRoles?.includes("ROLE_OWNER")) {
                 const {
@@ -303,7 +319,7 @@ export default function AdminDashboard() {
                         {userRoles?.includes("ROLE_OWNER") && <TabsTrigger value="admins">Gerenciar Administradores</TabsTrigger>}
                     </TabsList>
 
-                    {countStatus.length > 0 && (
+                    {countStatus && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                             {countStatus.map((item) => (
                                 <Card key={item.status} className="bg-gradient-to-br from-white to-gray-50">

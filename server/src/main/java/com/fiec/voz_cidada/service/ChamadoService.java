@@ -8,6 +8,7 @@ import com.fiec.voz_cidada.domain.chamado.Secretaria;
 import com.fiec.voz_cidada.domain.funcionario.Funcionario;
 import com.fiec.voz_cidada.exceptions.ResourceNotFoundException;
 import com.fiec.voz_cidada.exceptions.UnauthorizedException;
+import com.fiec.voz_cidada.repository.AuthRepository;
 import com.fiec.voz_cidada.repository.ChamadoRepository;
 import com.fiec.voz_cidada.repository.FuncionarioRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,9 @@ import java.util.List;
 public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
 
     @Autowired
+    private AuthRepository authRepository;
+
+    @Autowired
     private ChamadoRepository repository;
 
     @Autowired
@@ -44,6 +48,12 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
     public EntityModel<ChamadoDTO> create(ChamadoDTO dto) {
         checkAccess(dto.getUsuarioId());
         Chamado entity = convertToEntity(dto);
+
+        if (dto.getAuthUserId() != null) {
+            AuthUser authUser = authRepository.findById(dto.getAuthUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não autenticado."));
+            entity.setAuthUser(authUser);
+        }
 
         if (dto.getFotoAntesUrl() != null && !dto.getFotoAntesUrl().isEmpty()) {
             entity.setFotoAntesUrl(dto.getFotoAntesUrl());

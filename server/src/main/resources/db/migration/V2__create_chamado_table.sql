@@ -1,6 +1,7 @@
 CREATE TABLE chamado (
     id SERIAL PRIMARY KEY,
     usuario_id INT NOT NULL,
+    auth_user_id INT NOT NULL,
     titulo VARCHAR(255) NOT NULL,
     descricao TEXT NOT NULL,
     data_abertura TIMESTAMP,

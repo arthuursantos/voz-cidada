@@ -1,4 +1,4 @@
-import {ReactNode, useContext} from "react";
+import {ReactNode, useContext, useState} from "react";
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import SignIn from '@/pages/SignIn';
@@ -7,8 +7,9 @@ import AdminDashboard from "@/pages/Admin";
 import SignUp from "@/pages/SignUp";
 import Home from "@/pages/Home";
 import OAuthSignUp from "@/pages/OAuthSignUp";
-import {Toaster} from "react-hot-toast";
+import {toast, Toaster} from "react-hot-toast";
 import Chamados from "@/pages/chamados_refactor";
+import {myGetToken, onMessageListener} from "./firebase.ts"
 
 type RouteProps = {
     children: ReactNode;
@@ -69,6 +70,18 @@ const OAuthRoute = ({children}: { children: ReactNode }) => {
 }
 
 const App = () => {
+
+    const [isTokenFound, setTokenFound] = useState(false);
+    myGetToken(setTokenFound);
+
+    onMessageListener()
+        .then((payload) => {
+            toast.success(payload.notification.body, {
+                duration: 4000,
+                position: "top-center",
+            })
+        })
+
     return (
         <GoogleOAuthProvider clientId="518788781560-5kjacjm9okd3cnofcs2beq2e6nb7br12.apps.googleusercontent.com">
             <BrowserRouter>
