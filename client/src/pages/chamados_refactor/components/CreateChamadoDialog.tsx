@@ -54,6 +54,8 @@
 
 //     async function onSubmit(data: CreateChamadoFields) {
 
+        // const {"vozcidada.accessToken": token} = parseCookies();
+        // const decoded = jwtDecode<JWTClaims>(token);
 
 //         const imageFormData = new FormData()
 //         imageFormData.append("image", data.fotoAntesFile[0])

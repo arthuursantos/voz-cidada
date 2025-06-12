@@ -1,5 +1,6 @@
 package com.fiec.voz_cidada.domain.auth_user;
 
+import com.fiec.voz_cidada.domain.chamado.Chamado;
 import com.fiec.voz_cidada.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,9 @@ public class AuthUser implements UserDetails {
 
     @OneToOne(mappedBy = "authUser", cascade = CascadeType.ALL)
     private Usuario profile;
+
+    @OneToMany
+    private List<Chamado> chamados;
 
     private String login;
     private String password;

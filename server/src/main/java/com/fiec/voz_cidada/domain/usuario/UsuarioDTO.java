@@ -1,6 +1,8 @@
 package com.fiec.voz_cidada.domain.usuario;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fiec.voz_cidada.domain.auth_user.AuthUser;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
@@ -15,6 +17,7 @@ public class UsuarioDTO extends RepresentationModel<UsuarioDTO> implements Seria
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private long authUserId;
     private String nome;
     private String cpf;
     @JsonFormat(pattern = "yyyy-MM-dd")

@@ -2,6 +2,7 @@ export type Status = "CONCLUÍDO" | "EM ANDAMENTO" | "PENDENTE"
 export interface ChamadoInterface {
     id: number;
     usuarioId?: number;
+    authUserId?: number;
     titulo: string;
     descricao?: string;
     secretaria?: string;
@@ -16,6 +17,7 @@ export interface ChamadoInterface {
 }
 export interface ChamadoCreateInterface {
     usuarioId: number;
+    authUserId?: number;
     titulo: string;
     descricao: string;
     status: Status | string;

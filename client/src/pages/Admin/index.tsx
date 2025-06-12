@@ -65,7 +65,7 @@ interface Funcionario {
 // ]
 
 export default function AdminDashboard() {
-    const { userRoles } = useContext(AuthContext);
+    const { userRoles, user } = useContext(AuthContext);
     
     const [showNewEmployeeDialog, setShowNewEmployeeDialog] = useState(false);
     const [showEditChamado, setShowEditChamado] = useState(false);
@@ -249,6 +249,9 @@ export default function AdminDashboard() {
 
             console.log("Chamado atualizado:", updatedChamado);
             
+            if (typeof user?.authUserId !== "number") {
+                throw new Error("authUserId is required and must be a number");
+            }
             await chamadoService.update(updatedChamado);
             console.log("Chamado atualizado com sucesso:", data);
             await getChamados();

@@ -20,9 +20,8 @@ tags:
     description: Operações relacionadas ao histórico de atualizações dos chamados
   - name: Avaliação
     description: Operações relacionadas a avaliações dos chamados
-  tags:
-    - name: Notificação
-      description: Operações relacionadas a notificações Firebase
+  - name: Notificação
+    description: Operações relacionadas a notificações Firebase
 
 paths:
   # Authentication endpoints
@@ -1087,19 +1086,19 @@ paths:
             schema:
               type: object
               properties:
+                authUserId:
+                  type: string
+                  description: ID do usuário autenticado
                 title:
                   type: string
                   description: Título da notificação
-                body:
+                message:
                   type: string
                   description: Corpo da mensagem
-                token:
-                  type: string
-                  description: Token FCM do destinatário
               required:
                 - title
-                - body
-                - token
+                - message
+                - authUserId
       responses:
         '200':
           description: Notificação enviada com sucesso

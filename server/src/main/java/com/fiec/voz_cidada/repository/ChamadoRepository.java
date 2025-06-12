@@ -18,12 +18,11 @@ public interface ChamadoRepository extends GenericRepository<Chamado, Long> {
 
     Page<Chamado> findChamadoBySecretaria(Pageable pageable, Secretaria secretaria);
 
-    @Query("SELECT c.status, COUNT(c) as total " +
-            "FROM Chamado c " +
-            "WHERE c.secretaria = :secretaria OR " +
-            "(c.secretaria IS NULL AND :secretaria IS NULL) " +
+    @Query("SELECT c.status, COUNT(*) AS total " +
+            "FROM Chamado as c " +
+            "WHERE c.secretaria = :secretaria " +
             "GROUP BY c.status")
-    List<Object[]> countByStatusForSecretaria(@Param("secretaria") Secretaria secretaria);
+    List<Object[]> countByStatusForSecretaria(@Param("secretaria") String secretaria);
 
     @Query("SELECT c.status, COUNT(c) as total " +
             "FROM Chamado c " +

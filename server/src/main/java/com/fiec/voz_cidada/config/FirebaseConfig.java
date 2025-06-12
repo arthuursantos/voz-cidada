@@ -43,7 +43,6 @@ public class FirebaseConfig {
             parent.mkdirs();
         }
 
-
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(content);
         }

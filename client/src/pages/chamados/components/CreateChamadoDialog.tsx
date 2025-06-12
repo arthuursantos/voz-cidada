@@ -258,6 +258,7 @@ export default function CreateChamadoDialog({
   
       await chamadoService.create({
         usuarioId: user.id,
+        authUserId: user.authUserId,
         titulo: values.titulo,
         descricao: values.descricao,
         latitude: values.latitude,

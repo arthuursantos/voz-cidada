@@ -58,7 +58,7 @@ public class ChamadoController {
     }
 
     @GetMapping("/count/{secretaria}")
-    public ResponseEntity<List<?>> countBySecretaria(@PathVariable Secretaria secretaria) {
+    public ResponseEntity<List<?>> countBySecretaria(@PathVariable String secretaria) {
         return service.countBySecretaria(secretaria);
     }
 

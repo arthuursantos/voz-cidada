@@ -10,6 +10,7 @@ import {initializeFirebaseMessaging} from "@/shared/firebaseMessaging.ts";
 
 type User = {
     id: number;
+    authUserId: number;
     nome: string;
     cpf: string;
     dataNascimento: string;
@@ -163,6 +164,7 @@ export function AuthProvider({children}: AuthProviderProps) {
                     api.get(`/api/usuario/auth/${decoded.sub}`)
                         .then(response => {
                             setUser(response.data)
+                            console.log(user);
                             navigate("/dashboard");
                         })
                         .catch(() => {
@@ -225,6 +227,7 @@ export function AuthProvider({children}: AuthProviderProps) {
         api.get(`/api/usuario/auth/${decoded.sub}`)
             .then(response => {
                 setUser(response.data)
+                console.log(user);
                 navigate("/dashboard");
             })
             .catch(() => {
