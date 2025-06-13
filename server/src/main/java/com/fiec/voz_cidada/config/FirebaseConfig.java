@@ -13,15 +13,9 @@ public class FirebaseConfig {
 
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        String pkContent = System.getenv("FIREBASE_PK");
-
-        if (pkContent == null) {
-            System.out.println("Variável de ambiente FIREBASE_PK não está definida. Ignorando Firebase.");
-            return null; // ou lançar uma exceção customizada se preferir
-        }
-
+// guardar o arquivo firebase.json na pasta resource, E NÃO FAZER O PUSH DESSE ARQUIVO NO GIT!
         File file = new File("firebase.json");
-        createFileFromString("firebase.json", pkContent);
+        createFileFromString("firebase.json", System.getenv("FIREBASE_PK"));
         InputStream serviceAccount = new FileInputStream(file);
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -31,18 +25,15 @@ public class FirebaseConfig {
     }
 
     public static void createFileFromString(String filePath, String content) throws IOException {
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("FIREBASE_PK não está definido ou está vazio.");
-        }
-
         File file = new File(filePath);
 
-
+        // Create parent directories if they don't exist
         File parent = file.getParentFile();
         if (parent != null) {
             parent.mkdirs();
         }
 
+        // Write content to file
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(content);
         }
