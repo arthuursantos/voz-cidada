@@ -8,27 +8,28 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      - mysql
       - elasticsearch
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/voz-cidada
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/voz-cidada
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
     volumes:
       - uploads-data:/app/uploads
       - ./server/logs:/app/logs
 
-  postgres:
-    image: postgres:16
-    container_name: postgres-voz-cidada
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
     ports:
-      - "5433:5432"
+     - "3306:3306"
     environment:
-      - POSTGRES_DB=voz-cidada
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=admin
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: voz-cidada
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - mysql-data:/var/lib/mysql
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.2
@@ -74,6 +75,6 @@ services:
       - elasticsearch
 
 volumes:
-  postgres-data:
+  mysql-data:
   uploads-data:
   elasticsearch-data:
