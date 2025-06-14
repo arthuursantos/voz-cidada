@@ -1,66 +1,74 @@
 package com.fiec.voz_cidada.controller;
 
-import com.fiec.voz_cidada.service.ChamadoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/upload")
 public class ChamadoUploadController {
 
-    @Autowired
-    private ChamadoService service;
+    private final AmazonS3 s3Client;
 
-    @Value("${app.upload.dir:/app/uploads}")
-    private String uploadDir;
+    @Value("${aws.s3.bucket-name}")
+    private String bucketName;
+
+    public ChamadoUploadController(AmazonS3 s3Client) {
+        this.s3Client = s3Client;
+    }
 
     @GetMapping("/{filename:.+}")
-    public ResponseEntity<UrlResource> getImage(@PathVariable String filename) {
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
-            Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
-            UrlResource resource = new UrlResource(filePath.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
+            S3Object s3Object = s3Client.getObject(bucketName, filename);
+            S3ObjectInputStream inputStream = s3Object.getObjectContent();
+
+            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            if (filename.toLowerCase().endsWith(".jpg") || filename.toLowerCase().endsWith(".jpeg")) {
+                mediaType = MediaType.IMAGE_JPEG;
+            } else if (filename.toLowerCase().endsWith(".png")) {
+                mediaType = MediaType.IMAGE_PNG;
             }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(s3Object.getObjectMetadata().getContentLength());
+            headers.setContentType(mediaType);
+            headers.setContentDispositionFormData("attachment", filename);
+
+            return new ResponseEntity<>(new InputStreamResource(inputStream), headers, HttpStatus.OK);
+
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            throw new RuntimeException("Não foi possível recuperar o upload.") ;
         }
     }
 
     @PostMapping("/file")
-    public String saveImage(MultipartFile image) {
+    public void saveImage(@RequestParam("image") MultipartFile image) {
         try {
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            String originalFilename = image.getOriginalFilename();
+            String filename = UUID.randomUUID().toString() + "_" + originalFilename;
 
-            String filename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-            Path filePath = uploadPath.resolve(filename);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(image.getSize());
+            metadata.setContentType(image.getContentType());
 
-            Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            PutObjectResult putObjectResult = s3Client.putObject(bucketName, filename, image.getInputStream(), metadata);
 
-            String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-            return baseUrl + "/api/upload/" + filename;
-        } catch (IOException e) {
-            throw new RuntimeException("Falha ao salvar imagem: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Não foi possível fazer upload da imagem.");
         }
     }
 }
