@@ -88,13 +88,15 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
         return ResponseEntity.ok(assembler.toModel(dtos, dto -> EntityModel.of(dto, generateLinks(dto))));
     }
 
-    public ResponseEntity<List<?>> countBySecretaria(String secretaria) {
+    public ResponseEntity<List<?>> countBySecretaria(Secretaria secretaria) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
         if ("OWNER".equals(currentAuthUser.getRole().toString())) {
-            return ResponseEntity.ok(repository.countByStatus());
+            if (!"ALL".equals(secretaria.toString())) {
+                return ResponseEntity.ok(repository.countByStatusForSecretaria(secretaria));
+            }
         }
-        return ResponseEntity.ok(repository.countByStatusForSecretaria(secretaria));
+        return ResponseEntity.ok(repository.countByStatus());
     }
 
     @Override
