@@ -91,10 +91,8 @@ public class ChamadoService extends GenericService<Chamado, ChamadoDTO, Long> {
     public ResponseEntity<List<?>> countBySecretaria(Secretaria secretaria) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AuthUser currentAuthUser = (AuthUser) authentication.getPrincipal();
-        if ("OWNER".equals(currentAuthUser.getRole().toString())) {
-            if (!"ALL".equals(secretaria.toString())) {
-                return ResponseEntity.ok(repository.countByStatusForSecretaria(secretaria));
-            }
+        if ("OWNER".equals(currentAuthUser.getRole().toString()) && "ALL".equals(secretaria.toString())) {
+            return ResponseEntity.ok(repository.countByStatus());
         }
         return ResponseEntity.ok(repository.countByStatus());
     }
